@@ -1,0 +1,6 @@
+package openwcli
+
+
+func RegisterNode() {
+
+}
