@@ -1,7 +1,21 @@
 {
 	"comment": "",
-	"ignore": "test github.com/blocktree/go-owcrypt github.com/blocktree/go-owcdrivers",
+	"ignore": "test github.com/blocktree/go-owcrypt/",
 	"package": [
+		{
+			"checksumSHA1": "45BRHJokXSPzNcOWTNp/9WVgDiA=",
+			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/HcashOrg/hcd/chaincfg/chainhash",
+			"path": "github.com/HcashOrg/hcd/chaincfg/chainhash",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
+			"checksumSHA1": "FXjXY4E4DEAsDr0cH5sVMVfy5MM=",
+			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/HcashOrg/hcutil/base58",
+			"path": "github.com/HcashOrg/hcutil/base58",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
 		{
 			"checksumSHA1": "hfo9ztt90zcHCuPZNnU2HRmVCNE=",
 			"path": "github.com/asdine/storm",
@@ -39,6 +53,13 @@
 			"revisionTime": "2018-04-30T18:00:54Z"
 		},
 		{
+			"checksumSHA1": "yX3T7B4g4JawmMzGD1Rl2d52gew=",
+			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/astaxie/beego/cache",
+			"path": "github.com/astaxie/beego/cache",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
 			"checksumSHA1": "m+xzAT4nURcPGkMePX2zklJK/lI=",
 			"path": "github.com/astaxie/beego/config",
 			"revision": "053a075344c118a5cc41981b29ef612bb53d20ca",
@@ -52,6 +73,12 @@
 			"revisionTime": "2018-12-12T06:53:36Z"
 		},
 		{
+			"checksumSHA1": "w6THTrjz0k0NO7HQa2hOvuP3QSg=",
+			"path": "github.com/blocktree/OpenWallet/cmd/utils",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
 			"checksumSHA1": "wmEO4imjPG3n+shYbSDEqjwXXMQ=",
 			"path": "github.com/blocktree/OpenWallet/common",
 			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
@@ -60,6 +87,12 @@
 		{
 			"checksumSHA1": "JvGQmeaffXUZNqdTlay6yBpqKMM=",
 			"path": "github.com/blocktree/OpenWallet/common/file",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
+			"checksumSHA1": "IX3bJjv6YAg0dw22Hmqa6uDWuy0=",
+			"path": "github.com/blocktree/OpenWallet/console",
 			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
 			"revisionTime": "2018-12-12T06:53:36Z"
 		},
@@ -94,10 +127,28 @@
 			"revisionTime": "2018-12-12T06:53:36Z"
 		},
 		{
+			"checksumSHA1": "bo40gXZUVf/c0cKjBX2/GRJ5xHg=",
+			"path": "github.com/blocktree/OpenWallet/owtp",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
 			"checksumSHA1": "wgrY1+NAvuuQOp+biTCpwce3/e4=",
 			"path": "github.com/blocktree/OpenWallet/timer",
 			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
 			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
+			"checksumSHA1": "zNBfduGfBphytOH15V/6lzUiSFI=",
+			"path": "github.com/blocktree/go-owcdrivers/owkeychain",
+			"revision": "bec6d67d992fabc5102effe2495acf5a7cd89983",
+			"revisionTime": "2018-12-06T12:54:53Z"
+		},
+		{
+			"checksumSHA1": "JOWsvX+ruAd8mlqTlrfNHjJsn4I=",
+			"path": "github.com/blocktree/go-owcrypt",
+			"revision": "6f1b04d12e5008b70a4eeef32b2de45d15834c30",
+			"revisionTime": "2018-11-27T06:33:16Z"
 		},
 		{
 			"checksumSHA1": "mq7Np3rIjHnE06Of949JjXdU/Rk=",
@@ -156,15 +207,57 @@
 			"revisionTime": "2018-12-12T06:53:36Z"
 		},
 		{
+			"checksumSHA1": "yiPmpn3VrMIidVhbSSiKP3KLdak=",
+			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/bwmarrin/snowflake",
+			"path": "github.com/bwmarrin/snowflake",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
 			"checksumSHA1": "qFaKrhSla38BRAyaGz2UaZvH/Dk=",
 			"path": "github.com/coreos/bbolt",
 			"revision": "af9db2027c98c61ecd8e17caa5bd265792b9b9a2",
 			"revisionTime": "2018-03-18T00:15:26Z"
 		},
 		{
+			"checksumSHA1": "Q5YN3JDk0g8zt0gZulGLn+uFC30=",
+			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/dchest/blake256",
+			"path": "github.com/dchest/blake256",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
+			"checksumSHA1": "QdSIO+gp41BqNti0ZDVdXvfDvDo=",
+			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/gorilla/websocket",
+			"path": "github.com/gorilla/websocket",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
+			"checksumSHA1": "5SFRzrVflqK1ptx4jWEbnZgaVtg=",
+			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/imroc/req",
+			"path": "github.com/imroc/req",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
+			"checksumSHA1": "3mf6G9NWxo5UakHoJrzyGaoqiHc=",
+			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/mr-tron/base58/base58",
+			"path": "github.com/mr-tron/base58/base58",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
 			"checksumSHA1": "Se195FlZ160eaEk/uVx4KdTPSxU=",
 			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/pborman/uuid",
 			"path": "github.com/pborman/uuid",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
+			"checksumSHA1": "lSRg5clrIZUxq4aaExbpnpAgtWA=",
+			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/peterh/liner",
+			"path": "github.com/peterh/liner",
 			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
 			"revisionTime": "2018-12-12T06:53:36Z"
 		},
@@ -179,6 +272,13 @@
 			"checksumSHA1": "/O004L4H91Bquw7BWHA2A69ABQs=",
 			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/shopspring/decimal",
 			"path": "github.com/shopspring/decimal",
+			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
+			"revisionTime": "2018-12-12T06:53:36Z"
+		},
+		{
+			"checksumSHA1": "JPPv7nnUo01Mlyqb0g+Qk5/URR4=",
+			"origin": "github.com/blocktree/OpenWallet/vendor/github.com/streadway/amqp",
+			"path": "github.com/streadway/amqp",
 			"revision": "271cfaaa7ce7d7b0589853725bfd883983ddb512",
 			"revisionTime": "2018-12-12T06:53:36Z"
 		},
@@ -218,10 +318,16 @@
 			"revisionTime": "2018-12-12T06:53:36Z"
 		},
 		{
-			"checksumSHA1": "HyvwgEh7Ja47KY376Mah02WDLEc=",
+			"checksumSHA1": "e66DmNWQKgI97tvj4BH7rHYnyJs=",
 			"path": "golang.org/x/sys/unix",
 			"revision": "7138fd3d9dc8335c567ca206f4333fb75eb05d56",
 			"revisionTime": "2018-06-27T13:57:12Z"
+		},
+		{
+			"checksumSHA1": "Yx1MU40fyGe7hhqW9+dkv8kXa60=",
+			"path": "gopkg.in/urfave/cli.v1",
+			"revision": "cfb38830724cc34fedffe9a2a29fb54fa9169cd1",
+			"revisionTime": "2017-08-11T01:42:03Z"
 		}
 	],
 	"rootPath": "github.com/blocktree/go-openw-cli"

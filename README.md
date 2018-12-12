@@ -4,47 +4,82 @@
 
 [TOC]
 
-## 修订信息
+## Build development environment
 
-| 版本  | 时间       | 修订人 | 修订内容         |
-|-------|------------|--------|------------------|
-| 1.0.0 | 2018-12-11 | 麦志泉 | 创建文档         |
+The requirements to build OpenWallet are:
+
+- Golang version 1.10 or later
+- govendor (a third party package management tool)
+- xgo (Go CGO cross compiler)
+- Properly configured Go language environment
+- Golang supported operating system
+
+## 依赖库管理工具govendor
+
+### 安装govendor
+
+```shell
+
+go get -u -v github.com/kardianos/govendor
+
+```
+
+### 使用govendor
+
+```shell
+
+#进入到项目目录
+$ cd $GOPATH/src/github.com/blocktree/OpenWallet
+
+#初始化vendor目录
+$ govendor init
+
+#查看vendor目录
+[root@CC54425A openwallet]# ls
+commands  main.go  vendor
+
+#将GOPATH中本工程使用到的依赖包自动移动到vendor目录中
+#说明：如果本地GOPATH没有依赖包，先go get相应的依赖包
+$ govendor add +external
+或使用缩写： govendor add +e
+
+#Go 1.6以上版本默认开启 GO15VENDOREXPERIMENT 环境变量，可忽略该步骤。
+#通过设置环境变量 GO15VENDOREXPERIMENT=1 使用vendor文件夹构建文件。
+#可以选择 export GO15VENDOREXPERIMENT=1 或 GO15VENDOREXPERIMENT=1 go build 执行编译
+$ export GO15VENDOREXPERIMENT=1
+
+# 如果$GOPATH下已更新本地库，可执行命令以下命令，同步更新vendor包下的库
+# 例如本地的$GOPATH/github.com/blocktree/下的组织项目更新后，可执行下面命令同步更新vendor
+$ govendor update +v
+
+```
+
+## 源码编译跨平台工具
+
+### 安装xgo（支持跨平台编译C代码）
+
+[官方github](https://github.com/karalabe/xgo)
+
+xgo的使用依赖docker。并且把要跨平台编译的项目文件加入到File sharing。
+
+```shell
+
+$ go get github.com/karalabe/xgo
+...
+$ xgo -h
+...
+
+```
 
 ---
 
-## 1. openw-cli介绍
+## openw-cli介绍
 
 openw-cli是一款命令行工具，通过调用openw-server钱包服务API实现主机客户端下的钱包管理。
 
 ---
 
-## 2. 需求要点
-
-> openw-cli实现了openw-server的API的方法调用，并提供一些openwallet常用方法。
-
-| 需求             | 描述                                                                                      |
-|----------------|-----------------------------------------------------------------------------------------|
-| **节点管理相关** | 管理通信方面的功能                                                                        |
-| 登记节点         | 如果还没生成通信密钥，则先生成密钥对，再向钱包平台登记节点。                                 |
-| 查看节点         | 查看通信节点信息，如：节点ID，通信密钥对。                                                    |
-| **钱包管理相关** | 管理钱包方面的功能                                                                        |
-| 创建钱包流程     | 输入钱包别名，钱包密码，进行创建。                                                           |
-| 查看钱包流程     | 查看已创建的钱包列表，如：钱包ID，钱包别名，钱包账户数。                                       |
-| 创建资产账户流程 | 选择钱包，输入币种类型，账户别名，进行创建。目前只支持（单签）                                  |
-| 查看资产账户流程 | 选择钱包，查看钱包下的资产账户列表，如：账户ID，资产种类，资产余额，地址总数，汇总地址，汇总阈值。 |
-| 创建地址流程     | 选择钱包，选择资产账户，输入创建地址数量，批量生成地址。                                      |
-| 查询地址         | 输入：地址，显示地址信息：所在钱包ID，账户ID，地址公钥，地址私钥，余额。                          |
-| 资产转账         | 选择钱包，选择资产账户，输入：转账数量，目标地址，自定义费率。                                  |
-| 设置汇总         | 选择钱包，显示资产账户列表，选择资产账户，设置：汇总地址，汇总阈值。                            |
-| 定时汇总         | 启动汇总后台。                                                                             |
-| **服务管理相关** | 搭建本地钱包服务（待研究）                                                                  |
-| 创建服务         | 本地部署一个openw-server。                                                                 |
-| 安装区块链全节点 | 通过简单命令执行，通过docker快速节点。                                                      |
-| 启动服务         | 启动openw-server。                                                                         |
-
----
-
-## 3. 功能详细设计 `openw-cli`
+## 功能详细设计 `openw-cli`
 
 ### 配置文件
 
@@ -101,115 +136,7 @@ summaryperiod = "1h"
 > 命令输入结构: openw-cli [命令模块] [子命令] [可选参数...]
 > 如：openw-cli wallet newwallet -s btc
 
-### 3.1 节点管理 `node`
-
-#### 3.3.1 登记节点 `register`
-
-1. 初始化通信密钥对，如果已存在，则提示是否需要覆盖。
-1. 如果重新创建成功，客户端会重新登记节点。
-
-#### 3.3.2 查看节点 `info`
-
-1. 查看节点ID，通信密钥对。
-
-### 3.2 钱包管理 `wallet`
-
-#### 3.2.1 创建钱包 `newwallet`
-
-1. 执行钱包创建流程，要求用户输入钱包别名，钱包密码等信息。
-1. 创建成功后，钱包种子保存成keystore文件到 {datadir}/key/目录下。
-
-#### 3.2.2 查看钱包列表 `listwallet`
-
-1. 只查看本地节点创建的拥有钱包种子的所有钱包。
-1. 显示钱包列表，显示钱包别名，钱包ID，钱包账户总数。
-
-#### 3.2.3 创建资产账户 `newaccount`
-
-1. 选择一个已创建的钱包。
-1. 输入：账户别名，币种类型，下一步创建资产账户。
-
-#### 3.2.4 查看资产账户列表 `listaccount`
-
-1. 选择一个已创建的钱包。
-1. 显示资产账户列表，显示账户别名，账户ID，币种类型，账户余额，地址总数，汇总地址，汇总阈值。
-
-#### 3.2.5 创建地址 `newaddress`
-
-1. 选择一个已创建的钱包，及已创建的账户。
-1. 输入：地址数量，下一步批量创建新地址。
-
-#### 3.2.6 创建地址 `searchaddress`
-
-1. 输入一个地址，后台去查询地址。显示地址所在的钱包ID，账户ID，地址余额，地址公钥，地址私钥。
-
-#### 3.2.7 资产转账 `transfer`
-
-1. 选择一个已创建的钱包，及已创建的账户。
-1. 输入：转账数目，转账地址，钱包密码。
-1. 构建交易单，计算手续费，完成交易签名，广播交易。
-
-#### 3.2.8 设置汇总 `setsum`
-
-1. 选择一个已创建的钱包，及已创建的账户。
-1. 输入：汇总地址，汇总阈值，保存设置。
-
-#### 3.2.9 定时汇总 `startsum`
-
-1. 选择需要汇总的钱包，输入要汇总的资产账户数组，输入钱包密码，启动汇总定时程序。
-1. 通过-file 加载json文件，指定多个汇总钱包，接着输入各个钱包的密码，启动汇总定时程序。
-
-`汇总样例JSON`
-
-```json
-
-{
-    "wallets": [
-        {
-            "alias": "bit",
-            "walletID": "1234qwer",
-            "accounts": [
-                "123",
-                "4567",
-            ]
-        },
-        {
-            "alias": "bitw",
-            "walletID": "1234qwer",
-            "accounts": [
-                "123",
-                "4567",
-            ]
-        }
-    ]
-}
-
-```
-
-### 3.3 服务管理 `service`
-
-自行搭建openw-server，待设计
-
----
-
-## 4. openw-cli应用说明
-
-### 4.1 编译openw-cli工具
-
-```shell
-
-# 进入目录
-$ $GOPATH/src/github.com/blocktree/go-openw-cli
-
-# 全部平台版本编译
-$ xgo .
-
-# 或自编译某个系统的版本
-$ xgo --targets=linux/amd64 .
-
-```
-
-### 4.2 命令示例
+### 命令示例
 
 ```shell
 
