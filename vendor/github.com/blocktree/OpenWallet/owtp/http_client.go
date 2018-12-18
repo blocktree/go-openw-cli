@@ -114,7 +114,7 @@ func NewHTTPClientWithHeader(header http.Header, responseWriter http.ResponseWri
 		//nodeID          string
 	)
 
-	//log.Debug("header:", header)
+	//log.Debug("http header:", header)
 
 	a := header.Get("a")
 
@@ -273,7 +273,9 @@ func (c *HTTPClient) sendHTTPRequest(data DataPacket) error {
 
 	r, err := c.httpClient.Post(c.baseURL, req.BodyJSON(&data), req.Header(c.authHeader))
 
-	log.Std.Info("%+v", r)
+	if Debug {
+		log.Std.Info("%+v", r)
+	}
 
 	if err != nil {
 		return err

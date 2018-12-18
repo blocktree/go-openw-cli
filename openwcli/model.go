@@ -2,15 +2,13 @@ package openwcli
 
 import "github.com/blocktree/OpenWallet/owtp"
 
-
 const (
-	CLIBucket = "CLIBucket"
+	CLIBucket          = "CLIBucket"
 	CurrentKeychainKey = "current_keychain"
 )
 
 //密钥对
 type Keychain struct {
-
 	NodeID     string `json:"nodeID" storm:"id"`
 	PrivateKey string `json:"privateKey"`
 	PublicKey  string `json:"publicKey"`
@@ -30,4 +28,9 @@ func NewKeychain(cert owtp.Certificate) *Keychain {
 		publicKeyBytes:  cert.PublicKeyBytes(),
 	}
 	return keychain
+
+}
+
+func (keychain *Keychain) Certificate() (owtp.Certificate, error) {
+	return owtp.NewCertificate(keychain.PrivateKey, "")
 }

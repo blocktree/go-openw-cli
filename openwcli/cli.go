@@ -3,20 +3,20 @@ package openwcli
 import (
 	"fmt"
 	"github.com/asdine/storm"
-	"github.com/blocktree/OpenWallet/common/file"
 	"github.com/blocktree/OpenWallet/console"
 	"github.com/blocktree/OpenWallet/log"
 	"github.com/blocktree/OpenWallet/openwallet"
+	"github.com/blocktree/OpenWallet/owtp"
+	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/coreos/bbolt"
 	"path/filepath"
 	"time"
 )
 
-
 type CLI struct {
-	//工具配置
-	config *Config
-	db     *openwallet.StormDB
+	config *Config             //工具配置
+	db     *openwallet.StormDB //本地数据库
+	api    *openwsdk.APINode   //api
 }
 
 // 初始化工具
@@ -26,27 +26,21 @@ func NewCLI(c *Config) (*CLI, error) {
 		return nil, fmt.Errorf("appkey is empty. ")
 	}
 
-	if len(c.appsecret) == 0 {
-		return nil, fmt.Errorf("appsecret is empty. ")
+	if len(c.appid) == 0 {
+		return nil, fmt.Errorf("appid is empty. ")
 	}
 
 	if len(c.remoteserver) == 0 {
 		return nil, fmt.Errorf("remoteserver is empty. ")
 	}
 
-	//建立文件夹
-	file.MkdirAll(c.datadir)
-	file.MkdirAll(c.logdir)
-
-	dbfile := filepath.Join(c.datadir, c.appkey+".db")
+	dbfile := filepath.Join(c.dbdir, c.appid+".db")
 
 	//加载数据
 	db, err := openwallet.OpenStormDB(
 		dbfile,
 		storm.BoltOptions(0600, &bolt.Options{Timeout: 5 * time.Second}),
 	)
-
-
 	if err != nil {
 		return nil, err
 	}
@@ -55,6 +49,28 @@ func NewCLI(c *Config) (*CLI, error) {
 		config: c,
 		db:     db,
 	}
+
+	keychain, err := cli.GetKeychain()
+	if err != nil || keychain == nil {
+		//没有生成通信密钥，主动生成
+		keychain, err = cli.GenKeychain()
+	}
+
+	cert, _ := keychain.Certificate()
+
+	sdkConfig := &openwsdk.APINodeConfig{
+		AppID:           c.appid,
+		AppKey:          c.appkey,
+		HostNodeID:      "openw-server",
+		ConnectType:     owtp.HTTP,
+		Address:         c.remoteserver,
+		EnableSignature: true,
+		Cert:            cert,
+	}
+
+	apiSDK := openwsdk.NewAPINode(sdkConfig)
+	cli.api = apiSDK
+
 	return cli, nil
 }
 
@@ -84,7 +100,7 @@ func (cli *CLI) RegisterFlow() error {
 	}
 
 	err := cli.db.Get(CLIBucket, CurrentKeychainKey, &current)
-	if len(current) > 0  {
+	if len(current) > 0 {
 		//已经存在，提示是否需要覆盖
 		confirm, _ = console.Stdin.PromptConfirm("The keychain already exist, do you want to regenerate current keychain?")
 	} else {
@@ -93,14 +109,19 @@ func (cli *CLI) RegisterFlow() error {
 
 	if confirm {
 		//生成keychain
-		err = cli.GenKeychain()
+		keychain, err := cli.GenKeychain()
 		if err != nil {
 			return err
 		}
+
+		log.Info("Create keychain successfully.")
+
+		//打印密钥对
+		printKeychain(keychain)
 	}
 
 	//登记节点
-	err = cli.RegisterOpenwServer()
+	err = cli.RegisterOnServer()
 	if err != nil {
 		return err
 	}
@@ -130,13 +151,12 @@ func (cli *CLI) GetNodeInfoFlow() error {
 
 //printKeychain 打印证书钥匙串
 func printKeychain(keychain *Keychain) {
-
 	//打印证书信息
 	log.Notice("--------------- PRIVATE KEY ---------------")
 	log.Notice(keychain.PrivateKey)
 	fmt.Println()
 	log.Notice("--------------- PUBLIC KEY ---------------")
-	log.Notice(keychain.PrivateKey)
+	log.Notice(keychain.PublicKey)
 	log.Notice("--------------- NODE ID ---------------")
 	log.Notice(keychain.NodeID)
 	fmt.Println()
@@ -144,15 +164,32 @@ func printKeychain(keychain *Keychain) {
 
 //NewWalletFlow 创建钱包流程
 func (cli *CLI) NewWalletFlow() error {
-	//TODO: WIP
-	name, _ := console.InputText("wallet name:", true)
-	log.Info(name)
+
+	var (
+		password string
+		name     string
+		err      error
+	)
+
+	// 等待用户输入钱包名字
+	name, err = console.InputText("Enter wallet's name: ", true)
+
+	// 等待用户输入密码
+	password, err = console.InputPassword(false, 3)
+
+	err = cli.CreateWalletOnServer(name, password)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 //ListWalletFlow
 func (cli *CLI) ListWalletFlow() error {
 	//TODO: WIP
+	wallets, _ := cli.GetWalletsOnServer()
+	cli.printWalletList(wallets)
 	return nil
 }
 

@@ -57,6 +57,8 @@ const (
 	ErrResponseMethodDiffer uint64 = 501
 	//协商失败
 	ErrKeyAgreementFailed uint64 = 502
+	//拒绝服务
+	ErrDenialOfService uint64 = 503
 
 	//60X: 自定义错误
 	ErrCustomError uint64 = 600
@@ -68,10 +70,21 @@ const (
 	HTTP string = "http"
 )
 
+//内置方法
 const (
 
 	//校验协商结果
 	KeyAgreementMethod = "internal_keyAgreement"
+
+	//准备前执行的方
+	PrepareMethod = "internal_prepare"
+
+	//结束时执行的方法
+	FinishMethod = "internal_finish"
+)
+
+var (
+	Debug = true
 )
 
 //节点主配置 作为json解析工具
@@ -153,9 +166,19 @@ func NewOWTPNode(cert Certificate, readBufferSize, writeBufferSize int) *OWTPNod
 	return node
 }
 
+//Certificate 节点证书
+func (node *OWTPNode) Certificate() Certificate {
+	return node.cert
+}
+
 //NodeID 节点的ID
 func (node *OWTPNode) NodeID() string {
 	return node.cert.ID()
+}
+
+//SetPeerstore 设置一个Peerstore指针
+func (node *OWTPNode) SetPeerstore(store Peerstore) {
+	node.peerstore = store
 }
 
 //Peerstore 节点存储器
@@ -428,6 +451,30 @@ func (node *OWTPNode) Close() {
 	//node.client.Close()
 }
 
+//CallSync 同步请求
+func  (node *OWTPNode) CallSync(
+	pid string,
+	method string,
+	params interface{},
+	) (*Response, error) {
+
+	var (
+		err      error
+		respChan = make(chan Response, 1)
+	)
+
+	err = node.Call(pid, method, params, true, func(resp Response) {
+		respChan <- resp
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	response := <- respChan
+	return &response, nil
+}
+
 //Call 向对方节点进行调用
 func (node *OWTPNode) Call(
 	pid string,
@@ -537,6 +584,16 @@ func (node *OWTPNode) encryptPacket(peer Peer, packet *DataPacket) error {
 //HandleFunc 绑定路由器方法
 func (node *OWTPNode) HandleFunc(method string, handler HandlerFunc) {
 	node.serveMux.HandleFunc(method, handler)
+}
+
+//HandlePrepareFunc 绑定准备前的处理方法
+func (node *OWTPNode) HandlePrepareFunc(handler HandlerFunc) {
+	node.serveMux.HandleFunc(PrepareMethod, handler)
+}
+
+//HandleFinishFunc 绑定结束后的处理方法
+func (node *OWTPNode) HandleFinishFunc(handler HandlerFunc) {
+	node.serveMux.HandleFunc(FinishMethod, handler)
 }
 
 //KeyAgreement 发起协商请求
@@ -706,7 +763,7 @@ func (node *OWTPNode) OnPeerNewDataPacketReceived(peer Peer, packet *DataPacket)
 
 		//授权检查，只检查请求过来的签名
 		if !peer.Auth().VerifySignature(packet) {
-			log.Critical("auth failed: ", packet)
+			log.Errorf("auth failed: %+v", packet)
 			packet.Req = WSResponse
 			packet.Data = responseError("verify signature failed, unauthorized", ErrUnauthorized)
 			peer.Send(*packet) //发送验证失败结果
@@ -733,7 +790,7 @@ func (node *OWTPNode) OnPeerNewDataPacketReceived(peer Peer, packet *DataPacket)
 		}
 
 		//创建上下面指针，处理请求参数
-		ctx := Context{PID: peer.PID(), Req: packet.Req, nonce: packet.Nonce, inputs: decryptData, Method: packet.Method}
+		ctx := Context{PID: peer.PID(), Req: packet.Req, RemoteAddress: peer.RemoteAddr().String(), nonce: packet.Nonce, inputs: decryptData, Method: packet.Method, peerstore: node.Peerstore()}
 
 		node.serveMux.ServeOWTP(peer.PID(), &ctx)
 
@@ -776,7 +833,7 @@ func (node *OWTPNode) OnPeerNewDataPacketReceived(peer Peer, packet *DataPacket)
 			resp = responseError("Response decode error", ErrBadRequest)
 		}
 
-		ctx := Context{Req: packet.Req, nonce: packet.Nonce, inputs: nil, Method: packet.Method, Resp: resp}
+		ctx := Context{Req: packet.Req, RemoteAddress: peer.RemoteAddr().String(), nonce: packet.Nonce, inputs: nil, Method: packet.Method, Resp: resp, peerstore: node.Peerstore()}
 
 		node.serveMux.ServeOWTP(peer.PID(), &ctx)
 

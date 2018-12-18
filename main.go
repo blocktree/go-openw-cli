@@ -83,10 +83,7 @@ func init() {
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2018 The OpenWallet Authors"
 	app.Version = Version
-	app.Commands = []cli.Command{
-		commands.CmdNode,
-		commands.CmdWallet,
-	}
+	app.Commands = commands.Commands
 	app.Flags = []cli.Flag{
 		commands.AppNameFlag,
 		commands.LogDirFlag,
