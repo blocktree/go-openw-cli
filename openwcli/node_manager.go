@@ -55,6 +55,6 @@ func (cli *CLI) GetKeychain() (*Keychain, error) {
 //RegisterOnServer 注册节点到openw-server
 func (cli *CLI) RegisterOnServer() error {
 
-	//	TODO: 登记节点到openw-server
-	return nil
+	//登记节点到openw-server
+	return cli.api.BindAppDevice()
 }
