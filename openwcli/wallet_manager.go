@@ -43,7 +43,7 @@ func (cli *CLI) CreateWalletOnServer(name, password string) error {
 	cli.api.CreateWallet(name, key.KeyID, key.RootPath, true,
 		func(status uint64, msg string, wallet *openwsdk.Wallet) {
 		if status == owtp.StatusSuccess {
-			log.Notice("Wallet create successfully, key path:", filePath)
+			log.Info("Wallet create successfully, key path:", filePath)
 		} else {
 			log.Error("create wallet on server failed, unexpected error:", msg)
 

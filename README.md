@@ -97,7 +97,7 @@ version = "1.0.0"
 appkey = "1234qwer"
 
 # App Secret
-appkey = "qwer1234"
+appid = "qwer1234"
 
 # Log file path
 logdir = "/usr/logs/"
@@ -133,8 +133,8 @@ summaryperiod = "1h"
 | {datadir}/db/                | 钱包数据库缓存目录，文件命名 [alias]-[WalletID].db                              |
 | {datadir}/backup/            | 钱包备份文件导出目录，以文件夹归档备份，文件夹命名 [alias]-[WalletID]-yyyyMMddHHmmss |
 
-> 命令输入结构: openw-cli [命令模块] [子命令] [可选参数...]
-> 如：openw-cli wallet newwallet -s btc
+> 命令输入结构: openw-cli [子命令] [可选参数...]
+> 如：openw-cli newwallet -s btc
 
 ### 命令示例
 
@@ -143,51 +143,38 @@ summaryperiod = "1h"
 #### 节点相关 ####
 
 # 登记到openw-server，成为应用的授权节点。
-$ ./openw-cli node register
+$ ./openw-cli noderegister
 
 # 查看节点的信息
-$ ./openw-cli node info
-
-# 执行来自配置文件关闭[symbol]节点的命令
-$ ./openw-cli node stop -s [symbol]
-
-# 移除节点docker容器
-$ ./openw-cli node remove -s [symbol]
-
-# 查看与[symbol]节点相关的信息
-$ ./openw-cli node status -s [symbol]
-
-# 查看./conf/[symbol].ini文件中与节点相关的配置信息
-$ ./openw-cli node config -s [symbol]
-
+$ ./openw-cli nodeinfo
 
 #### 钱包相关 ####
 
 # 创建钱包
-$ ./openw-cli wallet newwallet
+$ ./openw-cli newwallet
 
 # 查看节点本地已创建的钱包
-$ ./openw-cli wallet listwallet
+$ ./openw-cli listwallet
 
 # 创建钱包资产账户，先选择钱包
-$ ./openw-cli wallet newaccount
+$ ./openw-cli newaccount
 
 # 查看钱包资产账户，先选择钱包
-$ ./openw-cli wallet listaccount
+$ ./openw-cli listaccount
 
 # 创建新地址，先选择钱包，再选择资产账户
-$ ./openw-cli wallet newaddress
+$ ./openw-cli newaddress
 
 # 查询地址信息
-$ ./openw-cli wallet searchaddress
+$ ./openw-cli searchaddress
 
 # 设置汇总，先选择钱包，再选择资产账户
-$ ./openw-cli wallet setsum
+$ ./openw-cli setsum
 
 # 启动汇总定时器
-$ ./openw-cli wallet startsum
+$ ./openw-cli startsum
 
 # 启动汇总定时器，通过文件加载需要汇总的钱包和资产账户
-$ ./openw-cli wallet startsum -f /usr/to/sum.json
+$ ./openw-cli startsum -f /usr/to/sum.json
 
 ```

@@ -50,28 +50,37 @@ func NewCLI(c *Config) (*CLI, error) {
 		db:     db,
 	}
 
+	//配置日志
+	SetupLog(c.logdir, "openwcli.log", false)
+
 	keychain, err := cli.GetKeychain()
-	if err != nil || keychain == nil {
-		//没有生成通信密钥，主动生成
-		keychain, err = cli.GenKeychain()
+	if keychain != nil {
+		cli.setupAPISDK(keychain)
 	}
-
-	cert, _ := keychain.Certificate()
-
-	sdkConfig := &openwsdk.APINodeConfig{
-		AppID:           c.appid,
-		AppKey:          c.appkey,
-		HostNodeID:      "openw-server",
-		ConnectType:     owtp.HTTP,
-		Address:         c.remoteserver,
-		EnableSignature: true,
-		Cert:            cert,
-	}
-
-	apiSDK := openwsdk.NewAPINode(sdkConfig)
-	cli.api = apiSDK
 
 	return cli, nil
+}
+
+//setupAPI 配置APISDK
+func (cli *CLI) setupAPISDK(keychain *Keychain) error {
+
+	if keychain != nil {
+		cert, _ := keychain.Certificate()
+		sdkConfig := &openwsdk.APINodeConfig{
+			AppID:           cli.config.appid,
+			AppKey:          cli.config.appkey,
+			HostNodeID:      "openw-server",
+			ConnectType:     owtp.HTTP,
+			Address:         cli.config.remoteserver,
+			EnableSignature: true,
+			Cert:            cert,
+		}
+
+		apiSDK := openwsdk.NewAPINode(sdkConfig)
+		cli.api = apiSDK
+	}
+
+	return nil
 }
 
 //checkConfig 检查配置加载完
@@ -91,16 +100,16 @@ func (cli *CLI) checkConfig() error {
 func (cli *CLI) RegisterFlow() error {
 
 	var (
-		current string
 		confirm bool
+		keychain *Keychain
 	)
 
 	if check := cli.checkConfig(); check != nil {
 		return check
 	}
 
-	err := cli.db.Get(CLIBucket, CurrentKeychainKey, &current)
-	if len(current) > 0 {
+	keychain, err := cli.GetKeychain()
+	if keychain != nil {
 		//已经存在，提示是否需要覆盖
 		confirm, _ = console.Stdin.PromptConfirm("The keychain already exist, do you want to regenerate current keychain?")
 	} else {
@@ -109,7 +118,7 @@ func (cli *CLI) RegisterFlow() error {
 
 	if confirm {
 		//生成keychain
-		keychain, err := cli.GenKeychain()
+		keychain, err = cli.GenKeychain()
 		if err != nil {
 			return err
 		}
@@ -120,11 +129,20 @@ func (cli *CLI) RegisterFlow() error {
 		printKeychain(keychain)
 	}
 
+	//配置APISDK
+	err = cli.setupAPISDK(keychain)
+	if err != nil {
+		return err
+	}
+
+
 	//登记节点
 	err = cli.RegisterOnServer()
 	if err != nil {
 		return err
 	}
+
+	log.Info("Register node on opew-server successfully.")
 
 	return nil
 }
@@ -132,19 +150,12 @@ func (cli *CLI) RegisterFlow() error {
 //GetNodeInfo 获取节点信息
 func (cli *CLI) GetNodeInfoFlow() error {
 
-	var current string
-	err := cli.db.Get(CLIBucket, CurrentKeychainKey, &current)
+	keychain, err := cli.GetKeychain()
 	if err != nil {
-		return fmt.Errorf("The keychain not exist, please register node first. ")
+		return err
 	}
 
-	var keychain Keychain
-	err = cli.db.One("NodeID", current, &keychain)
-	if err != nil {
-		return fmt.Errorf("The keychain not exist, please register node first. ")
-	}
-
-	printKeychain(&keychain)
+	printKeychain(keychain)
 
 	return nil
 }
@@ -154,12 +165,10 @@ func printKeychain(keychain *Keychain) {
 	//打印证书信息
 	log.Notice("--------------- PRIVATE KEY ---------------")
 	log.Notice(keychain.PrivateKey)
-	fmt.Println()
 	log.Notice("--------------- PUBLIC KEY ---------------")
 	log.Notice(keychain.PublicKey)
 	log.Notice("--------------- NODE ID ---------------")
 	log.Notice(keychain.NodeID)
-	fmt.Println()
 }
 
 //NewWalletFlow 创建钱包流程
@@ -170,6 +179,10 @@ func (cli *CLI) NewWalletFlow() error {
 		name     string
 		err      error
 	)
+
+	if cli.api == nil {
+		return err
+	}
 
 	// 等待用户输入钱包名字
 	name, err = console.InputText("Enter wallet's name: ", true)

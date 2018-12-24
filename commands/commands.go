@@ -20,10 +20,10 @@ var (
 		},
 		{
 			//登记节点
-			Name:      "noderinfo",
+			Name:      "nodeinfo",
 			Usage:     "show node information",
 			ArgsUsage: "",
-			Action:    noderinfo,
+			Action:    nodeinfo,
 			Category:  "OPENW-CLI COMMANDS",
 		},
 		{
@@ -67,6 +67,7 @@ func getCLI(c *cli.Context) *openwcli.CLI {
 		log.Error("unexpected error: ", err)
 		return nil
 	}
+
 	return cli
 }
 
@@ -83,8 +84,8 @@ func noderegister(c *cli.Context) error {
 	return nil
 }
 
-//noderinfo
-func noderinfo(c *cli.Context) error {
+//nodeinfo
+func nodeinfo(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
 		err := cli.GetNodeInfoFlow()

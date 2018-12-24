@@ -1,0 +1,432 @@
+{
+	"_type": "Project",
+	"_id": "AAAAAAFF+h6SjaM2Hec=",
+	"name": "Untitled",
+	"ownedElements": [
+		{
+			"_type": "UMLModel",
+			"_id": "AAAAAAFF+qBWK6M3Z8Y=",
+			"_parent": {
+				"$ref": "AAAAAAFF+h6SjaM2Hec="
+			},
+			"name": "Model",
+			"ownedElements": [
+				{
+					"_type": "UMLClassDiagram",
+					"_id": "AAAAAAFF+qBtyKM79qY=",
+					"_parent": {
+						"$ref": "AAAAAAFF+qBWK6M3Z8Y="
+					},
+					"name": "Main",
+					"defaultDiagram": true
+				}
+			]
+		},
+		{
+			"_type": "FCFlowchart",
+			"_id": "AAAAAAFnwJSUFuVyD30=",
+			"_parent": {
+				"$ref": "AAAAAAFF+h6SjaM2Hec="
+			},
+			"name": "Flowchart1",
+			"ownedElements": [
+				{
+					"_type": "FCFlowchartDiagram",
+					"_id": "AAAAAAFnwJSUFuVzMM8=",
+					"_parent": {
+						"$ref": "AAAAAAFnwJSUFuVyD30="
+					},
+					"name": "FlowchartDiagram1",
+					"ownedViews": [
+						{
+							"_type": "FCTerminatorView",
+							"_id": "AAAAAAFnwJS//eV5EMw=",
+							"_parent": {
+								"$ref": "AAAAAAFnwJSUFuVzMM8="
+							},
+							"model": {
+								"$ref": "AAAAAAFnwJS//OV3ZoA="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAFnwJS//eV6Ey0=",
+									"_parent": {
+										"$ref": "AAAAAAFnwJS//eV5EMw="
+									},
+									"font": "Arial;13;0",
+									"left": 306,
+									"top": 146,
+									"width": 68.63720703125,
+									"height": 13,
+									"text": "openw-cli",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"left": 296,
+							"top": 136,
+							"width": 88.63720703125,
+							"height": 33,
+							"nameLabel": {
+								"$ref": "AAAAAAFnwJS//eV6Ey0="
+							}
+						},
+						{
+							"_type": "FCProcessView",
+							"_id": "AAAAAAFnwJT5TeWCyjE=",
+							"_parent": {
+								"$ref": "AAAAAAFnwJSUFuVzMM8="
+							},
+							"model": {
+								"$ref": "AAAAAAFnwJT5TeWAKuY="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAFnwJT5TeWDwJ4=",
+									"_parent": {
+										"$ref": "AAAAAAFnwJT5TeWCyjE="
+									},
+									"font": "Arial;13;0",
+									"left": 306,
+									"top": 226,
+									"width": 65,
+									"height": 13,
+									"text": "初始化配置",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"left": 296,
+							"top": 216,
+							"width": 85,
+							"height": 33,
+							"nameLabel": {
+								"$ref": "AAAAAAFnwJT5TeWDwJ4="
+							}
+						},
+						{
+							"_type": "FCProcessView",
+							"_id": "AAAAAAFnwJVCf+WMIeU=",
+							"_parent": {
+								"$ref": "AAAAAAFnwJSUFuVzMM8="
+							},
+							"model": {
+								"$ref": "AAAAAAFnwJVCf+WK5V8="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAFnwJVCf+WNbSo=",
+									"_parent": {
+										"$ref": "AAAAAAFnwJVCf+WMIeU="
+									},
+									"font": "Arial;13;0",
+									"left": 314,
+									"top": 298,
+									"width": 59.22998046875,
+									"height": 13,
+									"text": "初始化CLI",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"left": 304,
+							"top": 288,
+							"width": 79.22998046875,
+							"height": 33,
+							"nameLabel": {
+								"$ref": "AAAAAAFnwJVCf+WNbSo="
+							}
+						},
+						{
+							"_type": "FCDecisionView",
+							"_id": "AAAAAAFnwJW3DOXIDcQ=",
+							"_parent": {
+								"$ref": "AAAAAAFnwJSUFuVzMM8="
+							},
+							"model": {
+								"$ref": "AAAAAAFnwJW3C+XG3n8="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAFnwJW3DOXJgtc=",
+									"_parent": {
+										"$ref": "AAAAAAFnwJW3DOXIDcQ="
+									},
+									"font": "Arial;13;0",
+									"left": 298.5,
+									"top": 383.5,
+									"width": 117,
+									"height": 15,
+									"text": "是否已创建通信密钥",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"left": 240,
+							"top": 376,
+							"width": 234,
+							"height": 30,
+							"nameLabel": {
+								"$ref": "AAAAAAFnwJW3DOXJgtc="
+							}
+						},
+						{
+							"_type": "FCProcessView",
+							"_id": "AAAAAAFnwJXyQuXSbuI=",
+							"_parent": {
+								"$ref": "AAAAAAFnwJSUFuVzMM8="
+							},
+							"model": {
+								"$ref": "AAAAAAFnwJXyQuXQnkA="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAFnwJXyQuXTjAc=",
+									"_parent": {
+										"$ref": "AAAAAAFnwJXyQuXSbuI="
+									},
+									"font": "Arial;13;0",
+									"left": 306,
+									"top": 450,
+									"width": 78,
+									"height": 13,
+									"text": "生成通信密钥",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"left": 296,
+							"top": 440,
+							"width": 98,
+							"height": 33,
+							"nameLabel": {
+								"$ref": "AAAAAAFnwJXyQuXTjAc="
+							}
+						},
+						{
+							"_type": "FCProcessView",
+							"_id": "AAAAAAFnwJYW2uXcHww=",
+							"_parent": {
+								"$ref": "AAAAAAFnwJSUFuVzMM8="
+							},
+							"model": {
+								"$ref": "AAAAAAFnwJYW2eXaOjk="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAFnwJYW2uXdn4k=",
+									"_parent": {
+										"$ref": "AAAAAAFnwJYW2uXcHww="
+									},
+									"font": "Arial;13;0",
+									"left": 258,
+									"top": 530,
+									"width": 169.75537109375,
+									"height": 13,
+									"text": "登记通信节点到openw-server",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"left": 248,
+							"top": 520,
+							"width": 189.75537109375,
+							"height": 33,
+							"nameLabel": {
+								"$ref": "AAAAAAFnwJYW2uXdn4k="
+							}
+						},
+						{
+							"_type": "FCProcessView",
+							"_id": "AAAAAAFnwJeWR+XnK6s=",
+							"_parent": {
+								"$ref": "AAAAAAFnwJSUFuVzMM8="
+							},
+							"model": {
+								"$ref": "AAAAAAFnwJeWR+Xln5w="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAFnwJeWR+XoeOk=",
+									"_parent": {
+										"$ref": "AAAAAAFnwJeWR+XnK6s="
+									},
+									"font": "Arial;13;0",
+									"left": 586,
+									"top": 378,
+									"width": 54.18994140625,
+									"height": 13,
+									"text": "创建钱包",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"left": 576,
+							"top": 368,
+							"width": 74.18994140625,
+							"height": 33,
+							"nameLabel": {
+								"$ref": "AAAAAAFnwJeWR+XoeOk="
+							}
+						},
+						{
+							"_type": "FCProcessView",
+							"_id": "AAAAAAFnwJe6LuXwbeA=",
+							"_parent": {
+								"$ref": "AAAAAAFnwJSUFuVzMM8="
+							},
+							"model": {
+								"$ref": "AAAAAAFnwJe6LeXunSg="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAFnwJe6LuXxmEU=",
+									"_parent": {
+										"$ref": "AAAAAAFnwJe6LuXwbeA="
+									},
+									"font": "Arial;13;0",
+									"left": 554,
+									"top": 466,
+									"width": 96.078125,
+									"height": 13,
+									"text": "创建HDKeystore",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"left": 544,
+							"top": 456,
+							"width": 116.078125,
+							"height": 33,
+							"nameLabel": {
+								"$ref": "AAAAAAFnwJe6LuXxmEU="
+							}
+						},
+						{
+							"_type": "FCTerminatorView",
+							"_id": "AAAAAAFnwJgbzOX6RP8=",
+							"_parent": {
+								"$ref": "AAAAAAFnwJSUFuVzMM8="
+							},
+							"model": {
+								"$ref": "AAAAAAFnwJgbzOX45Pk="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAFnwJgbzOX7pmk=",
+									"_parent": {
+										"$ref": "AAAAAAFnwJgbzOX6RP8="
+									},
+									"font": "Arial;13;0",
+									"left": 578,
+									"top": 290,
+									"width": 78,
+									"height": 13,
+									"text": "创建钱包流程",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"left": 568,
+							"top": 280,
+							"width": 98,
+							"height": 33,
+							"nameLabel": {
+								"$ref": "AAAAAAFnwJgbzOX7pmk="
+							}
+						}
+					]
+				},
+				{
+					"_type": "FCTerminator",
+					"_id": "AAAAAAFnwJS//OV3ZoA=",
+					"_parent": {
+						"$ref": "AAAAAAFnwJSUFuVyD30="
+					},
+					"name": "openw-cli"
+				},
+				{
+					"_type": "FCProcess",
+					"_id": "AAAAAAFnwJT5TeWAKuY=",
+					"_parent": {
+						"$ref": "AAAAAAFnwJSUFuVyD30="
+					},
+					"name": "初始化配置"
+				},
+				{
+					"_type": "FCProcess",
+					"_id": "AAAAAAFnwJVCf+WK5V8=",
+					"_parent": {
+						"$ref": "AAAAAAFnwJSUFuVyD30="
+					},
+					"name": "初始化CLI"
+				},
+				{
+					"_type": "FCProcess",
+					"_id": "AAAAAAFnwJWPO+Wrb5U=",
+					"_parent": {
+						"$ref": "AAAAAAFnwJSUFuVyD30="
+					},
+					"name": "Process4"
+				},
+				{
+					"_type": "FCDecision",
+					"_id": "AAAAAAFnwJW3C+XG3n8=",
+					"_parent": {
+						"$ref": "AAAAAAFnwJSUFuVyD30="
+					},
+					"name": "是否已创建通信密钥"
+				},
+				{
+					"_type": "FCProcess",
+					"_id": "AAAAAAFnwJXyQuXQnkA=",
+					"_parent": {
+						"$ref": "AAAAAAFnwJSUFuVyD30="
+					},
+					"name": "生成通信密钥"
+				},
+				{
+					"_type": "FCProcess",
+					"_id": "AAAAAAFnwJYW2eXaOjk=",
+					"_parent": {
+						"$ref": "AAAAAAFnwJSUFuVyD30="
+					},
+					"name": "登记通信节点到openw-server"
+				},
+				{
+					"_type": "FCProcess",
+					"_id": "AAAAAAFnwJeWR+Xln5w=",
+					"_parent": {
+						"$ref": "AAAAAAFnwJSUFuVyD30="
+					},
+					"name": "创建钱包"
+				},
+				{
+					"_type": "FCProcess",
+					"_id": "AAAAAAFnwJe6LeXunSg=",
+					"_parent": {
+						"$ref": "AAAAAAFnwJSUFuVyD30="
+					},
+					"name": "创建HDKeystore"
+				},
+				{
+					"_type": "FCTerminator",
+					"_id": "AAAAAAFnwJgbzOX45Pk=",
+					"_parent": {
+						"$ref": "AAAAAAFnwJSUFuVyD30="
+					},
+					"name": "创建钱包流程"
+				}
+			]
+		}
+	]
+}
