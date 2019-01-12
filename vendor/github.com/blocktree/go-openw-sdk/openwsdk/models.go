@@ -6,6 +6,14 @@ import (
 	"github.com/blocktree/OpenWallet/openwallet"
 )
 
+type CallbackNode struct {
+	NodeID             string `json:"nodeID"`             //@required 节点ID
+	Address            string `json:"address"`            //@required 连接IP地址
+	ConnectType        string `json:"connectType"`        //@required 连接方式
+	EnableKeyAgreement bool   `json:"enableKeyAgreement"` //是否开启owtp协议协商密码
+	EnableSSL          bool   `json:"enableSSL"`          //是否开启链接SSL，https，wss
+}
+
 type Wallet struct {
 	AppID        string `json:"appID" bson:"appID"`
 	WalletID     string `json:"walletID" bson:"walletID"`
@@ -22,7 +30,7 @@ type Wallet struct {
 }
 
 type Symbol struct {
-	Name     string `json:"name" bson:"name"`
+	Name     string `json:"name" bson:"name" storm:"id"`
 	Coin     string `json:"coin" bson:"coin"`
 	Curve    int64  `json:"curve" bson:"curve"`
 	Orderno  int64  `json:"orderno" bson:"orderno"`
@@ -74,7 +82,7 @@ type Address struct {
 }
 
 type TokenContract struct {
-	ContractID string `json:"contractID" bson:"contractID"`
+	ContractID string `json:"contractID" bson:"contractID" storm:"id"`
 	Symbol     string `json:"symbol" bson:"symbol"` //主链标记
 	Name       string `json:"name" bson:"name"`
 	Decimals   int64  `json:"decimals" bson:"decimals"`

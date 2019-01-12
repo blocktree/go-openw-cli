@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+const (
+	maxAddresNum = 2000
+)
+
 type CLI struct {
 	config *Config             //工具配置
 	db     *openwallet.StormDB //本地数据库
@@ -67,13 +71,13 @@ func (cli *CLI) setupAPISDK(keychain *Keychain) error {
 	if keychain != nil {
 		cert, _ := keychain.Certificate()
 		sdkConfig := &openwsdk.APINodeConfig{
-			AppID:           cli.config.appid,
-			AppKey:          cli.config.appkey,
-			HostNodeID:      "openw-server",
-			ConnectType:     owtp.HTTP,
-			Address:         cli.config.remoteserver,
-			EnableSignature: true,
-			Cert:            cert,
+			AppID:              cli.config.appid,
+			AppKey:             cli.config.appkey,
+			ConnectType:        owtp.HTTP,
+			Host:               cli.config.remoteserver,
+			EnableSignature:    false,
+			EnableKeyAgreement: true,
+			Cert:               cert,
 		}
 
 		apiSDK := openwsdk.NewAPINode(sdkConfig)
@@ -100,7 +104,7 @@ func (cli *CLI) checkConfig() error {
 func (cli *CLI) RegisterFlow() error {
 
 	var (
-		confirm bool
+		confirm  bool
 		keychain *Keychain
 	)
 
@@ -134,7 +138,6 @@ func (cli *CLI) RegisterFlow() error {
 	if err != nil {
 		return err
 	}
-
 
 	//登记节点
 	err = cli.RegisterOnServer()
@@ -200,7 +203,6 @@ func (cli *CLI) NewWalletFlow() error {
 
 //ListWalletFlow
 func (cli *CLI) ListWalletFlow() error {
-	//TODO: WIP
 	wallets, _ := cli.GetWalletsOnServer()
 	cli.printWalletList(wallets)
 	return nil
@@ -208,37 +210,210 @@ func (cli *CLI) ListWalletFlow() error {
 
 //NewAccountFlow
 func (cli *CLI) NewAccountFlow() error {
-	//TODO: WIP
+
+	//:选择钱包
+	wallet, err := cli.selectWalletStep()
+	if err != nil {
+		return err
+	}
+
+	//:输入钱包密码
+	// 等待用户输入密码
+	password, err := console.InputPassword(false, 3)
+	if err != nil {
+		return err
+	}
+
+	//:输入账户别名
+	// 等待用户输入钱包名字
+	name, err := console.InputText("Enter account's name: ", true)
+	if err != nil {
+		return err
+	}
+
+	//:输入币种类别
+	// 等待用户输入钱包名字
+	symbol, err := console.InputText("Enter account's symbol: ", true)
+	if err != nil {
+		return err
+	}
+
+	//创建新账户
+	err = cli.CreateAccountOnServer(name, password, symbol, wallet)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 //ListAccountFlow
 func (cli *CLI) ListAccountFlow() error {
-	//TODO: WIP
+
+	//:选择钱包
+	wallet, err := cli.selectWalletStep()
+	if err != nil {
+		return err
+	}
+
+	accounts, _ := cli.GetAccountsOnServer(wallet.WalletID)
+	cli.printAccountList(accounts)
 	return nil
 }
 
 //NewAddressFlow
 func (cli *CLI) NewAddressFlow() error {
-	//TODO: WIP
+
+	//:选择钱包
+	wallet, err := cli.selectWalletStep()
+	if err != nil {
+		return err
+	}
+
+	//:选择账户
+	account, err := cli.selectAccountStep(wallet.WalletID)
+	if err != nil {
+		return err
+	}
+
+	// 输入地址数量
+	count, err := console.InputNumber("Enter the number of addresses you want: ", false)
+	if err != nil {
+		return err
+	}
+
+	if count > maxAddresNum {
+		return fmt.Errorf("The number of addresses can not exceed %d ", maxAddresNum)
+	}
+
+	err = cli.CreateAddressOnServer(account.WalletID, account.AccountID, count)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 //SearchAddressFlow
 func (cli *CLI) SearchAddressFlow() error {
-	//TODO: WIP
+
+	var (
+		password string
+	)
+
+	// 等待用户输入地址
+	addr, err := console.InputText("Enter address: ", true)
+	if err != nil {
+		return err
+	}
+
+	//是否需要显示地址私钥，需要必须填入密码
+	confirm, _ := console.Stdin.PromptConfirm("Do want to show address private key?")
+	if confirm {
+		// 等待用户输入密码
+		password, err = console.InputPassword(false, 3)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = cli.SearchAddressOnServer(addr, password)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 //TransferFlow
 func (cli *CLI) TransferFlow() error {
-	//TODO: WIP
+	//:选择钱包
+	wallet, err := cli.selectWalletStep()
+	if err != nil {
+		return err
+	}
+
+	//:选择账户
+	account, err := cli.selectAccountStep(wallet.WalletID)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入合约地址
+	contractAddress, err := console.InputText("Enter contract address: ", true)
+	if err != nil {
+		return err
+	}
+	// 等待用户输入接收地址
+	to, err := console.InputText("Enter received address: ", true)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入发送数量
+	amount, err := console.InputRealNumber("Enter amount to send: ", true)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入密码
+	password, err := console.InputPassword(false, 3)
+	if err != nil {
+		return err
+	}
+
+	err = cli.Transfer(wallet, account, contractAddress, to, amount, password)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 //SetSumFlow
 func (cli *CLI) SetSumFlow() error {
-	//TODO: WIP
+
+	//:选择钱包
+	wallet, err := cli.selectWalletStep()
+	if err != nil {
+		return err
+	}
+
+	//:选择账户
+	account, err := cli.selectAccountStep(wallet.WalletID)
+	if err != nil {
+		return err
+	}
+
+	sumAddress, err := console.InputText("Enter account's summary address: ", true)
+	if err != nil {
+		return err
+	}
+
+	threshold, err := console.InputText("Enter account's summary threshold: ", true)
+	if err != nil {
+		return err
+	}
+
+	minTransfer, err := console.InputText("Enter address's minimum transfer amount: ", true)
+	if err != nil {
+		return err
+	}
+
+	retainedBalance, err := console.InputText("Enter address's retained balance: ", true)
+	if err != nil {
+		return err
+	}
+
+	confirms, err := console.InputNumber("Enter how many confirms can transfer: ", true)
+	if err != nil {
+		return err
+	}
+
+	err = cli.SetSummaryInfo(account.WalletID, account.AccountID, sumAddress, threshold, minTransfer, retainedBalance, confirms)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -246,4 +421,79 @@ func (cli *CLI) SetSumFlow() error {
 func (cli *CLI) StartSumFlow() error {
 	//TODO: WIP
 	return nil
+}
+
+//UpdateInfoFlow
+func (cli *CLI) UpdateInfoFlow() error {
+	return cli.UpdateSymbols()
+}
+
+//ListSymbolFlow
+func (cli *CLI) ListSymbolFlow() error {
+	list, err := cli.GetSymbolList()
+	if err != nil {
+		return err
+	}
+	cli.printSymbolList(list)
+	return nil
+}
+
+//ListTokenContractFlow
+func (cli *CLI) ListTokenContractFlow() error {
+
+	symbol, err := console.InputText("Enter symbol: ", true)
+	if err != nil {
+		return err
+	}
+
+	list, err := cli.GetTokenContractList("Symbol", symbol)
+	if err != nil {
+		return err
+	}
+	cli.printTokenContractList(list)
+	return nil
+}
+
+//selectWalletStep 选择钱包操作
+func (cli *CLI) selectWalletStep() (*openwsdk.Wallet, error) {
+
+	wallets, _ := cli.GetWalletsOnServer()
+	cli.printWalletList(wallets)
+
+	fmt.Printf("[Please select a wallet] \n")
+
+	//选择钱包
+	num, err := console.InputNumber("Enter wallet No.: ", true)
+	if err != nil {
+		return nil, err
+	}
+
+	if int(num) >= len(wallets) {
+		return nil, fmt.Errorf("Input number is out of index! ")
+	}
+
+	wallet := wallets[num]
+	return wallet, nil
+}
+
+//selectAccountStep 选择资产账户操作
+func (cli *CLI) selectAccountStep(walletID string) (*openwsdk.Account, error) {
+
+	accounts, _ := cli.GetAccountsOnServer(walletID)
+	cli.printAccountList(accounts)
+
+	fmt.Printf("[Please select a account] \n")
+
+	//选择钱包
+	num, err := console.InputNumber("Enter account No.: ", true)
+	if err != nil {
+		return nil, err
+	}
+
+	if int(num) >= len(accounts) {
+		return nil, fmt.Errorf("Input number is out of index! ")
+	}
+
+	account := accounts[num]
+	return account, nil
 }

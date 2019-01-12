@@ -34,3 +34,14 @@ func NewKeychain(cert owtp.Certificate) *Keychain {
 func (keychain *Keychain) Certificate() (owtp.Certificate, error) {
 	return owtp.NewCertificate(keychain.PrivateKey, "")
 }
+
+//SummarySetting 汇总设置信息
+type SummarySetting struct {
+	WalletID        string `json:"walletID"`
+	AccountID       string `json:"accountID" storm:"id"`
+	SumAddress      string `json:"sumAddress"`
+	Threshold       string `json:"threshold"`
+	MinTransfer     string `json:"minTransfer"`
+	RetainedBalance string `json:"retainedBalance"`
+	Confirms        uint64 `json:"confirms"`
+}
