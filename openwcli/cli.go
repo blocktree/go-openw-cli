@@ -18,9 +18,10 @@ const (
 )
 
 type CLI struct {
-	config *Config             //工具配置
-	db     *openwallet.StormDB //本地数据库
-	api    *openwsdk.APINode   //api
+	config      *Config             //工具配置
+	db          *openwallet.StormDB //本地数据库
+	api         *openwsdk.APINode   //api
+	summaryTask *SummaryTask        //汇总任务
 }
 
 // 初始化工具
@@ -420,6 +421,17 @@ func (cli *CLI) SetSumFlow() error {
 //StartSumFlow
 func (cli *CLI) StartSumFlow() error {
 	//TODO: WIP
+
+	//TODO:输入汇总间隔时间
+
+	//TODO:选择汇总钱包
+
+	//TODO:选择汇总钱包账户
+
+	//TODO:输入解锁钱包密码
+
+	//TODO:启动汇总程序
+
 	return nil
 }
 

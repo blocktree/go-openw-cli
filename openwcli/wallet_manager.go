@@ -182,6 +182,27 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 	return nil
 }
 
+
+//GetAccountOnServerByAccountID 从服务器获取账户
+func (cli *CLI) GetAccountByAccountID(accountID string) (*openwsdk.Account, error) {
+
+	var (
+		getAccount *openwsdk.Account
+		err error
+	)
+
+	cli.api.FindAccountByAccountID(accountID, true,
+		func(status uint64, msg string, account *openwsdk.Account) {
+			if status == owtp.StatusSuccess {
+				getAccount = account
+			} else {
+				err = fmt.Errorf(msg)
+			}
+		})
+
+	return getAccount, err
+}
+
 //GetAccountsOnServer 从服务器获取账户列表
 func (cli *CLI) GetAccountsOnServer(walletID string) ([]*openwsdk.Account, error) {
 
