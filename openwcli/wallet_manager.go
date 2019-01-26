@@ -387,8 +387,13 @@ func (cli *CLI) printAddressList(walletID string, list []*openwsdk.Address, pass
 
 //UpdateSymbols 更新主链
 func (cli *CLI) UpdateSymbols() error {
+
+	const (
+		limit = 500
+	)
+
 	var getSymbols []*openwsdk.Symbol
-	err := cli.api.GetSymbolList(0, 1000, true,
+	err := cli.api.GetSymbolList(0, limit, true,
 		func(status uint64, msg string, symbols []*openwsdk.Symbol) {
 			getSymbols = symbols
 		})
@@ -404,21 +409,28 @@ func (cli *CLI) UpdateSymbols() error {
 
 	for _, s := range getSymbols {
 
-		var getTokenContract []*openwsdk.TokenContract
-		err = cli.api.GetContracts(s.Coin, 0, 5000, true,
-			func(status uint64, msg string, tokenContract []*openwsdk.TokenContract) {
-				getTokenContract = tokenContract
-			})
-		if err != nil {
-			return err
-		}
+		i := 0
+		for {
 
-		//保存主链上的合约信息
-		for _, c := range getTokenContract {
-			err = tx.Save(c)
-			if err != nil {
-				return err
+			var getTokenContract []*openwsdk.TokenContract
+			err = cli.api.GetContracts(s.Coin, i, limit, true,
+				func(status uint64, msg string, tokenContract []*openwsdk.TokenContract) {
+					getTokenContract = tokenContract
+				})
+			if err != nil || len(getTokenContract) == 0 {
+				break
 			}
+
+			//保存主链上的合约信息
+			for _, c := range getTokenContract {
+				err = tx.Save(c)
+				if err != nil {
+					return err
+				}
+			}
+
+			i = i + limit
+
 		}
 
 		//保存主链信息

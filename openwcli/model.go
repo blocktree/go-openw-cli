@@ -50,7 +50,7 @@ type SummarySetting struct {
 }
 
 type SummaryTask struct {
-	Wallets []SummaryWalletTask `json:"wallets"`
+	Wallets []*SummaryWalletTask `json:"wallets"`
 }
 
 type SummaryAccountTask struct {
@@ -60,9 +60,9 @@ type SummaryAccountTask struct {
 }
 
 type SummaryWalletTask struct {
-	WalletID string               `json:"walletID"`
-	Password string               `json:"password"`
-	Accounts []SummaryAccountTask `json:"accounts"`
+	WalletID string                `json:"walletID"`
+	Password string                `json:"password"`
+	Accounts []*SummaryAccountTask `json:"accounts"`
 	wallet   *openwsdk.Wallet
 }
 
@@ -77,7 +77,7 @@ type SummaryWalletTask struct {
 					"accountID": "123",
 					"contracts":[
 						"all", //全部合约
-						"3qoe2ll2=", //指定的合约ID
+						"0x1234567890abcdef", //指定的合约地址
 					]
 				},
 			],

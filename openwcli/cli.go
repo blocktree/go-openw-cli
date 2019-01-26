@@ -1,14 +1,17 @@
 package openwcli
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/asdine/storm"
 	"github.com/blocktree/OpenWallet/console"
 	"github.com/blocktree/OpenWallet/log"
 	"github.com/blocktree/OpenWallet/openwallet"
 	"github.com/blocktree/OpenWallet/owtp"
+	"github.com/blocktree/OpenWallet/timer"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/coreos/bbolt"
+	"io/ioutil"
 	"path/filepath"
 	"time"
 )
@@ -420,17 +423,88 @@ func (cli *CLI) SetSumFlow() error {
 
 //StartSumFlow
 func (cli *CLI) StartSumFlow() error {
-	//TODO: WIP
 
-	//TODO:输入汇总间隔时间
+	var (
+		endRunning  = make(chan bool, 1)
+		manual      = true //手动选择
+		summaryTask SummaryTask
+	)
 
-	//TODO:选择汇总钱包
+	fmt.Println("Setup summary task timer cycle time, sample: 30s, 1m, 1h, 3m20s etc.")
+	cycleTime, err := console.InputText("Enter summary task timer cycle time: ", true)
+	if err != nil {
+		return err
+	}
 
-	//TODO:选择汇总钱包账户
+	cycleSec, err := time.ParseDuration(cycleTime)
+	if err != nil {
+		return err
+	}
 
-	//TODO:输入解锁钱包密码
+	taskFile, err := console.InputText("Enter summary task json file path: ", false)
+	if err != nil {
+		return err
+	}
 
-	//TODO:启动汇总程序
+	taskJSON, err := ioutil.ReadFile(taskFile)
+	if err == nil {
+
+		err = json.Unmarshal(taskJSON, &summaryTask)
+		if err == nil {
+			manual = false
+		}
+	}
+
+	if manual {
+
+		//:选择钱包
+		wallet, selectErr := cli.selectWalletStep()
+		if selectErr != nil {
+			return selectErr
+		}
+
+		//:选择账户
+		account, selectErr := cli.selectAccountStep(wallet.WalletID)
+		if selectErr != nil {
+			return selectErr
+		}
+
+		// 等待用户输入密码
+		password, selectErr := console.InputPassword(false, 3)
+		if selectErr != nil {
+			return selectErr
+		}
+
+		summaryAccountTask := &SummaryAccountTask{
+			AccountID: account.AccountID,
+			Contracts: []string{},
+		}
+
+		summaryWalletTask := &SummaryWalletTask{
+			WalletID: wallet.WalletID,
+			Password: password,
+			wallet:   wallet,
+			Accounts: []*SummaryAccountTask{
+				summaryAccountTask,
+			},
+		}
+
+		summaryTask = SummaryTask{
+			Wallets: []*SummaryWalletTask{
+				summaryWalletTask,
+			},
+		}
+	}
+
+	cli.summaryTask = &summaryTask
+
+	log.Infof("The timer for summary task start now. Execute by every %v seconds.\n", cycleSec.Seconds())
+
+	//启动钱包汇总程序
+	sumTimer := timer.NewTask(cycleSec, cli.SummaryTask)
+	sumTimer.Start()
+
+	<-endRunning
 
 	return nil
 }
