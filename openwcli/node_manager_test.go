@@ -18,3 +18,16 @@ func TestCLI_GenKeychain(t *testing.T) {
 	}
 	printKeychain(keychain)
 }
+
+func TestCLI_RegisterOnServer(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+
+	err := cli.RegisterOnServer()
+	if err != nil {
+		log.Error("RegisterOnServer error:", err)
+		return
+	}
+}

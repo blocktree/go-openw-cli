@@ -19,7 +19,7 @@ var (
 			Category:  "OPENW-CLI COMMANDS",
 		},
 		{
-			//登记节点
+			//节点信息
 			Name:      "nodeinfo",
 			Usage:     "show node information",
 			ArgsUsage: "",
