@@ -9,7 +9,7 @@ func getTestOpenwCLI() *CLI {
 
 	confFile := `
 # Remote Server
-remoteserver = "47.52.191.89"
+remoteserver = "120.78.83.180"
 
 # API Version
 version = "1.0.0"
