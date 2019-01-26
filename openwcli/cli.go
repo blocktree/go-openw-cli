@@ -80,7 +80,7 @@ func (cli *CLI) setupAPISDK(keychain *Keychain) error {
 			ConnectType:        owtp.HTTP,
 			Host:               cli.config.remoteserver,
 			EnableSignature:    false,
-			EnableKeyAgreement: true,
+			EnableKeyAgreement: false,
 			Cert:               cert,
 		}
 
@@ -320,10 +320,12 @@ func (cli *CLI) SearchAddressFlow() error {
 		}
 	}
 
-	err = cli.SearchAddressOnServer(addr, password)
+	address, err := cli.SearchAddressOnServer(addr)
 	if err != nil {
 		return err
 	}
+
+	cli.printAddressList(address.WalletID, []*openwsdk.Address{address}, password)
 
 	return nil
 }

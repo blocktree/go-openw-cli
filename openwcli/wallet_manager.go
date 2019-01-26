@@ -11,8 +11,8 @@ import (
 	"github.com/blocktree/OpenWallet/openwallet"
 	"github.com/blocktree/OpenWallet/owtp"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
-	"github.com/blocktree/go-owcdrivers/owkeychain"
 	"github.com/bndr/gotabulate"
+	"strings"
 )
 
 //CreateWalletOnServer
@@ -169,7 +169,7 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 	cli.api.CreateNormalAccount(newaccount, true,
 		func(status uint64, msg string, account *openwsdk.Account, addresses []*openwsdk.Address) {
 			if status == owtp.StatusSuccess {
-				log.Infof("create [%s] account successfully", selectedSymbol)
+				log.Infof("create [%s] account successfully", selectedSymbol.Coin)
 				log.Infof("new accountID: %s", account.AccountID)
 				if len(addresses) > 0 {
 					log.Infof("new address: %s", addresses[0].Address)
@@ -277,23 +277,49 @@ func (cli *CLI) CreateAddressOnServer(walletID, accountID string, count uint64) 
 }
 
 //SearchAddressOnServer
-func (cli *CLI) SearchAddressOnServer(address string, password string) error {
+func (cli *CLI) SearchAddressOnServer(address string) (*openwsdk.Address, error) {
 
 	if len(address) == 0 {
-		return fmt.Errorf("address is empty. ")
+		return nil, fmt.Errorf("address is empty. ")
 	}
+
+	var addr *openwsdk.Address
 
 	cli.api.FindAddressByAddress(address, true,
 		func(status uint64, msg string, address *openwsdk.Address) {
 			if status == owtp.StatusSuccess {
-				cli.printAddressList(address.WalletID, []*openwsdk.Address{address}, password)
-				//log.Infof("create [%d] addresses successfully", len(addresses))
+				addr = address
 			} else {
 				log.Error("search address on server failed, unexpected error:", msg)
 			}
 		})
 
-	return nil
+	return addr, nil
+}
+
+//GetAddressesOnServer
+func (cli *CLI) GetAddressesOnServer(walletID, accountID string, offset, limit int) ([]*openwsdk.Address, error) {
+
+	list := make([]*openwsdk.Address, 0)
+
+	if len(accountID) == 0 {
+		return nil, fmt.Errorf("accountID is empty. ")
+	}
+
+	if len(walletID) == 0 {
+		return nil, fmt.Errorf("walleID is empty. ")
+	}
+
+	cli.api.FindAddressByAccountID(accountID, offset, limit, true,
+		func(status uint64, msg string, addresses []*openwsdk.Address) {
+			if status == owtp.StatusSuccess {
+				list = addresses
+			} else {
+				log.Error("get address on server failed, unexpected error:", msg)
+			}
+		})
+
+	return list, nil
 }
 
 //printAddressList 打印地址列表
@@ -302,7 +328,6 @@ func (cli *CLI) printAddressList(walletID string, list []*openwsdk.Address, pass
 	var (
 		isShowPrivateKey bool
 		privatekey       = ""
-		publicKey        = ""
 		key              *hdkeystore.HDKey
 	)
 
@@ -360,15 +385,8 @@ func (cli *CLI) printAddressList(walletID string, list []*openwsdk.Address, pass
 				privatekey = hex.EncodeToString(privateKeyBytes)
 			}
 
-			extPublicKey, err := owkeychain.OWDecode(a.PublicKey)
-			if err != nil {
-				return err
-			}
-
-			publicKey = hex.EncodeToString(extPublicKey.GetPublicKeyBytes())
-
 			tableInfo = append(tableInfo, []interface{}{
-				i, a.Address, a.WalletID, a.AccountID, a.Symbol, a.Balance, publicKey, privatekey,
+				i, a.Address, a.WalletID, a.AccountID, a.Symbol, a.Balance, a.PublicKey, privatekey,
 			})
 
 		}
@@ -528,7 +546,7 @@ func (cli *CLI) GetSymbolInfo(symbol string) (*openwsdk.Symbol, error) {
 	}
 
 	for _, s := range getSymbols {
-		if s.Coin == symbol {
+		if s.Coin == strings.ToUpper(symbol) {
 			return s, nil
 		}
 	}
