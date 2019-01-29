@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"github.com/blocktree/OpenWallet/cmd/utils"
 	"github.com/blocktree/OpenWallet/log"
 	"github.com/blocktree/go-openw-cli/openwcli"
 	"gopkg.in/urfave/cli.v1"
@@ -29,11 +28,10 @@ var (
 		{
 			//获取钱包列表信息
 			Name:     "listwallet",
-			Usage:    "Show all wallet information",
+			Usage:    "show all wallet information",
 			Action:   listwallet,
 			Category: "WALLET COMMANDS",
 			Flags: []cli.Flag{
-				utils.SymbolFlag,
 			},
 		},
 		{
@@ -44,7 +42,117 @@ var (
 			Action:    newwallet,
 			Category:  "WALLET COMMANDS",
 			Flags: []cli.Flag{
-				utils.SymbolFlag,
+			},
+		},
+		{
+
+			Name:      "newaccount",
+			Usage:     "create a new assets account",
+			ArgsUsage: "<symbol>",
+			Action:    newaccount,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
+			},
+		},
+		{
+
+			Name:      "listaccount",
+			Usage:     "show all assets account",
+			ArgsUsage: "<symbol>",
+			Action:    listaccount,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
+			},
+		},
+		{
+
+			Name:      "newaddress",
+			Usage:     "select account to create batch address",
+			ArgsUsage: "<symbol>",
+			Action:    newaddress,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
+			},
+		},
+		{
+
+			Name:      "searchaddress",
+			Usage:     "search address info",
+			ArgsUsage: "<symbol>",
+			Action:    searchaddress,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
+			},
+		},
+		{
+
+			Name:      "transfer",
+			Usage:     "create a transaction",
+			ArgsUsage: "<symbol>",
+			Action:    transfer,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
+			},
+		},
+		{
+
+			Name:      "setsum",
+			Usage:     "setup assets account summary info",
+			ArgsUsage: "<symbol>",
+			Action:    setsum,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
+			},
+		},
+		{
+
+			Name:      "startsum",
+			Usage:     "start summary account task",
+			ArgsUsage: "<symbol>",
+			Action:    startsum,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
+				FileFlag,
+			},
+		},
+		{
+
+			Name:      "updateinfo",
+			Usage:     "update info from openw-server",
+			ArgsUsage: "<symbol>",
+			Action:    updateinfo,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
+			},
+		},
+		{
+
+			Name:      "listsymbol",
+			Usage:     "show all symbols info",
+			ArgsUsage: "<symbol>",
+			Action:    listsymbol,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
+			},
+		},
+		{
+
+			Name:      "listtokencontract",
+			Usage:     "show all token contract info",
+			ArgsUsage: "<symbol>",
+			Action:    listtokencontract,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
+			},
+		},
+		{
+
+			Name:      "listaddress",
+			Usage:     "select account to show all address",
+			ArgsUsage: "<symbol>",
+			Action:    listaddress,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
 			},
 		},
 	}
@@ -117,6 +225,170 @@ func listwallet(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
 		err := cli.ListWalletFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+//newaccount 创建账户
+func newaccount(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.NewAccountFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+
+//listaccount 账户列表
+func listaccount(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.ListAccountFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+//newaddress 创建地址
+func newaddress(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.NewAddressFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+//searchaddress 查询地址
+func searchaddress(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.SearchAddressFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+//transfer 转账交易
+func transfer(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.TransferFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+//setsum 设置汇总
+func setsum(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.SetSumFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+//startsum 定时汇总
+func startsum(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+
+		file := c.String("file")
+
+		err := cli.StartSumFlow(file)
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+//updateinfo 更新区块链资料库
+func updateinfo(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.UpdateInfoFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+//listsymbol 查看所有币种信息列表
+func listsymbol(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.ListSymbolFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+//listtokencontract 查看某个区块链所有代币合约信息列表
+func listtokencontract(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.ListTokenContractFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+//listaddress 查看账户所有地址
+func listaddress(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.ListAddressFlow()
 		if err != nil {
 			log.Error("unexpected error: ", err)
 			return err
