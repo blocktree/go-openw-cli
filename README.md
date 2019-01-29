@@ -88,16 +88,16 @@ openw-cli是一款命令行工具，通过调用openw-server钱包服务API实�
 ```ini
 
 # Remote Server
-remoteserver = "www.openwallet.site"
+remoteserver = "www.openwallet.link"
 
 # API Version
 version = "1.0.0"
 
 # App Key
-appkey = "1234qwer"
+appid = "1234qwer"
 
 # App Secret
-appid = "qwer1234"
+appkey = "qwer1234"
 
 # Log file path
 logdir = "/usr/logs/"
@@ -117,6 +117,7 @@ summaryperiod = "1h"
 | 参数变量    | 描述                                                  |
 |-------------|-----------------------------------------------------|
 | -s, -symbol | 币种标识符，其后带值[symbol]，如btc，ltc，eth，ada，btm，sc  |
+| -c, -conf   | 工具配置文件路径。                                     |
 | -i, -init   | 是否初始化，应用于配置功能时候，是否需要执行初始化流程。 |
 | -p, -path   | 指定文件目录。                                         |
 | -f, -file   | 指定加载的文件。                                       |
@@ -133,48 +134,65 @@ summaryperiod = "1h"
 | {datadir}/db/                | 钱包数据库缓存目录，文件命名 [alias]-[WalletID].db                              |
 | {datadir}/backup/            | 钱包备份文件导出目录，以文件夹归档备份，文件夹命名 [alias]-[WalletID]-yyyyMMddHHmmss |
 
-> 命令输入结构: openw-cli [子命令] [可选参数...]
-> 如：openw-cli newwallet -s btc
+> 命令输入结构: openw-cli [配置文件] [子命令] [可选参数...]
+> 如：openw-cli -c ./node.ini newwallet -s btc
+
 
 ### 命令示例
 
 ```shell
 
+# 通过-c或-conf设置工具的配置文件路径
+$ ./openw-cli -c=./node.ini
+
 #### 节点相关 ####
 
 # 登记到openw-server，成为应用的授权节点。
-$ ./openw-cli noderegister
+$ ./openw-cli -c=./node.ini noderegister
 
 # 查看节点的信息
-$ ./openw-cli nodeinfo
+$ ./openw-cli -c=./node.ini nodeinfo
+
 
 #### 钱包相关 ####
 
 # 创建钱包
-$ ./openw-cli newwallet
+$ ./openw-cli -c=./node.ini newwallet
 
 # 查看节点本地已创建的钱包
-$ ./openw-cli listwallet
+$ ./openw-cli -c=./node.ini listwallet
 
 # 创建钱包资产账户，先选择钱包
 $ ./openw-cli newaccount
 
 # 查看钱包资产账户，先选择钱包
-$ ./openw-cli listaccount
+$ ./openw-cli -c=./node.ini listaccount
 
 # 创建新地址，先选择钱包，再选择资产账户
-$ ./openw-cli newaddress
+$ ./openw-cli -c=./node.ini newaddress
+
+# 创建新地址，先选择钱包，再选择资产账户，输入offset和limit查询地址列表
+$ ./openw-cli -c=./node.ini listaddress
 
 # 查询地址信息
-$ ./openw-cli searchaddress
+$ ./openw-cli -c=./node.ini searchaddress
 
 # 设置汇总，先选择钱包，再选择资产账户
-$ ./openw-cli setsum
+$ ./openw-cli -c=./node.ini setsum
 
 # 启动汇总定时器
-$ ./openw-cli startsum
+$ ./openw-cli -c=./node.ini startsum
 
 # 启动汇总定时器，通过文件加载需要汇总的钱包和资产账户
-$ ./openw-cli startsum -f /usr/to/sum.json
+$ ./openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
+
+# 更新区块链资料
+$ ./openw-cli -c=./node.ini updateinfo
+
+# 查询主链列表
+$ ./openw-cli -c=./node.ini listsymbol
+
+# 查询主链下的合约列表
+$ ./openw-cli -c=./node.ini listtokencontract
 
 ```
