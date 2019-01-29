@@ -193,7 +193,7 @@ func (cli *CLI) NewWalletFlow() error {
 	)
 
 	if cli.api == nil {
-		return err
+		return fmt.Errorf("local node is not registed")
 	}
 
 	// 等待用户输入钱包名字
@@ -603,6 +603,9 @@ func (cli *CLI) selectWalletStep() (*openwsdk.Wallet, error) {
 
 	wallets, _ := cli.GetWalletsOnServer()
 	cli.printWalletList(wallets)
+	if len(wallets) == 0 {
+		return nil, fmt.Errorf("No wallet ")
+	}
 
 	fmt.Printf("[Please select a wallet] \n")
 
@@ -625,6 +628,10 @@ func (cli *CLI) selectAccountStep(walletID string) (*openwsdk.Account, error) {
 
 	accounts, _ := cli.GetAccountsOnServer(walletID)
 	cli.printAccountList(accounts)
+
+	if len(accounts) == 0 {
+		return nil, fmt.Errorf("No account ")
+	}
 
 	fmt.Printf("[Please select a account] \n")
 
