@@ -13,6 +13,7 @@ import (
 	"github.com/coreos/bbolt"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -25,6 +26,10 @@ type CLI struct {
 	db          *openwallet.StormDB //本地数据库
 	api         *openwsdk.APINode   //api
 	summaryTask *SummaryTask        //汇总任务
+}
+
+func init() {
+	owtp.Debug = false
 }
 
 // 初始化工具
@@ -345,7 +350,7 @@ func (cli *CLI) TransferFlow() error {
 	}
 
 	// 等待用户输入合约地址
-	contractAddress, err := console.InputText("Enter contract address: ", true)
+	contractAddress, err := console.InputText("Enter contract address: ", false)
 	if err != nil {
 		return err
 	}
@@ -420,22 +425,23 @@ func (cli *CLI) SetSumFlow() error {
 		return err
 	}
 
+	log.Infof("setup summary info successfully")
 	return nil
 }
 
 //StartSumFlow
-func (cli *CLI) StartSumFlow() error {
+func (cli *CLI) StartSumFlow(file string) error {
 
 	var (
 		endRunning  = make(chan bool, 1)
 		manual      = true //手动选择
 		summaryTask SummaryTask
+		taskFile    string
 	)
 
-	fmt.Println("Setup summary task timer cycle time, sample: 30s, 1m, 1h, 3m20s etc.")
-	cycleTime, err := console.InputText("Enter summary task timer cycle time: ", true)
-	if err != nil {
-		return err
+	cycleTime := cli.config.summaryperiod
+	if len(cycleTime) == 0 {
+		cycleTime = "1m"
 	}
 
 	cycleSec, err := time.ParseDuration(cycleTime)
@@ -443,9 +449,13 @@ func (cli *CLI) StartSumFlow() error {
 		return err
 	}
 
-	taskFile, err := console.InputText("Enter summary task json file path: ", false)
-	if err != nil {
-		return err
+	if len(file) == 0 {
+		taskFile, err = console.InputText("Enter summary task json file path: ", false)
+		if err != nil {
+			return err
+		}
+	} else {
+		taskFile = file
 	}
 
 	taskJSON, err := ioutil.ReadFile(taskFile)
@@ -500,7 +510,7 @@ func (cli *CLI) StartSumFlow() error {
 
 	cli.summaryTask = &summaryTask
 
-	log.Infof("The timer for summary task start now. Execute by every %v seconds.\n", cycleSec.Seconds())
+	log.Infof("The timer for summary task start now. Execute by every %v seconds.", cycleSec.Seconds())
 
 	//启动钱包汇总程序
 	sumTimer := timer.NewTask(cycleSec, cli.SummaryTask)
@@ -513,7 +523,15 @@ func (cli *CLI) StartSumFlow() error {
 
 //UpdateInfoFlow
 func (cli *CLI) UpdateInfoFlow() error {
-	return cli.UpdateSymbols()
+
+	err := cli.UpdateSymbols()
+	if err != nil {
+		return nil
+	}
+
+	log.Infof("update info successfully")
+
+	return nil
 }
 
 //ListSymbolFlow
@@ -533,12 +551,50 @@ func (cli *CLI) ListTokenContractFlow() error {
 	if err != nil {
 		return err
 	}
-
+	symbol = strings.ToUpper(symbol)
 	list, err := cli.GetTokenContractList("Symbol", symbol)
 	if err != nil {
 		return err
 	}
 	cli.printTokenContractList(list)
+	return nil
+}
+
+//ListAddressFlow
+func (cli *CLI) ListAddressFlow() error {
+
+	//:选择钱包
+	wallet, err := cli.selectWalletStep()
+	if err != nil {
+		return err
+	}
+
+	//:选择账户
+	account, err := cli.selectAccountStep(wallet.WalletID)
+	if err != nil {
+		return err
+	}
+
+	offset, err := console.InputNumber("Enter offset: ", true)
+	if err != nil {
+		return err
+	}
+
+	limit, err := console.InputNumber("Enter limit: ", true)
+	if err != nil {
+		return err
+	}
+
+	addresses, err := cli.GetAddressesOnServer(account.WalletID, account.AccountID, int(offset), int(limit))
+	if err != nil {
+		return err
+	}
+
+	err = cli.printAddressList(account.WalletID, addresses, "")
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

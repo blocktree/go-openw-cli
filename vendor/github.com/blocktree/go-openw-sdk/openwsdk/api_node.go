@@ -633,6 +633,7 @@ func (api *APINode) CreateSummaryTx(
 	addressStartIndex int,
 	addressLimit int,
 	confirms uint64,
+	sid string,
 	sync bool,
 	reqFunc func(status uint64, msg string, rawTxs []*RawTransaction)) error {
 	if api == nil {
@@ -641,7 +642,7 @@ func (api *APINode) CreateSummaryTx(
 	params := map[string]interface{}{
 		"appID":             api.config.AppID,
 		"accountID":         accountID,
-		"sumAddress":        sumAddress,
+		"address":           sumAddress,
 		"coin":              coin,
 		"minTransfer":       minTransfer,
 		"retainedBalance":   retainedBalance,
@@ -649,9 +650,10 @@ func (api *APINode) CreateSummaryTx(
 		"addressStartIndex": addressStartIndex,
 		"addressLimit":      addressLimit,
 		"confirms":          confirms,
+		"sid":               sid,
 	}
 
-	return api.node.Call(HostNodeID, "getFeeRate", params, sync, func(resp owtp.Response) {
+	return api.node.Call(HostNodeID, "createSummaryTx", params, sync, func(resp owtp.Response) {
 
 		data := resp.JsonData()
 		rawTxs := make([]*RawTransaction, 0)

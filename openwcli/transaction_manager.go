@@ -27,12 +27,14 @@ func (cli *CLI) GetTokenBalance(account *openwsdk.Account, contractID string) st
 func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, password string) error {
 
 	var (
-		isContract bool
-		retTx      []*openwsdk.Transaction
-		retFailed  []*openwsdk.FailedRawTransaction
-		retRawTx   *openwsdk.RawTransaction
-		err        error
-		contractID string
+		isContract  bool
+		retTx       []*openwsdk.Transaction
+		retFailed   []*openwsdk.FailedRawTransaction
+		retRawTx    *openwsdk.RawTransaction
+		err         error
+		createErr   error
+		contractID  string
+		tokenSymbol string
 	)
 
 	//获取种子文件
@@ -48,6 +50,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 			return findErr
 		}
 		contractID = token[0].ContractID
+		tokenSymbol = token[0].Token
 	}
 	coin := openwsdk.Coin{
 		Symbol:     account.Symbol,
@@ -61,7 +64,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	err = api.CreateTrade(account.AccountID, sid, coin, amount, to, "", "", true,
 		func(status uint64, msg string, rawTx *openwsdk.RawTransaction) {
 			if status != owtp.StatusSuccess {
-				err = fmt.Errorf(msg)
+				createErr = fmt.Errorf(msg)
 				return
 			}
 			retRawTx = rawTx
@@ -69,6 +72,19 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	if err != nil {
 		return err
 	}
+	if createErr != nil {
+		return createErr
+	}
+
+	//:打印交易单明细
+	log.Infof("-----------------------------------------------")
+	log.Infof("[%s %s Transfer]", account.Symbol, tokenSymbol)
+	log.Infof("From Account: %s", account.AccountID)
+	log.Infof("To Address: %s", to)
+	log.Infof("Send Amount: %s", amount)
+	log.Infof("Fees: %v", retRawTx.Fees)
+	log.Infof("FeeRate: %v", retRawTx.FeeRate)
+	log.Infof("-----------------------------------------------")
 
 	//签名交易单
 	err = openwsdk.SignRawTransaction(retRawTx, key)
@@ -80,7 +96,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	err = api.SubmitTrade(retRawTx, true,
 		func(status uint64, msg string, successTx []*openwsdk.Transaction, failedRawTxs []*openwsdk.FailedRawTransaction) {
 			if status != owtp.StatusSuccess {
-				err = fmt.Errorf(msg)
+				createErr = fmt.Errorf(msg)
 				return
 			}
 
@@ -89,6 +105,9 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 		})
 	if err != nil {
 		return err
+	}
+	if createErr != nil {
+		return createErr
 	}
 
 	if len(retTx) > 0 {
@@ -200,13 +219,13 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *SummaryAccountTask, ac
 		sumSets SummarySetting
 	)
 
+	if len(accountTask.Contracts) == 0 {
+		return nil
+	}
+
 	tokens, err := cli.GetTokenContractList("Symbol", account.Symbol)
 	if err != nil {
 		return err
-	}
-
-	if len(accountTask.Contracts) == 0 {
-		return fmt.Errorf("summary token contracts is empty")
 	}
 
 	//查询已选token过程
@@ -269,11 +288,12 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *SummaryAccountTask, ac
 func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore.HDKey, balance string, sumSets SummarySetting, coin openwsdk.Coin) error {
 
 	const (
-		limit = 1000
+		limit = 200
 	)
 
 	var (
 		err       error
+		createErr error
 		retTx     []*openwsdk.Transaction
 		retFailed []*openwsdk.FailedRawTransaction
 		retRawTxs []*openwsdk.RawTransaction
@@ -297,18 +317,26 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore
 
 			log.Infof("Create Summary Transaction in address range [%d...%d]", i, i+limit)
 
+			//TODO:记录汇总批次号
+			sid := uuid.New().String()
+
 			err = cli.api.CreateSummaryTx(account.AccountID, sumSets.SumAddress, coin,
 				"", sumSets.MinTransfer, sumSets.RetainedBalance,
-				i, limit, sumSets.Confirms, true,
+				i, limit, sumSets.Confirms, sid, true,
 				func(status uint64, msg string, rawTxs []*openwsdk.RawTransaction) {
 					retRawTxs = rawTxs
 					if status != owtp.StatusSuccess {
-						err = fmt.Errorf(msg)
+						createErr = fmt.Errorf(msg)
 					}
 				})
 
 			if err != nil {
-				log.Errorf("CreateSummaryTransaction unexpected error: %v", err)
+				log.Warn("CreateSummaryTransaction unexpected error: %v", err)
+				continue
+			}
+
+			if createErr != nil {
+				log.Warn("CreateSummaryTransaction unexpected error: %v", createErr)
 				continue
 			}
 
@@ -316,15 +344,17 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore
 				//签名交易
 				err = openwsdk.SignRawTransaction(rawTx, key)
 				if err != nil {
-					log.Errorf("SignRawTransaction unexpected error: %v", err)
+					log.Warn("SignRawTransaction unexpected error: %v", err)
 					continue
 				}
+
+				//continue
 
 				//	广播交易单
 				err = cli.api.SubmitTrade(rawTx, true,
 					func(status uint64, msg string, successTx []*openwsdk.Transaction, failedRawTxs []*openwsdk.FailedRawTransaction) {
 						if status != owtp.StatusSuccess {
-							err = fmt.Errorf(msg)
+							createErr = fmt.Errorf(msg)
 							return
 						}
 
@@ -332,24 +362,28 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore
 						retFailed = failedRawTxs
 					})
 				if err != nil {
-					log.Errorf("SubmitRawTransaction unexpected error: %v", err)
+					log.Warn("SubmitRawTransaction unexpected error: %v", err)
+					continue
+				}
+				if createErr != nil {
+					log.Warn("SubmitRawTransaction unexpected error: %v", createErr)
 					continue
 				}
 
 				//打印汇总交易结果
 
 				for _, tx := range retTx {
-					log.Infof("[Success] txid:", tx.Txid)
+					log.Infof("[Success] txid: %s", tx.Txid)
 				}
 
 				for _, tx := range retFailed {
-					log.Errorf("[Failed] reason:", tx.Reason)
+					log.Warn("[Failed] reason:", tx.Reason)
 				}
 			}
 
 		}
 	} else {
-		log.Infof("Summary account[%s] Current Balance: %v，below threshold: %v", account.AccountID, balance, threshold)
+		log.Infof("Summary account[%s] Current Balance: %v, below threshold: %v", account.AccountID, balance, threshold)
 	}
 
 	return nil
