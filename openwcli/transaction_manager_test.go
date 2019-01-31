@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/blocktree/OpenWallet/log"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
+	"github.com/google/uuid"
 	"testing"
 )
 
@@ -38,8 +39,8 @@ func TestCLI_Transfer_BTC(t *testing.T) {
 		account := testFindAccountByID("J3wiDj2jMGdp9aqmALhQtEkJQch4YN9e38TEXzRgZyKY", accounts)
 
 		if account != nil {
-
-			err = cli.Transfer(wallets[0], accounts[0], "", "mp1JDsi7Dr2PkcWu1j4SUSTXJqXjFMaeVx", "0.023", "12345678")
+			sid := uuid.New().String()
+			_, _, err = cli.Transfer(wallets[0], accounts[0], "", "mp1JDsi7Dr2PkcWu1j4SUSTXJqXjFMaeVx", "0.023", sid, "", "", "12345678")
 			if err != nil {
 				log.Error("Transfer error:", err)
 				return
@@ -70,7 +71,7 @@ func TestCLI_Summary_BTC(t *testing.T) {
 }
 
 `
-	var summaryTask SummaryTask
+	var summaryTask openwsdk.SummaryTask
 	err := json.Unmarshal([]byte(plain), &summaryTask)
 	if err != nil {
 		log.Error("json.Unmarshal error:", err)
@@ -79,7 +80,9 @@ func TestCLI_Summary_BTC(t *testing.T) {
 
 	cli.summaryTask = &summaryTask
 
-	err = cli.SetSummaryInfo(
+
+
+	err = cli.SetSummaryInfo(&openwsdk.SummarySetting{
 		"VzRF939isEwpz7wLUwqULpmhct2wsApdm4",
 		accountID,
 		"mxoCkSBmiLQ86N73kXNLHEUgcUBoKdFawH",
@@ -87,7 +90,7 @@ func TestCLI_Summary_BTC(t *testing.T) {
 		"0.001",
 		"0",
 		0,
-	)
+	})
 	if err != nil {
 		log.Error("SetSummaryInfo error:", err)
 		return

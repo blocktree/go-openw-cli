@@ -35,15 +35,17 @@ type APINodeConfig struct {
 	EnableSSL          bool             `json:"enableSSL"`
 	EnableSignature    bool             `json:"enableSignature"`
 	Cert               owtp.Certificate `json:"cert"`
+	Timeout            time.Duration    `json:"timeout"`
 	//HostNodeID string           `json:"hostNodeID"`
 }
 
 //APINode APINode通信节点
 type APINode struct {
-	mu        sync.RWMutex //读写锁
-	node      *owtp.OWTPNode
-	config    *APINodeConfig
-	observers map[OpenwNotificationObject]bool //观察者
+	mu           sync.RWMutex //读写锁
+	node         *owtp.OWTPNode
+	config       *APINodeConfig
+	observers    map[OpenwNotificationObject]bool //观察者
+	transmitNode *TransmitNode                    //钱包转发节点
 }
 
 //NewAPINode 创建API节点
@@ -53,6 +55,7 @@ func NewAPINode(config *APINodeConfig) *APINode {
 	connectCfg.ConnectType = config.ConnectType
 	connectCfg.EnableSSL = config.EnableSSL
 	connectCfg.EnableSignature = config.EnableSignature
+	connectCfg.Timeout = config.Timeout
 	node := owtp.NewNode(owtp.NodeConfig{
 		Cert: config.Cert,
 	})
@@ -61,6 +64,8 @@ func NewAPINode(config *APINodeConfig) *APINode {
 		node:   node,
 		config: config,
 	}
+
+	api.observers = make(map[OpenwNotificationObject]bool)
 
 	//开启协商密码
 	if config.EnableKeyAgreement {
@@ -664,4 +669,50 @@ func (api *APINode) CreateSummaryTx(
 		}
 		reqFunc(resp.Status, resp.Msg, rawTxs)
 	})
+}
+
+//ServeTransmitNode 启动转发服务节点
+func (api *APINode) ServeTransmitNode(port int) error {
+
+	if api.transmitNode != nil {
+		return fmt.Errorf("transmit node is inited")
+	}
+
+	transmitNode, err := NewTransmitNode(&APINodeConfig{
+		Host:               fmt.Sprintf(":%d", port),
+		ConnectType:        owtp.Websocket,
+		AppID:              api.config.AppID,
+		AppKey:             api.config.AppKey,
+		Cert:               api.config.Cert,
+		EnableSignature:    api.config.EnableSignature,
+		EnableKeyAgreement: api.config.EnableKeyAgreement,
+	})
+	if err != nil {
+		return nil
+	}
+	api.transmitNode = transmitNode
+	api.transmitNode.Listen()
+
+	return nil
+}
+
+//StopTransmitNode 停止转发服务节点
+func (api *APINode) StopTransmitNode(port int) error {
+
+	if api.transmitNode == nil {
+		return fmt.Errorf("transmit node is not inited")
+	}
+
+	api.transmitNode.Close()
+	api.transmitNode = nil
+
+	return nil
+}
+
+//TransmitNode 转发节点
+func (api *APINode) TransmitNode() (*TransmitNode, error) {
+	if api.transmitNode == nil {
+		return nil, fmt.Errorf("transmit node is not inited")
+	}
+	return api.transmitNode, nil
 }
