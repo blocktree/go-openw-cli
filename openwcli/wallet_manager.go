@@ -666,6 +666,7 @@ func (cli *CLI) GetTokenContractInfo(contractID string) (*openwsdk.TokenContract
 
 //SetSummaryInfo 设置账户的汇总设置
 func (cli *CLI) SetSummaryInfo(obj *openwsdk.SummarySetting) error {
+	//TODO:查询钱包和账户是否存在
 	return cli.db.Save(obj)
 }
 

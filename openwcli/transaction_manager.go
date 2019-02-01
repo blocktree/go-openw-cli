@@ -335,7 +335,7 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore
 			}
 
 			if createErr != nil {
-				log.Warn("CreateSummaryTransaction unexpected error: %v", createErr)
+				log.Warn("CreateSummaryTransaction unexpected error:", createErr)
 				continue
 			}
 

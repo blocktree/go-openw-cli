@@ -30,20 +30,24 @@ func (cli *CLI) ServeTransmitNode(autoReconnect bool) error {
 	cli.transmitNode.HandleFunc("createWalletViaTrustNode", cli.createWalletViaTrustNode)
 	cli.transmitNode.HandleFunc("createAccountViaTrustNode", cli.createAccountViaTrustNode)
 	cli.transmitNode.HandleFunc("sendTransactionViaTrustNode", cli.sendTransactionViaTrustNode)
+	cli.transmitNode.HandleFunc("setSummaryInfoViaTrustNode", cli.setSummaryInfoViaTrustNode)
 	cli.transmitNode.HandleFunc("findSummaryInfoByWalletIDViaTrustNode", cli.findSummaryInfoByWalletIDViaTrustNode)
 	cli.transmitNode.HandleFunc("startSummaryTaskViaTrustNode", cli.startSummaryTaskViaTrustNode)
 	cli.transmitNode.HandleFunc("stopSummaryTaskViaTrustNode", cli.stopSummaryTaskViaTrustNode)
 	cli.transmitNode.HandleFunc("updateInfoViaTrustNode", cli.updateInfoViaTrustNode)
 
-	//建立连接
+	//自动连接
+	if autoReconnect {
+		go cli.autoReconnectTransmitNode()
+		return nil
+	}
+
+	//单独连接
 	err = cli.connectTransmitNode()
 	if err != nil {
 		return err
 	}
 
-	if autoReconnect {
-		go cli.autoReconnectTransmitNode()
-	}
 	return nil
 }
 
@@ -85,9 +89,9 @@ func (cli *CLI) autoReconnectTransmitNode() error {
 	var (
 		err error
 		//连接状态通道
-		reconnect chan bool
+		reconnect = make(chan bool, 1)
 		//断开状态通道
-		disconnected chan struct{}
+		disconnected = make(chan struct{}, 1)
 		//重连时的等待时间
 		reconnectWait = 10
 	)
@@ -102,8 +106,8 @@ func (cli *CLI) autoReconnectTransmitNode() error {
 		disconnected <- struct{}{}
 	})
 
-	reconnect = make(chan bool, 1)
-	disconnected = make(chan struct{}, 1)
+	//启动连接
+	reconnect <- true
 
 	//节点运行时
 	for {
@@ -334,7 +338,7 @@ func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 		return
 	}
 
-	if cli.summaryTaskTimer.Running() {
+	if cli.summaryTaskTimer != nil && cli.summaryTaskTimer.Running() {
 		ctx.Response(nil, owtp.ErrCustomError, "summary task timer is running")
 		return
 	}
@@ -373,6 +377,8 @@ func (cli *CLI) stopSummaryTaskViaTrustNode(ctx *owtp.Context) {
 		cli.summaryTaskTimer.Stop()
 		cli.summaryTaskTimer = nil
 	}
+
+	log.Infof("The timer for summary task has been stopped.")
 
 	ctx.Response(nil, owtp.StatusSuccess, "success")
 }
