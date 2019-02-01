@@ -164,59 +164,59 @@ requesttimeout = 60
 ```shell
 
 # 通过-c或-conf设置工具的配置文件路径
-$ ./openw-cli -c=./node.ini
+$ ./go-openw-cli -c=./node.ini
 
 #### 节点相关 ####
 
 # 登记到openw-server，成为应用的授权节点。
-$ ./openw-cli -c=./node.ini noderegister
+$ ./go-openw-cli -c=./node.ini noderegister
 
 # 查看节点的信息
-$ ./openw-cli -c=./node.ini nodeinfo
+$ ./go-openw-cli -c=./node.ini nodeinfo
 
 
 #### 钱包相关 ####
 
 # 创建钱包
-$ ./openw-cli -c=./node.ini newwallet
+$ ./go-openw-cli -c=./node.ini newwallet
 
 # 查看节点本地已创建的钱包
-$ ./openw-cli -c=./node.ini listwallet
+$ ./go-openw-cli -c=./node.ini listwallet
 
 # 创建钱包资产账户，先选择钱包
-$ ./openw-cli newaccount
+$ ./go-openw-cli newaccount
 
 # 查看钱包资产账户，先选择钱包
-$ ./openw-cli -c=./node.ini listaccount
+$ ./go-openw-cli -c=./node.ini listaccount
 
 # 创建新地址，先选择钱包，再选择资产账户
-$ ./openw-cli -c=./node.ini newaddress
+$ ./go-openw-cli -c=./node.ini newaddress
 
 # 创建新地址，先选择钱包，再选择资产账户，输入offset和limit查询地址列表
-$ ./openw-cli -c=./node.ini listaddress
+$ ./go-openw-cli -c=./node.ini listaddress
 
 # 查询地址信息
-$ ./openw-cli -c=./node.ini searchaddress
+$ ./go-openw-cli -c=./node.ini searchaddress
 
 # 设置汇总，先选择钱包，再选择资产账户
-$ ./openw-cli -c=./node.ini setsum
+$ ./go-openw-cli -c=./node.ini setsum
 
 # 启动汇总定时器
-$ ./openw-cli -c=./node.ini startsum
+$ ./go-openw-cli -c=./node.ini startsum
 
 # 启动汇总定时器，通过文件加载需要汇总的钱包和资产账户
-$ ./openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
+$ ./go-openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
 
 # 更新区块链资料
-$ ./openw-cli -c=./node.ini updateinfo
+$ ./go-openw-cli -c=./node.ini updateinfo
 
 # 查询主链列表
-$ ./openw-cli -c=./node.ini listsymbol
+$ ./go-openw-cli -c=./node.ini listsymbol
 
 # 查询主链下的合约列表
-$ ./openw-cli -c=./node.ini listtokencontract
+$ ./go-openw-cli -c=./node.ini listtokencontract
 
 # 启动后台托管钱包服务
-$ ./openw-cli -c=./node.ini trustserver
+$ ./go-openw-cli -c=./node.ini trustserver
 
 ```
