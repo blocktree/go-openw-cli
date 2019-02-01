@@ -11,6 +11,7 @@ import (
 	"github.com/blocktree/OpenWallet/timer"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/coreos/bbolt"
+	"github.com/google/uuid"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -22,10 +23,12 @@ const (
 )
 
 type CLI struct {
-	config      *Config             //工具配置
-	db          *openwallet.StormDB //本地数据库
-	api         *openwsdk.APINode   //api
-	summaryTask *SummaryTask        //汇总任务
+	config           *Config               //工具配置
+	db               *openwallet.StormDB   //本地数据库
+	api              *openwsdk.APINode     //api
+	summaryTask      *openwsdk.SummaryTask //汇总任务
+	summaryTaskTimer *timer.TaskTimer      //汇总任务定时器
+	transmitNode     *owtp.OWTPNode        //转发节点，被托管钱包种子的节点
 }
 
 func init() {
@@ -202,7 +205,7 @@ func (cli *CLI) NewWalletFlow() error {
 	// 等待用户输入密码
 	password, err = console.InputPassword(false, 3)
 
-	err = cli.CreateWalletOnServer(name, password)
+	_, err = cli.CreateWalletOnServer(name, password)
 	if err != nil {
 		return err
 	}
@@ -248,7 +251,7 @@ func (cli *CLI) NewAccountFlow() error {
 	}
 
 	//创建新账户
-	err = cli.CreateAccountOnServer(name, password, symbol, wallet)
+	_, _, err = cli.CreateAccountOnServer(name, password, symbol, wallet)
 	if err != nil {
 		return err
 	}
@@ -372,7 +375,10 @@ func (cli *CLI) TransferFlow() error {
 		return err
 	}
 
-	err = cli.Transfer(wallet, account, contractAddress, to, amount, password)
+	//创建新交易单
+	sid := uuid.New().String()
+
+	_, _, err = cli.Transfer(wallet, account, contractAddress, to, amount, sid, "", "", password)
 	if err != nil {
 		return err
 	}
@@ -420,7 +426,17 @@ func (cli *CLI) SetSumFlow() error {
 		return err
 	}
 
-	err = cli.SetSummaryInfo(account.WalletID, account.AccountID, sumAddress, threshold, minTransfer, retainedBalance, confirms)
+	obj := &openwsdk.SummarySetting{
+		WalletID:        account.WalletID,
+		AccountID:       account.AccountID,
+		SumAddress:      sumAddress,
+		Threshold:       threshold,
+		MinTransfer:     minTransfer,
+		RetainedBalance: retainedBalance,
+		Confirms:        confirms,
+	}
+
+	err = cli.SetSummaryInfo(obj)
 	if err != nil {
 		return err
 	}
@@ -435,7 +451,7 @@ func (cli *CLI) StartSumFlow(file string) error {
 	var (
 		endRunning  = make(chan bool, 1)
 		manual      = true //手动选择
-		summaryTask SummaryTask
+		summaryTask openwsdk.SummaryTask
 		taskFile    string
 	)
 
@@ -487,22 +503,22 @@ func (cli *CLI) StartSumFlow(file string) error {
 			return selectErr
 		}
 
-		summaryAccountTask := &SummaryAccountTask{
+		summaryAccountTask := &openwsdk.SummaryAccountTask{
 			AccountID: account.AccountID,
 			Contracts: []string{},
 		}
 
-		summaryWalletTask := &SummaryWalletTask{
+		summaryWalletTask := &openwsdk.SummaryWalletTask{
 			WalletID: wallet.WalletID,
 			Password: password,
-			wallet:   wallet,
-			Accounts: []*SummaryAccountTask{
+			Wallet:   wallet,
+			Accounts: []*openwsdk.SummaryAccountTask{
 				summaryAccountTask,
 			},
 		}
 
-		summaryTask = SummaryTask{
-			Wallets: []*SummaryWalletTask{
+		summaryTask = openwsdk.SummaryTask{
+			Wallets: []*openwsdk.SummaryWalletTask{
 				summaryWalletTask,
 			},
 		}
@@ -515,6 +531,8 @@ func (cli *CLI) StartSumFlow(file string) error {
 	//启动钱包汇总程序
 	sumTimer := timer.NewTask(cycleSec, cli.SummaryTask)
 	sumTimer.Start()
+
+	cli.summaryTaskTimer = sumTimer
 
 	<-endRunning
 
@@ -594,6 +612,23 @@ func (cli *CLI) ListAddressFlow() error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+//StartTrustServerFlow
+func (cli *CLI) StartTrustServerFlow() error {
+
+	var (
+		endRunning = make(chan bool, 1)
+	)
+
+	err := cli.ServeTransmitNode(true)
+	if err != nil {
+		return err
+	}
+
+	<-endRunning
 
 	return nil
 }

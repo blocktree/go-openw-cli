@@ -76,8 +76,8 @@
 			"checksumSHA1": "W7HBzu7HlF18vCfNPgax7xvHXB0=",
 			"origin": "github.com/blocktree/go-openw-sdk/vendor/github.com/astaxie/beego/utils",
 			"path": "github.com/astaxie/beego/utils",
-			"revision": "6b26e238948c3373a9007f8df6c56c9c1b877324",
-			"revisionTime": "2019-01-26T10:04:29Z"
+			"revision": "b20f2bf1eb93407a067829107e48f23ff3412432",
+			"revisionTime": "2019-01-31T12:50:08Z"
 		},
 		{
 			"checksumSHA1": "w6THTrjz0k0NO7HQa2hOvuP3QSg=",
@@ -134,7 +134,7 @@
 			"revisionTime": "2019-01-28T09:41:53Z"
 		},
 		{
-			"checksumSHA1": "R3DryWLoqJRxBRq3yv9nIsLoSWo=",
+			"checksumSHA1": "MTat3jSzZYTTxC2NRR4rBN64cJk=",
 			"path": "github.com/blocktree/OpenWallet/owtp",
 			"revision": "e612e85ebb83f2b55338e7e1bd3cf59b9585fd1f",
 			"revisionTime": "2019-01-28T09:41:53Z"
@@ -143,8 +143,8 @@
 			"checksumSHA1": "1iyk9Mq9nOkIgvJFAoaZZH3I6BQ=",
 			"origin": "github.com/blocktree/go-openw-sdk/vendor/github.com/blocktree/OpenWallet/session",
 			"path": "github.com/blocktree/OpenWallet/session",
-			"revision": "6b26e238948c3373a9007f8df6c56c9c1b877324",
-			"revisionTime": "2019-01-26T10:04:29Z"
+			"revision": "b20f2bf1eb93407a067829107e48f23ff3412432",
+			"revisionTime": "2019-01-31T12:50:08Z"
 		},
 		{
 			"checksumSHA1": "wgrY1+NAvuuQOp+biTCpwce3/e4=",
@@ -153,10 +153,10 @@
 			"revisionTime": "2019-01-28T09:41:53Z"
 		},
 		{
-			"checksumSHA1": "7PPkla1qno9AWEWa8kJaKo0WvuU=",
+			"checksumSHA1": "5NXGc3NDQfNs+lJ32bgWW6BOcgs=",
 			"path": "github.com/blocktree/go-openw-sdk/openwsdk",
-			"revision": "6b26e238948c3373a9007f8df6c56c9c1b877324",
-			"revisionTime": "2019-01-26T10:04:29Z"
+			"revision": "b20f2bf1eb93407a067829107e48f23ff3412432",
+			"revisionTime": "2019-01-31T12:50:08Z"
 		},
 		{
 			"checksumSHA1": "qCX4I+U9CKxxFsqQKLud1zmjvXU=",

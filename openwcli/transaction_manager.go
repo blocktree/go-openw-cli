@@ -24,7 +24,7 @@ func (cli *CLI) GetTokenBalance(account *openwsdk.Account, contractID string) st
 }
 
 //Transfer 转账交易
-func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, password string) error {
+func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, error) {
 
 	var (
 		isContract  bool
@@ -40,14 +40,14 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	//获取种子文件
 	key, err := cli.getLocalKeyByWallet(wallet, password)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	if len(contractAddress) > 0 {
 		isContract = true
 		token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", contractAddress)
 		if findErr != nil {
-			return findErr
+			return nil, nil, findErr
 		}
 		contractID = token[0].ContractID
 		tokenSymbol = token[0].Token
@@ -58,10 +58,9 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 		ContractID: contractID,
 	}
 
-	//创建新交易单
-	sid := uuid.New().String()
+
 	api := cli.api
-	err = api.CreateTrade(account.AccountID, sid, coin, amount, to, "", "", true,
+	err = api.CreateTrade(account.AccountID, sid, coin, amount, to, feeRate, memo, true,
 		func(status uint64, msg string, rawTx *openwsdk.RawTransaction) {
 			if status != owtp.StatusSuccess {
 				createErr = fmt.Errorf(msg)
@@ -70,10 +69,10 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 			retRawTx = rawTx
 		})
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 	if createErr != nil {
-		return createErr
+		return nil, nil, createErr
 	}
 
 	//:打印交易单明细
@@ -89,7 +88,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	//签名交易单
 	err = openwsdk.SignRawTransaction(retRawTx, key)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	//广播交易单
@@ -104,10 +103,10 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 			retFailed = failedRawTxs
 		})
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 	if createErr != nil {
-		return createErr
+		return nil, nil, createErr
 	}
 
 	if len(retTx) > 0 {
@@ -119,7 +118,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 		log.Error("send transaction failed. unexpected error:", retFailed[0].Reason)
 	}
 
-	return nil
+	return retTx, retFailed, nil
 }
 
 //SummaryWallets 执行汇总流程
@@ -130,16 +129,16 @@ func (cli *CLI) SummaryTask() {
 	//读取参与汇总的钱包
 	for _, task := range cli.summaryTask.Wallets {
 
-		if task.wallet == nil {
+		if task.Wallet == nil {
 			w, err := cli.GetWalletByWalletIDOnLocal(task.WalletID)
 			if err != nil {
 				log.Errorf("Summary wallet[%s] unexpected error: %v", task.WalletID, err)
 				continue
 			}
-			task.wallet = w
+			task.Wallet = w
 		}
 
-		key, err := cli.getLocalKeyByWallet(task.wallet, task.Password)
+		key, err := cli.getLocalKeyByWallet(task.Wallet, task.Password)
 		if err != nil {
 			log.Errorf("Summary wallet[%s] unexpected error: %v", task.WalletID, err)
 			continue
@@ -172,11 +171,11 @@ func (cli *CLI) SummaryTask() {
 }
 
 //SummaryAccountMainCoin 汇总账户主币
-func (cli *CLI) SummaryAccountMainCoin(accountTask *SummaryAccountTask, account *openwsdk.Account, key *hdkeystore.HDKey) error {
+func (cli *CLI) SummaryAccountMainCoin(accountTask *openwsdk.SummaryAccountTask, account *openwsdk.Account, key *hdkeystore.HDKey) error {
 
 	var (
 		err     error
-		sumSets SummarySetting
+		sumSets openwsdk.SummarySetting
 	)
 
 	//读取汇总信息
@@ -212,11 +211,11 @@ func (cli *CLI) SummaryAccountMainCoin(accountTask *SummaryAccountTask, account 
 }
 
 //SummaryAccountTokenContracts 汇总账户代币合约
-func (cli *CLI) SummaryAccountTokenContracts(accountTask *SummaryAccountTask, account *openwsdk.Account, key *hdkeystore.HDKey) error {
+func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccountTask, account *openwsdk.Account, key *hdkeystore.HDKey) error {
 
 	var (
 		err     error
-		sumSets SummarySetting
+		sumSets openwsdk.SummarySetting
 	)
 
 	if len(accountTask.Contracts) == 0 {
@@ -285,7 +284,7 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *SummaryAccountTask, ac
 }
 
 //summaryAccountProcess 汇总账户过程
-func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore.HDKey, balance string, sumSets SummarySetting, coin openwsdk.Coin) error {
+func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore.HDKey, balance string, sumSets openwsdk.SummarySetting, coin openwsdk.Coin) error {
 
 	const (
 		limit = 200
@@ -336,7 +335,7 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore
 			}
 
 			if createErr != nil {
-				log.Warn("CreateSummaryTransaction unexpected error: %v", createErr)
+				log.Warn("CreateSummaryTransaction unexpected error:", createErr)
 				continue
 			}
 

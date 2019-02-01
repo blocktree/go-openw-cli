@@ -11,7 +11,7 @@ const (
 	defaultConfig = `
 
 # Remote Server
-remoteserver = "www.openwallet.site"
+remoteserver = "www.openwallet.link"
 
 # API Version
 version = "1.0.0"
@@ -30,6 +30,27 @@ datadir = "/usr/data/"
 
 # Wallet Summary Period
 summaryperiod = "1h"
+
+# The custom name of local node
+localname = "blocktree"
+
+# Be trusted client server
+trustedserver = "client.blocktree.top"
+
+# Enable client server request local transfer
+enablerequesttransfer = false
+
+# Enable client server execute summary task
+enableexecutesummarytask = false
+
+# Enable key agreement on local node communicate with client server
+enablekeyagreement = true
+
+# Enable https or wss
+enablessl = false
+
+# Network request timeout, unit: second
+requesttimeout = 60
 
 `
 
@@ -58,6 +79,20 @@ type Config struct {
 	keydir string
 	//数据库目录
 	dbdir string
+	//被托管节点服务地址
+	trustedserver string
+	//是否接受被托管节点发起的转账请求
+	enablerequesttransfer bool
+	//是否接受被托管节点执行汇总任务
+	enableexecutesummarytask bool
+	//是否开启协商密码通信
+	enablekeyagreement bool
+	//是否支持ssl：https，wss等
+	enablessl bool
+	//网络请求超时，单位：秒
+	requesttimeout int64
+	//本地节点自定义的名字
+	localname string
 }
 
 //初始化一个配置对象
@@ -70,6 +105,13 @@ func NewConfig(c config.Configer) *Config {
 	conf.logdir = c.String("logdir")
 	conf.datadir = c.String("datadir")
 	conf.summaryperiod = c.String("summaryperiod")
+	conf.trustedserver = c.String("trustedserver")
+	conf.localname = c.String("localname")
+	conf.enablerequesttransfer, _ = c.Bool("enablerequesttransfer")
+	conf.enableexecutesummarytask, _ = c.Bool("enableexecutesummarytask")
+	conf.enablekeyagreement, _ = c.Bool("enablekeyagreement")
+	conf.enablessl, _ = c.Bool("enablessl")
+	conf.requesttimeout, _ = c.Int64("requesttimeout")
 
 	conf.keydir = filepath.Join(conf.datadir, keyDirName)
 	conf.dbdir =filepath.Join(conf.datadir, dbDirName)

@@ -29,6 +29,27 @@ datadir = "./testdata/data/"
 # Wallet Summary Period
 summaryperiod = "10s"
 
+# The custom name of local node
+localname = "blocktree"
+
+# Be trusted client server
+trustedserver = "127.0.0.1:9088"
+
+# Enable client server request local transfer
+enablerequesttransfer = true
+
+# Enable client server execute summary task
+enableexecutesummarytask = true
+
+# Enable key agreement on local node communicate with client server
+enablekeyagreement = true
+
+# Enable https or wss
+enablessl = false
+
+# Network request timeout, unit: second
+requesttimeout = 60
+
 `
 
 	c, err := config.NewConfigData("ini", []byte(confFile))

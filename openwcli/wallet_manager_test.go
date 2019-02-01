@@ -3,21 +3,16 @@ package openwcli
 import (
 	"fmt"
 	"github.com/blocktree/OpenWallet/log"
-	"github.com/blocktree/OpenWallet/owtp"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"testing"
 )
-
-func init() {
-	owtp.Debug = false
-}
 
 func TestCLI_CreateWalletOnServer(t *testing.T) {
 	cli := getTestOpenwCLI()
 	if cli == nil {
 		return
 	}
-	err := cli.CreateWalletOnServer("testwallet", "12345678")
+	_, err := cli.CreateWalletOnServer("testwallet", "12345678")
 	if err != nil {
 		log.Error("CreateWalletOnServer error:", err)
 		return
@@ -51,7 +46,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	}
 
 	if len(wallets) > 0 {
-		err = cli.CreateAccountOnServer("helleo", "12345678", "BTC", wallets[0])
+		_, _, err = cli.CreateAccountOnServer("helleo", "12345678", "BTC", wallets[0])
 		if err != nil {
 			log.Error("CreateAccountOnServer error:", err)
 			return
@@ -111,7 +106,6 @@ func TestCLI_CreateAddressOnServer(t *testing.T) {
 		}
 	}
 
-
 }
 
 func TestCLI_GetAddressesOnServer(t *testing.T) {
@@ -135,7 +129,7 @@ func TestCLI_GetAddressesOnServer(t *testing.T) {
 		}
 
 		if len(accounts) > 0 {
-			addresses, err := cli.GetAddressesOnServer(accounts[0].WalletID, accounts[0].AccountID, 0,50)
+			addresses, err := cli.GetAddressesOnServer(accounts[0].WalletID, accounts[0].AccountID, 0, 50)
 			if err != nil {
 				log.Error("GetAddressesOnServer error:", err)
 				return
@@ -150,7 +144,6 @@ func TestCLI_GetAddressesOnServer(t *testing.T) {
 }
 
 func TestCLI_SearchAddressOnServer(t *testing.T) {
-
 
 	cli := getTestOpenwCLI()
 	if cli == nil {
@@ -233,7 +226,7 @@ func TestCLI_SetSummaryInfo(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	err := cli.SetSummaryInfo(
+	err := cli.SetSummaryInfo(&openwsdk.SummarySetting{
 		"VzRF939isEwpz7wLUwqULpmhct2wsApdm4",
 		"J3wiDj2jMGdp9aqmALhQtEkJQch4YN9e38TEXzRgZyKY",
 		"mp1JDsi7Dr2PkcWu1j4SUSTXJqXjFMaeVx",
@@ -241,13 +234,13 @@ func TestCLI_SetSummaryInfo(t *testing.T) {
 		"0.1",
 		"0",
 		1,
-		)
+	})
 	if err != nil {
 		log.Error("SetSummaryInfo error:", err)
 		return
 	}
 
-	var sumSets SummarySetting
+	var sumSets openwsdk.SummarySetting
 	//读取汇总信息
 	err = cli.db.One("AccountID", "J3wiDj2jMGdp9aqmALhQtEkJQch4YN9e38TEXzRgZyKY", &sumSets)
 	if err != nil {

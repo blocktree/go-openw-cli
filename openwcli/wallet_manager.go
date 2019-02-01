@@ -16,18 +16,19 @@ import (
 )
 
 //CreateWalletOnServer
-func (cli *CLI) CreateWalletOnServer(name, password string) error {
+func (cli *CLI) CreateWalletOnServer(name, password string) (*openwsdk.Wallet, error) {
 
 	var (
-		key *hdkeystore.HDKey
+		key       *hdkeystore.HDKey
+		retWallet *openwsdk.Wallet
 	)
 
 	if len(name) == 0 {
-		return fmt.Errorf("wallet name is empty. ")
+		return nil, fmt.Errorf("wallet name is empty. ")
 	}
 
 	if len(password) == 0 {
-		return fmt.Errorf("wallet password is empty. ")
+		return nil, fmt.Errorf("wallet password is empty. ")
 	}
 
 	//随机生成keystore
@@ -40,7 +41,7 @@ func (cli *CLI) CreateWalletOnServer(name, password string) error {
 	)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//登记钱包的openw-server
@@ -48,6 +49,7 @@ func (cli *CLI) CreateWalletOnServer(name, password string) error {
 		func(status uint64, msg string, wallet *openwsdk.Wallet) {
 			if status == owtp.StatusSuccess {
 				log.Info("Wallet create successfully, key path:", filePath)
+				retWallet = wallet
 			} else {
 				log.Error("create wallet on server failed, unexpected error:", msg)
 
@@ -56,7 +58,7 @@ func (cli *CLI) CreateWalletOnServer(name, password string) error {
 			}
 		})
 
-	return nil
+	return retWallet, nil
 }
 
 //GetWalletsByKeyDir 通过给定的文件路径加载keystore文件得到钱包列表
@@ -77,6 +79,37 @@ func (cli *CLI) GetWalletsOnServer() ([]*openwsdk.Wallet, error) {
 	}
 
 	return serverWallets, nil
+}
+
+//GetWalletByWalletID 查找本地且线上有的钱包对象
+func (cli *CLI) GetWalletByWalletID(walletID string) (*openwsdk.Wallet, error) {
+
+	var (
+		findErr error
+	)
+
+	localWallet, err := cli.GetWalletByWalletIDOnLocal(walletID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cli.api.FindWalletByWalletID(walletID, true,
+		func(status uint64, msg string, wallet *openwsdk.Wallet) {
+			if status == owtp.StatusSuccess && wallet != nil {
+				localWallet = wallet
+			} else {
+				findErr = fmt.Errorf(msg)
+			}
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	if findErr != nil {
+		return nil, findErr
+	}
+
+	return localWallet, nil
 }
 
 //GetWalletByWalletIDOnLocal 查找本地种子目录的钱包对象
@@ -123,24 +156,26 @@ func (cli *CLI) printWalletList(list []*openwsdk.Wallet) {
 }
 
 //CreateAccountOnServer
-func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *openwsdk.Wallet) error {
+func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *openwsdk.Wallet) (*openwsdk.Account, []*openwsdk.Address, error) {
 
 	var (
 		key            *hdkeystore.HDKey
 		selectedSymbol *openwsdk.Symbol
+		retAccount     *openwsdk.Account
+		retAddresses   []*openwsdk.Address
 	)
 
 	if len(name) == 0 {
-		return fmt.Errorf("wallet name is empty. ")
+		return nil, nil, fmt.Errorf("wallet name is empty. ")
 	}
 
 	if len(password) == 0 {
-		return fmt.Errorf("wallet password is empty. ")
+		return nil, nil, fmt.Errorf("wallet password is empty. ")
 	}
 
 	selectedSymbol, err := cli.GetSymbolInfo(symbol)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	keystore := hdkeystore.NewHDKeystore(
@@ -157,12 +192,12 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 		password,
 	)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	newaccount, err := wallet.CreateAccount(name, selectedSymbol, key)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	//登记钱包的openw-server
@@ -174,21 +209,23 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 				if len(addresses) > 0 {
 					log.Infof("new address: %s", addresses[0].Address)
 				}
+
+				retAccount = account
+				retAddresses = addresses
 			} else {
 				log.Error("create account on server failed, unexpected error:", msg)
 			}
 		})
 
-	return nil
+	return retAccount, retAddresses, nil
 }
-
 
 //GetAccountOnServerByAccountID 从服务器获取账户
 func (cli *CLI) GetAccountByAccountID(accountID string) (*openwsdk.Account, error) {
 
 	var (
 		getAccount *openwsdk.Account
-		err error
+		err        error
 	)
 
 	cli.api.FindAccountByAccountID(accountID, true,
@@ -227,7 +264,7 @@ func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 		for i, w := range list {
 
 			//读取汇总信息
-			var sum SummarySetting
+			var sum openwsdk.SummarySetting
 			cli.db.One("AccountID", w.AccountID, &sum)
 
 			tableInfo = append(tableInfo, []interface{}{
@@ -628,17 +665,9 @@ func (cli *CLI) GetTokenContractInfo(contractID string) (*openwsdk.TokenContract
 }
 
 //SetSummaryInfo 设置账户的汇总设置
-func (cli *CLI) SetSummaryInfo(walletID, accountID, sumAddress, threshold, minTransfer, retainedBalance string, confirms uint64) error {
-	obj := SummarySetting{
-		WalletID:        walletID,
-		AccountID:       accountID,
-		SumAddress:      sumAddress,
-		Threshold:       threshold,
-		MinTransfer:     minTransfer,
-		RetainedBalance: retainedBalance,
-		Confirms:        confirms,
-	}
-	return cli.db.Save(&obj)
+func (cli *CLI) SetSummaryInfo(obj *openwsdk.SummarySetting) error {
+	//TODO:查询钱包和账户是否存在
+	return cli.db.Save(obj)
 }
 
 //getLocalKeyByWallet

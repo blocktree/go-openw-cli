@@ -155,6 +155,17 @@ var (
 			Flags: []cli.Flag{
 			},
 		},
+		{
+
+			Name:      "trustserver",
+			Usage:     "start trusteeship wallet service for transmit node",
+			ArgsUsage: "<symbol>",
+			Action:    trustserver,
+			Category:  "WALLET COMMANDS",
+			Flags: []cli.Flag{
+			},
+		},
+
 	}
 )
 
@@ -389,6 +400,21 @@ func listaddress(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
 		err := cli.ListAddressFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+//trustserver 启动后台托管钱包服务
+func trustserver(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+
+		err := cli.StartTrustServerFlow()
 		if err != nil {
 			log.Error("unexpected error: ", err)
 			return err
