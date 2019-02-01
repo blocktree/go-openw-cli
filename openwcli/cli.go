@@ -32,7 +32,7 @@ type CLI struct {
 }
 
 func init() {
-	owtp.Debug = true
+	owtp.Debug = false
 }
 
 // 初始化工具
@@ -612,6 +612,23 @@ func (cli *CLI) ListAddressFlow() error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+//StartTrustServerFlow
+func (cli *CLI) StartTrustServerFlow() error {
+
+	var (
+		endRunning = make(chan bool, 1)
+	)
+
+	err := cli.ServeTransmitNode(true)
+	if err != nil {
+		return err
+	}
+
+	<-endRunning
 
 	return nil
 }

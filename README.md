@@ -108,6 +108,27 @@ datadir = "/usr/data/"
 # Wallet Summary Period
 summaryperiod = "1h"
 
+# The custom name of local node
+localname = "blocktree"
+
+# Be trusted client server
+trustedserver = "client.blocktree.top"
+
+# Enable client server request local transfer
+enablerequesttransfer = false
+
+# Enable client server execute summary task
+enableexecutesummarytask = false
+
+# Enable key agreement on local node communicate with client server
+enablekeyagreement = true
+
+# Enable https or wss
+enablessl = false
+
+# Network request timeout, unit: second
+requesttimeout = 60
+
 ```
 
 我们提供命令行工具openw-cli，以下功能点作为管理资产的【子命令】，附加以下参数变量。
@@ -194,5 +215,8 @@ $ ./openw-cli -c=./node.ini listsymbol
 
 # 查询主链下的合约列表
 $ ./openw-cli -c=./node.ini listtokencontract
+
+# 启动后台托管钱包服务
+$ ./openw-cli -c=./node.ini trustserver
 
 ```
