@@ -3,7 +3,13 @@ package openwcli
 import (
 	"github.com/astaxie/beego/config"
 	"github.com/blocktree/OpenWallet/log"
+	"github.com/blocktree/OpenWallet/owtp"
 )
+
+
+func init() {
+	owtp.Debug = false
+}
 
 func getTestOpenwCLI() *CLI {
 

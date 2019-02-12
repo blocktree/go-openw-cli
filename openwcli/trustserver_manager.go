@@ -20,7 +20,8 @@ func (cli *CLI) ServeTransmitNode(autoReconnect bool) error {
 	}
 	cert, _ := keychain.Certificate()
 	node := owtp.NewNode(owtp.NodeConfig{
-		Cert: cert,
+		Cert:       cert,
+		TimeoutSEC: cli.config.requesttimeout,
 	})
 
 	cli.transmitNode = node
@@ -59,7 +60,6 @@ func (cli *CLI) connectTransmitNode() error {
 	connectCfg.ConnectType = owtp.Websocket
 	connectCfg.EnableSSL = cli.config.enablessl
 	connectCfg.EnableSignature = false
-	connectCfg.Timeout = time.Duration(cli.config.requesttimeout) * time.Second
 
 	//建立连接
 	err := cli.transmitNode.Connect(trustHostID, connectCfg)

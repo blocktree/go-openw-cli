@@ -31,10 +31,6 @@ type CLI struct {
 	transmitNode     *owtp.OWTPNode        //转发节点，被托管钱包种子的节点
 }
 
-func init() {
-	owtp.Debug = false
-}
-
 // 初始化工具
 func NewCLI(c *Config) (*CLI, error) {
 
@@ -90,6 +86,7 @@ func (cli *CLI) setupAPISDK(keychain *Keychain) error {
 			EnableSignature:    false,
 			EnableKeyAgreement: false,
 			Cert:               cert,
+			TimeoutSEC:            cli.config.requesttimeout,
 		}
 
 		apiSDK := openwsdk.NewAPINode(sdkConfig)

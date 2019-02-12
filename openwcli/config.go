@@ -55,7 +55,7 @@ requesttimeout = 60
 `
 
 	keyDirName = "key"
-	dbDirName = "db"
+	dbDirName  = "db"
 )
 
 //配置
@@ -90,7 +90,7 @@ type Config struct {
 	//是否支持ssl：https，wss等
 	enablessl bool
 	//网络请求超时，单位：秒
-	requesttimeout int64
+	requesttimeout int
 	//本地节点自定义的名字
 	localname string
 }
@@ -111,10 +111,10 @@ func NewConfig(c config.Configer) *Config {
 	conf.enableexecutesummarytask, _ = c.Bool("enableexecutesummarytask")
 	conf.enablekeyagreement, _ = c.Bool("enablekeyagreement")
 	conf.enablessl, _ = c.Bool("enablessl")
-	conf.requesttimeout, _ = c.Int64("requesttimeout")
+	conf.requesttimeout, _ = c.Int("requesttimeout")
 
 	conf.keydir = filepath.Join(conf.datadir, keyDirName)
-	conf.dbdir =filepath.Join(conf.datadir, dbDirName)
+	conf.dbdir = filepath.Join(conf.datadir, dbDirName)
 
 	//建立文件夹
 	file.MkdirAll(conf.datadir)
@@ -124,7 +124,6 @@ func NewConfig(c config.Configer) *Config {
 
 	return conf
 }
-
 
 // 加载工具配置
 func LoadConfig(path string) (*Config, error) {
