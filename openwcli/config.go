@@ -43,6 +43,9 @@ enablerequesttransfer = false
 # Enable client server execute summary task
 enableexecutesummarytask = false
 
+# Enable client server edit wallet summary settings
+enableeditsummarysettings = false
+
 # Enable key agreement on local node communicate with client server
 enablekeyagreement = true
 
@@ -85,6 +88,8 @@ type Config struct {
 	enablerequesttransfer bool
 	//是否接受被托管节点执行汇总任务
 	enableexecutesummarytask bool
+	//是否接收被托管节点修改钱包汇总设置
+	enableeditsummarysettings bool
 	//是否开启协商密码通信
 	enablekeyagreement bool
 	//是否支持ssl：https，wss等
@@ -109,6 +114,7 @@ func NewConfig(c config.Configer) *Config {
 	conf.localname = c.String("localname")
 	conf.enablerequesttransfer, _ = c.Bool("enablerequesttransfer")
 	conf.enableexecutesummarytask, _ = c.Bool("enableexecutesummarytask")
+	conf.enableeditsummarysettings, _ = c.Bool("enableeditsummarysettings")
 	conf.enablekeyagreement, _ = c.Bool("enablekeyagreement")
 	conf.enablessl, _ = c.Bool("enablessl")
 	conf.requesttimeout, _ = c.Int("requesttimeout")

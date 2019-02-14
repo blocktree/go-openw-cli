@@ -36,6 +36,8 @@ func (cli *CLI) ServeTransmitNode(autoReconnect bool) error {
 	cli.transmitNode.HandleFunc("startSummaryTaskViaTrustNode", cli.startSummaryTaskViaTrustNode)
 	cli.transmitNode.HandleFunc("stopSummaryTaskViaTrustNode", cli.stopSummaryTaskViaTrustNode)
 	cli.transmitNode.HandleFunc("updateInfoViaTrustNode", cli.updateInfoViaTrustNode)
+	cli.transmitNode.HandleFunc("appendSummaryTaskViaTrustNode", cli.appendSummaryTaskViaTrustNode)
+	cli.transmitNode.HandleFunc("removeSummaryTaskViaTrustNode", cli.removeSummaryTaskViaTrustNode)
 
 	//自动连接
 	if autoReconnect {
@@ -271,8 +273,8 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 
 func (cli *CLI) setSummaryInfoViaTrustNode(ctx *owtp.Context) {
 
-	if !cli.config.enableexecutesummarytask {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [transfer] ability")
+	if !cli.config.enableeditsummarysettings {
+		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [edit summary settings] ability")
 		return
 	}
 
@@ -301,11 +303,6 @@ func (cli *CLI) findSummaryInfoByWalletIDViaTrustNode(ctx *owtp.Context) {
 		sumSets []*openwsdk.SummarySetting
 	)
 
-	if !cli.config.enableexecutesummarytask {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [transfer] ability")
-		return
-	}
-
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
@@ -327,7 +324,7 @@ func (cli *CLI) findSummaryInfoByWalletIDViaTrustNode(ctx *owtp.Context) {
 func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enableexecutesummarytask {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [transfer] ability")
+		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
 		return
 	}
 
@@ -345,7 +342,17 @@ func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	summaryTask := openwsdk.NewSummaryTask(ctx.Params().Get("summaryTask"))
 	cycleSec := ctx.Params().Get("cycleSec").Int()
+
+	//:先检查汇总任务是否有汇总配置
+	err := cli.checkSummaryTaskIsHaveSettings(summaryTask)
+	if err != nil {
+		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		return
+	}
+
+	cli.mu.Lock()
 	cli.summaryTask = summaryTask
+	cli.mu.Unlock()
 
 	log.Infof("The timer for summary task start now. Execute by every %v seconds.", cycleSec)
 
@@ -362,7 +369,7 @@ func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 func (cli *CLI) stopSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enableexecutesummarytask {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [transfer] ability")
+		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
 		return
 	}
 
@@ -399,4 +406,66 @@ func (cli *CLI) updateInfoViaTrustNode(ctx *owtp.Context) {
 	}
 
 	ctx.Response(nil, owtp.StatusSuccess, "success")
+}
+
+func (cli *CLI) appendSummaryTaskViaTrustNode(ctx *owtp.Context) {
+
+	if !cli.config.enableexecutesummarytask {
+		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
+		return
+	}
+
+	if cli.summaryTaskTimer == nil || !cli.summaryTaskTimer.Running() {
+		ctx.Response(nil, owtp.ErrCustomError, "summary task timer is not start")
+		return
+	}
+
+	appID := ctx.Params().Get("appID").String()
+
+	if appID != cli.config.appid {
+		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		return
+	}
+
+	summaryTask := openwsdk.NewSummaryTask(ctx.Params().Get("summaryTask"))
+
+	//:先检查汇总任务是否有汇总配置
+	err := cli.checkSummaryTaskIsHaveSettings(summaryTask)
+	if err != nil {
+		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		return
+	}
+
+	cli.appendSummaryWalletTasks(summaryTask.Wallets)
+
+	ctx.Response(nil, owtp.StatusSuccess, "success")
+
+}
+
+
+func (cli *CLI) removeSummaryTaskViaTrustNode(ctx *owtp.Context) {
+
+	if !cli.config.enableexecutesummarytask {
+		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
+		return
+	}
+
+	if cli.summaryTaskTimer == nil || !cli.summaryTaskTimer.Running() {
+		ctx.Response(nil, owtp.ErrCustomError, "summary task timer is not start")
+		return
+	}
+
+	appID := ctx.Params().Get("appID").String()
+	walletID := ctx.Params().Get("walletID").String()
+	accountID := ctx.Params().Get("accountID").String()
+
+	if appID != cli.config.appid {
+		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		return
+	}
+
+	cli.removeSummaryWalletTasks(walletID, accountID)
+
+	ctx.Response(nil, owtp.StatusSuccess, "success")
+
 }

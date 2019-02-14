@@ -47,6 +47,9 @@ enablerequesttransfer = true
 # Enable client server execute summary task
 enableexecutesummarytask = true
 
+# Enable client server edit wallet summary settings
+enableeditsummarysettings = false
+
 # Enable key agreement on local node communicate with client server
 enablekeyagreement = true
 

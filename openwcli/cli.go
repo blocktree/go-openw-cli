@@ -15,6 +15,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -23,6 +24,7 @@ const (
 )
 
 type CLI struct {
+	mu sync.RWMutex
 	config           *Config               //工具配置
 	db               *openwallet.StormDB   //本地数据库
 	api              *openwsdk.APINode     //api
@@ -521,7 +523,9 @@ func (cli *CLI) StartSumFlow(file string) error {
 		}
 	}
 
+	cli.mu.Lock()
 	cli.summaryTask = &summaryTask
+	cli.mu.Unlock()
 
 	log.Infof("The timer for summary task start now. Execute by every %v seconds.", cycleSec.Seconds())
 

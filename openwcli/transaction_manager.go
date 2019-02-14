@@ -58,7 +58,6 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 		ContractID: contractID,
 	}
 
-
 	api := cli.api
 	err = api.CreateTrade(account.AccountID, sid, coin, amount, to, feeRate, memo, true,
 		func(status uint64, msg string, rawTx *openwsdk.RawTransaction) {
@@ -126,6 +125,8 @@ func (cli *CLI) SummaryTask() {
 
 	log.Infof("[Summary Task Start]------%s", common.TimeFormat("2006-01-02 15:04:05"))
 
+	cli.mu.RLock()
+	defer cli.mu.RUnlock()
 	//读取参与汇总的钱包
 	for _, task := range cli.summaryTask.Wallets {
 
@@ -181,11 +182,11 @@ func (cli *CLI) SummaryAccountMainCoin(accountTask *openwsdk.SummaryAccountTask,
 	//读取汇总信息
 	err = cli.db.One("AccountID", account.AccountID, &sumSets)
 	if err != nil {
-		return err
+		return fmt.Errorf("Summary account[%s] can not find account summary setting ", account.AccountID)
 	}
 
 	if sumSets.SumAddress == "" {
-		log.Errorf("Summary account[%s] summary address is empty!")
+		log.Errorf("Summary account[%s] summary address is empty!", account.AccountID)
 		return err
 	}
 
@@ -386,4 +387,95 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore
 	}
 
 	return nil
+}
+
+func FindExistedSummaryWalletTask(walletID string, tasks []*openwsdk.SummaryWalletTask) (int, *openwsdk.SummaryWalletTask) {
+	for i, w := range tasks {
+		if w.WalletID == walletID {
+			return i, w
+		}
+	}
+	return -1, nil
+}
+
+func FindExistedSummaryAccountTask(accountID string, tasks []*openwsdk.SummaryAccountTask) (int, *openwsdk.SummaryAccountTask) {
+	for i, w := range tasks {
+		if w.AccountID == accountID {
+			return i, w
+		}
+	}
+	return -1, nil
+}
+
+//checkSummaryTaskIsHaveSettings 检查汇总任务中的账户是否已配置
+func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error {
+
+	for _, w := range task.Wallets {
+		for _, account := range w.Accounts {
+			var sumSets openwsdk.SummarySetting
+			//读取汇总信息
+			err := cli.db.One("AccountID", account.AccountID, &sumSets)
+			if err != nil {
+				return fmt.Errorf("Summary account[%s] can not find account summary setting ", account.AccountID)
+			}
+
+			if sumSets.SumAddress == "" {
+				log.Errorf("Summary account[%s] summary address is empty!", account.AccountID)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (cli *CLI) appendSummaryWalletTasks(sums []*openwsdk.SummaryWalletTask) {
+	cli.mu.Lock()
+	defer cli.mu.Unlock()
+
+	for _, newWalletTask := range sums {
+
+		//查找钱包是否汇总中
+		_, executingWallet := FindExistedSummaryWalletTask(newWalletTask.WalletID, cli.summaryTask.Wallets)
+		if executingWallet != nil {
+			//钱包汇总中...
+			for _, newAccountTask := range newWalletTask.Accounts {
+				//查找账户是否汇总中
+				_, executingAccount := FindExistedSummaryAccountTask(newAccountTask.AccountID, executingWallet.Accounts)
+				if executingAccount != nil {
+					//账户汇总中...
+					//重置汇总的合约
+					executingAccount.Contracts = newAccountTask.Contracts
+				} else {
+					executingWallet.Accounts = append(executingWallet.Accounts, newAccountTask)
+					log.Infof("Summary account[%s] task has been appended ", newAccountTask.AccountID)
+				}
+			}
+
+		} else {
+			cli.summaryTask.Wallets = append(cli.summaryTask.Wallets, newWalletTask)
+			log.Infof("Summary wallet[%s] task has been appended ", newWalletTask.WalletID)
+		}
+	}
+
+}
+
+func (cli *CLI) removeSummaryWalletTasks(walletID string, accountID string) {
+	cli.mu.Lock()
+	defer cli.mu.Unlock()
+	indexWallet, executingWallet := FindExistedSummaryWalletTask(walletID, cli.summaryTask.Wallets)
+	if executingWallet != nil {
+		if len(accountID) > 0 {
+			//查找账户是否汇总中
+			indexAccount, executingAccount := FindExistedSummaryAccountTask(accountID, executingWallet.Accounts)
+			if executingAccount != nil {
+				//移除汇总账户任务
+				executingWallet.Accounts = append(executingWallet.Accounts[:indexAccount], executingWallet.Accounts[indexAccount+1:]...)
+				log.Infof("Summary account[%s] task has been removed ", accountID)
+			}
+		} else {
+			//移除汇总钱包任务
+			cli.summaryTask.Wallets = append(cli.summaryTask.Wallets[:indexWallet], cli.summaryTask.Wallets[indexWallet+1:]...)
+			log.Infof("Summary wallet[%s] task has been removed ", walletID)
+		}
+	}
 }
