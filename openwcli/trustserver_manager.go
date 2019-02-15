@@ -1,6 +1,7 @@
 package openwcli
 
 import (
+	"github.com/asdine/storm"
 	"github.com/blocktree/OpenWallet/log"
 	"github.com/blocktree/OpenWallet/owtp"
 	"github.com/blocktree/OpenWallet/timer"
@@ -38,6 +39,8 @@ func (cli *CLI) ServeTransmitNode(autoReconnect bool) error {
 	cli.transmitNode.HandleFunc("updateInfoViaTrustNode", cli.updateInfoViaTrustNode)
 	cli.transmitNode.HandleFunc("appendSummaryTaskViaTrustNode", cli.appendSummaryTaskViaTrustNode)
 	cli.transmitNode.HandleFunc("removeSummaryTaskViaTrustNode", cli.removeSummaryTaskViaTrustNode)
+	cli.transmitNode.HandleFunc("getCurrentSummaryTaskViaTrustNode", cli.getCurrentSummaryTaskViaTrustNode)
+	cli.transmitNode.HandleFunc("getSummaryTaskLogViaTrustNode", cli.getSummaryTaskLogViaTrustNode)
 
 	//自动连接
 	if autoReconnect {
@@ -122,7 +125,7 @@ func (cli *CLI) autoReconnectTransmitNode() error {
 				log.Errorf("Connect %s node failed unexpected error: %v", trustHostID, err)
 				disconnected <- struct{}{}
 			} else {
-				log.Infof("Connect %s node successfully. \n", trustHostID)
+				log.Infof("Connect %s node successfully.", trustHostID)
 			}
 
 		case <-disconnected:
@@ -442,7 +445,6 @@ func (cli *CLI) appendSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 }
 
-
 func (cli *CLI) removeSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enableexecutesummarytask {
@@ -468,4 +470,55 @@ func (cli *CLI) removeSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	ctx.Response(nil, owtp.StatusSuccess, "success")
 
+}
+
+func (cli *CLI) getCurrentSummaryTaskViaTrustNode(ctx *owtp.Context) {
+
+	if !cli.config.enableexecutesummarytask {
+		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
+		return
+	}
+
+	if cli.summaryTaskTimer == nil || !cli.summaryTaskTimer.Running() {
+		ctx.Response(nil, owtp.ErrCustomError, "summary task timer is not start")
+		return
+	}
+
+	appID := ctx.Params().Get("appID").String()
+
+	if appID != cli.config.appid {
+		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		return
+	}
+
+	ctx.Response(cli.summaryTask, owtp.StatusSuccess, "success")
+}
+
+
+
+func (cli *CLI) getSummaryTaskLogViaTrustNode(ctx *owtp.Context) {
+
+	if !cli.config.enableexecutesummarytask {
+		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
+		return
+	}
+
+	appID := ctx.Params().Get("appID").String()
+	offset := ctx.Params().Get("offset").Int()
+	limit := ctx.Params().Get("limit").Int()
+
+	if appID != cli.config.appid {
+		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		return
+	}
+
+	var summaryTaskLog  []*openwsdk.SummaryTaskLog
+	err := cli.db.AllByIndex("CreatedAt", &summaryTaskLog,
+		storm.Limit(int(limit)), storm.Skip(int(offset)), storm.Reverse())
+	if err != nil {
+		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		return
+	}
+
+	ctx.Response(summaryTaskLog, owtp.StatusSuccess, "success")
 }
