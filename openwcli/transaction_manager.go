@@ -2,6 +2,7 @@ package openwcli
 
 import (
 	"fmt"
+	"github.com/asdine/storm"
 	"github.com/blocktree/OpenWallet/common"
 	"github.com/blocktree/OpenWallet/hdkeystore"
 	"github.com/blocktree/OpenWallet/log"
@@ -92,7 +93,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	}
 
 	//广播交易单
-	err = api.SubmitTrade(retRawTx, true,
+	err = api.SubmitTrade([]*openwsdk.RawTransaction{retRawTx}, true,
 		func(status uint64, msg string, successTx []*openwsdk.Transaction, failedRawTxs []*openwsdk.FailedRawTransaction) {
 			if status != owtp.StatusSuccess {
 				createErr = fmt.Errorf(msg)
@@ -383,11 +384,19 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore
 			for _, tx := range retTx {
 				log.Infof("[Success] txid: %s", tx.Txid)
 				//:计算总的汇总数量，手续费
-				amount, _ := decimal.NewFromString(tx.Amount)
+
 				fees, _ := decimal.NewFromString(tx.Fees)
-				totalSumAmount = totalSumAmount.Add(amount)
+
 				totalCostFees = totalCostFees.Add(fees)
 				txIDs = append(txIDs, tx.Txid)
+
+				//统计汇总总数
+				for i, a := range tx.ToAddress {
+					if a == sumSets.SumAddress {
+						amount, _ := decimal.NewFromString(tx.ToAddressV[i])
+						totalSumAmount = totalSumAmount.Add(amount)
+					}
+				}
 			}
 
 			for _, tx := range retFailed {
@@ -410,7 +419,13 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore
 				TotalCostFees:  totalCostFees.String(),
 				CreateTime:     time.Now().Unix(),
 			}
-			cli.db.Save(&summaryTaskLog)
+			err = cli.db.Save(&summaryTaskLog)
+			if err != nil {
+				log.Infof("Save summary task log failed: %s", err.Error())
+			} else {
+				log.Infof("Save summary task log successfully")
+			}
+
 
 		}
 	} else {
@@ -509,4 +524,15 @@ func (cli *CLI) removeSummaryWalletTasks(walletID string, accountID string) {
 			log.Infof("Summary wallet[%s] task has been removed ", walletID)
 		}
 	}
+}
+
+func (cli *CLI)GetSummaryTaskLog(offset, limit int64) ([]*openwsdk.SummaryTaskLog, error) {
+	var summaryTaskLog []*openwsdk.SummaryTaskLog
+	//err := cli.db.All(&summaryTaskLog)
+	err := cli.db.AllByIndex("CreateTime", &summaryTaskLog,
+		storm.Limit(int(limit)), storm.Skip(int(offset)), storm.Reverse())
+	if err != nil {
+		return nil, err
+	}
+	return summaryTaskLog, nil
 }

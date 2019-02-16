@@ -116,3 +116,18 @@ func TestCLI_Summary_BTC(t *testing.T) {
 		}
 	}
 }
+
+func TestCLI_GetSummaryTaskLog(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+	logs, err := cli.GetSummaryTaskLog(0, 20)
+	if err != nil {
+		log.Error("GetAccountsOnServer error:", err)
+		return
+	}
+	for i, l := range logs {
+		log.Infof("log[%d]: %+v", i, l)
+	}
+}

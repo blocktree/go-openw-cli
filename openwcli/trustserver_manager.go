@@ -1,7 +1,6 @@
 package openwcli
 
 import (
-	"github.com/asdine/storm"
 	"github.com/blocktree/OpenWallet/log"
 	"github.com/blocktree/OpenWallet/owtp"
 	"github.com/blocktree/OpenWallet/timer"
@@ -512,13 +511,11 @@ func (cli *CLI) getSummaryTaskLogViaTrustNode(ctx *owtp.Context) {
 		return
 	}
 
-	var summaryTaskLog  []*openwsdk.SummaryTaskLog
-	err := cli.db.AllByIndex("CreatedAt", &summaryTaskLog,
-		storm.Limit(int(limit)), storm.Skip(int(offset)), storm.Reverse())
+	logs, err := cli.GetSummaryTaskLog(offset, limit)
 	if err != nil {
 		ctx.Response(nil, owtp.ErrCustomError, err.Error())
 		return
 	}
 
-	ctx.Response(summaryTaskLog, owtp.StatusSuccess, "success")
+	ctx.Response(logs, owtp.StatusSuccess, "success")
 }
