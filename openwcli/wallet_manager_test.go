@@ -39,14 +39,15 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	wallets, err := cli.GetWalletsOnServer()
+	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
+	wallet, err := cli.GetWalletByWalletID(walletID)
 	if err != nil {
-		log.Error("GetWalletsOnServer error:", err)
+		log.Error("GetWalletByWalletID error:", err)
 		return
 	}
 
-	if len(wallets) > 0 {
-		_, _, err = cli.CreateAccountOnServer("helleo", "12345678", "BTC", wallets[0])
+	if wallet != nil {
+		_, _, err = cli.CreateAccountOnServer("helleo", "12345678", "BTC", wallet)
 		if err != nil {
 			log.Error("CreateAccountOnServer error:", err)
 			return
@@ -60,21 +61,14 @@ func TestCLI_GetAccountsOnServer(t *testing.T) {
 		return
 	}
 
-	wallets, err := cli.GetWalletsOnServer()
+	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
+	accounts, err := cli.GetAccountsOnServer(walletID)
 	if err != nil {
-		log.Error("GetWalletsOnServer error:", err)
+		log.Error("GetAccountsOnServer error:", err)
 		return
 	}
-
-	if len(wallets) > 0 {
-		accounts, err := cli.GetAccountsOnServer(wallets[0].WalletID)
-		if err != nil {
-			log.Error("GetAccountsOnServer error:", err)
-			return
-		}
-		for i, w := range accounts {
-			log.Info("account[", i, "]:", w)
-		}
+	for i, w := range accounts {
+		log.Info("account[", i, "]:", w)
 	}
 }
 
@@ -84,26 +78,12 @@ func TestCLI_CreateAddressOnServer(t *testing.T) {
 		return
 	}
 
-	wallets, err := cli.GetWalletsOnServer()
+	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
+	accountID := "A3Mxhqm65kTgS2ybHLenNrZzZNtLGVobDFYdpc1ge4eK"
+	err := cli.CreateAddressOnServer(walletID, accountID, 20)
 	if err != nil {
-		log.Error("GetWalletsOnServer error:", err)
+		log.Error("CreateAddressOnServer error:", err)
 		return
-	}
-
-	if len(wallets) > 0 {
-		accounts, err := cli.GetAccountsOnServer(wallets[0].WalletID)
-		if err != nil {
-			log.Error("GetAccountsOnServer error:", err)
-			return
-		}
-
-		if len(accounts) > 0 {
-			err = cli.CreateAddressOnServer(accounts[0].WalletID, accounts[0].AccountID, 20)
-			if err != nil {
-				log.Error("CreateAddressOnServer error:", err)
-				return
-			}
-		}
 	}
 
 }
@@ -115,30 +95,17 @@ func TestCLI_GetAddressesOnServer(t *testing.T) {
 		return
 	}
 
-	wallets, err := cli.GetWalletsOnServer()
+	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
+	accountID := "3i26MQmtuWVVnw8GnRCVopG3pi8MaYU6RqWVV2E1hwJx"
+
+	addresses, err := cli.GetAddressesOnServer(walletID, accountID, 0, 50)
 	if err != nil {
-		log.Error("GetWalletsOnServer error:", err)
+		log.Error("GetAddressesOnServer error:", err)
 		return
 	}
 
-	if len(wallets) > 0 {
-		accounts, err := cli.GetAccountsOnServer(wallets[0].WalletID)
-		if err != nil {
-			log.Error("GetAccountsOnServer error:", err)
-			return
-		}
-
-		if len(accounts) > 0 {
-			addresses, err := cli.GetAddressesOnServer(accounts[0].WalletID, accounts[0].AccountID, 0, 50)
-			if err != nil {
-				log.Error("GetAddressesOnServer error:", err)
-				return
-			}
-
-			for i, w := range addresses {
-				log.Info("address[", i, "]:", w)
-			}
-		}
+	for i, w := range addresses {
+		log.Info("address[", i, "]:", w)
 	}
 
 }

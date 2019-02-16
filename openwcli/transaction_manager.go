@@ -2,6 +2,7 @@ package openwcli
 
 import (
 	"fmt"
+	"github.com/asdine/storm"
 	"github.com/blocktree/OpenWallet/common"
 	"github.com/blocktree/OpenWallet/hdkeystore"
 	"github.com/blocktree/OpenWallet/log"
@@ -9,6 +10,7 @@ import (
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
+	"time"
 )
 
 //GetTokenBalance 获取代币余额
@@ -91,7 +93,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	}
 
 	//广播交易单
-	err = api.SubmitTrade(retRawTx, true,
+	err = api.SubmitTrade([]*openwsdk.RawTransaction{retRawTx}, true,
 		func(status uint64, msg string, successTx []*openwsdk.Transaction, failedRawTxs []*openwsdk.FailedRawTransaction) {
 			if status != owtp.StatusSuccess {
 				createErr = fmt.Errorf(msg)
@@ -340,6 +342,8 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore
 				continue
 			}
 
+			signedRawTxs := make([]*openwsdk.RawTransaction, 0)
+			txIDs := make([]string, 0)
 			for _, rawTx := range retRawTxs {
 				//签名交易
 				err = openwsdk.SignRawTransaction(rawTx, key)
@@ -348,38 +352,80 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore
 					continue
 				}
 
-				//continue
+				signedRawTxs = append(signedRawTxs, rawTx)
+			}
 
-				//	广播交易单
-				err = cli.api.SubmitTrade(rawTx, true,
-					func(status uint64, msg string, successTx []*openwsdk.Transaction, failedRawTxs []*openwsdk.FailedRawTransaction) {
-						if status != owtp.StatusSuccess {
-							createErr = fmt.Errorf(msg)
-							return
-						}
+			//continue
 
-						retTx = successTx
-						retFailed = failedRawTxs
-					})
-				if err != nil {
-					log.Warn("SubmitRawTransaction unexpected error: %v", err)
-					continue
-				}
-				if createErr != nil {
-					log.Warn("SubmitRawTransaction unexpected error: %v", createErr)
-					continue
-				}
+			//	广播交易单
+			err = cli.api.SubmitTrade(signedRawTxs, true,
+				func(status uint64, msg string, successTx []*openwsdk.Transaction, failedRawTxs []*openwsdk.FailedRawTransaction) {
+					if status != owtp.StatusSuccess {
+						createErr = fmt.Errorf(msg)
+						return
+					}
 
-				//打印汇总交易结果
+					retTx = successTx
+					retFailed = failedRawTxs
+				})
+			if err != nil {
+				log.Warn("SubmitRawTransaction unexpected error: %v", err)
+				continue
+			}
+			if createErr != nil {
+				log.Warn("SubmitRawTransaction unexpected error: %v", createErr)
+				continue
+			}
 
-				for _, tx := range retTx {
-					log.Infof("[Success] txid: %s", tx.Txid)
-				}
+			//打印汇总交易结果
+			totalSumAmount := decimal.Zero
+			totalCostFees := decimal.Zero
 
-				for _, tx := range retFailed {
-					log.Warn("[Failed] reason:", tx.Reason)
+			for _, tx := range retTx {
+				log.Infof("[Success] txid: %s", tx.Txid)
+				//:计算总的汇总数量，手续费
+
+				fees, _ := decimal.NewFromString(tx.Fees)
+
+				totalCostFees = totalCostFees.Add(fees)
+				txIDs = append(txIDs, tx.Txid)
+
+				//统计汇总总数
+				for i, a := range tx.ToAddress {
+					if a == sumSets.SumAddress {
+						amount, _ := decimal.NewFromString(tx.ToAddressV[i])
+						totalSumAmount = totalSumAmount.Add(amount)
+					}
 				}
 			}
+
+			for _, tx := range retFailed {
+				log.Warn("[Failed] reason:", tx.Reason)
+			}
+
+			//:记录汇总情况
+			totalSumAmount = totalSumAmount.Sub(totalCostFees)
+			summaryTaskLog := openwsdk.SummaryTaskLog{
+				Sid:            sid,
+				WalletID:       account.WalletID,
+				AccountID:      account.AccountID,
+				StartAddrIndex: i,
+				EndAddrIndex:   i + limit,
+				Coin:           coin,
+				SuccessCount:   len(retTx),
+				FailCount:      len(retFailed),
+				TxIDs:          txIDs,
+				TotalSumAmount: totalSumAmount.String(),
+				TotalCostFees:  totalCostFees.String(),
+				CreateTime:     time.Now().Unix(),
+			}
+			err = cli.db.Save(&summaryTaskLog)
+			if err != nil {
+				log.Infof("Save summary task log failed: %s", err.Error())
+			} else {
+				log.Infof("Save summary task log successfully")
+			}
+
 
 		}
 	} else {
@@ -478,4 +524,15 @@ func (cli *CLI) removeSummaryWalletTasks(walletID string, accountID string) {
 			log.Infof("Summary wallet[%s] task has been removed ", walletID)
 		}
 	}
+}
+
+func (cli *CLI)GetSummaryTaskLog(offset, limit int64) ([]*openwsdk.SummaryTaskLog, error) {
+	var summaryTaskLog []*openwsdk.SummaryTaskLog
+	//err := cli.db.All(&summaryTaskLog)
+	err := cli.db.AllByIndex("CreateTime", &summaryTaskLog,
+		storm.Limit(int(limit)), storm.Skip(int(offset)), storm.Reverse())
+	if err != nil {
+		return nil, err
+	}
+	return summaryTaskLog, nil
 }
