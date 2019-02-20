@@ -97,7 +97,7 @@ func (cli *CLI) autoReconnectTransmitNode() error {
 		//断开状态通道
 		disconnected = make(chan struct{}, 1)
 		//重连时的等待时间
-		reconnectWait = 10
+		reconnectWait = 5
 	)
 
 	defer func() {

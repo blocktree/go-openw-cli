@@ -55,6 +55,9 @@ enablessl = false
 # Network request timeout, unit: second
 requesttimeout = 60
 
+# Terminal print log of debug 
+logdebug = false
+
 `
 
 	keyDirName = "key"
@@ -98,6 +101,8 @@ type Config struct {
 	requesttimeout int
 	//本地节点自定义的名字
 	localname string
+	//是否输出LogDebugg日志
+	logdebug bool
 }
 
 //初始化一个配置对象
@@ -118,6 +123,7 @@ func NewConfig(c config.Configer) *Config {
 	conf.enablekeyagreement, _ = c.Bool("enablekeyagreement")
 	conf.enablessl, _ = c.Bool("enablessl")
 	conf.requesttimeout, _ = c.Int("requesttimeout")
+	conf.logdebug, _ = c.Bool("logdebug")
 
 	conf.keydir = filepath.Join(conf.datadir, keyDirName)
 	conf.dbdir = filepath.Join(conf.datadir, dbDirName)

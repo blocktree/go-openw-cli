@@ -132,6 +132,9 @@ enablessl = false
 # Network request timeout, unit: second
 requesttimeout = 60
 
+# Terminal print log of debug 
+logdebug = false
+
 ```
 
 我们提供命令行工具openw-cli，以下功能点作为管理资产的【子命令】，附加以下参数变量。

@@ -163,6 +163,8 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 		selectedSymbol *openwsdk.Symbol
 		retAccount     *openwsdk.Account
 		retAddresses   []*openwsdk.Address
+		err        error
+		retErr     error
 	)
 
 	if len(name) == 0 {
@@ -173,7 +175,7 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 		return nil, nil, fmt.Errorf("wallet password is empty. ")
 	}
 
-	selectedSymbol, err := cli.GetSymbolInfo(symbol)
+	selectedSymbol, err = cli.GetSymbolInfo(symbol)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -201,7 +203,7 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 	}
 
 	//登记钱包的openw-server
-	cli.api.CreateNormalAccount(newaccount, true,
+	err = cli.api.CreateNormalAccount(newaccount, true,
 		func(status uint64, msg string, account *openwsdk.Account, addresses []*openwsdk.Address) {
 			if status == owtp.StatusSuccess {
 				log.Infof("create [%s] account successfully", selectedSymbol.Coin)
@@ -214,8 +216,16 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 				retAddresses = addresses
 			} else {
 				log.Error("create account on server failed, unexpected error:", msg)
+				retErr = fmt.Errorf(msg)
 			}
 		})
+
+	if err != nil {
+		return nil, nil, err
+	}
+	if retErr != nil {
+		return nil, nil, retErr
+	}
 
 	return retAccount, retAddresses, nil
 }
@@ -226,31 +236,51 @@ func (cli *CLI) GetAccountByAccountID(accountID string) (*openwsdk.Account, erro
 	var (
 		getAccount *openwsdk.Account
 		err        error
+		retErr     error
 	)
 
-	cli.api.FindAccountByAccountID(accountID, true,
+	err = cli.api.FindAccountByAccountID(accountID, true,
 		func(status uint64, msg string, account *openwsdk.Account) {
 			if status == owtp.StatusSuccess {
 				getAccount = account
 			} else {
-				err = fmt.Errorf(msg)
+				retErr = fmt.Errorf(msg)
 			}
 		})
+	if err != nil {
+		return nil, err
+	}
+	if retErr != nil {
+		return nil, retErr
+	}
 
-	return getAccount, err
+	return getAccount, nil
 }
 
 //GetAccountsOnServer 从服务器获取账户列表
 func (cli *CLI) GetAccountsOnServer(walletID string) ([]*openwsdk.Account, error) {
 
-	list := make([]*openwsdk.Account, 0)
+	var (
+		list   = make([]*openwsdk.Account, 0)
+		err    error
+		retErr error
+	)
 
-	cli.api.FindAccountByWalletID(walletID, true,
+	err = cli.api.FindAccountByWalletID(walletID, true,
 		func(status uint64, msg string, accounts []*openwsdk.Account) {
 			if status == owtp.StatusSuccess && len(accounts) > 0 {
 				list = append(list, accounts...)
+			} else {
+				retErr = fmt.Errorf(msg)
 			}
 		})
+
+	if err != nil {
+		return nil, err
+	}
+	if retErr != nil {
+		return nil, retErr
+	}
 
 	return list, nil
 }
