@@ -23,8 +23,12 @@ const (
 	maxAddresNum = 2000
 )
 
+func init() {
+	owtp.Debug = true
+}
+
 type CLI struct {
-	mu sync.RWMutex
+	mu               sync.RWMutex
 	config           *Config               //工具配置
 	db               *openwallet.StormDB   //本地数据库
 	api              *openwsdk.APINode     //api
@@ -65,7 +69,7 @@ func NewCLI(c *Config) (*CLI, error) {
 	}
 
 	//配置日志
-	SetupLog(c.logdir, "openwcli.log", false)
+	SetupLog(c.logdir, "openwcli.log", c.logdebug)
 
 	keychain, err := cli.GetKeychain()
 	if keychain != nil {
@@ -86,9 +90,9 @@ func (cli *CLI) setupAPISDK(keychain *Keychain) error {
 			ConnectType:        owtp.HTTP,
 			Host:               cli.config.remoteserver,
 			EnableSignature:    false,
-			EnableKeyAgreement: false,
+			EnableKeyAgreement: cli.config.enablekeyagreement,
 			Cert:               cert,
-			TimeoutSEC:            cli.config.requesttimeout,
+			TimeoutSEC:         cli.config.requesttimeout,
 		}
 
 		apiSDK := openwsdk.NewAPINode(sdkConfig)

@@ -202,7 +202,7 @@ func (cli *CLI) SummaryAccountMainCoin(accountTask *openwsdk.SummaryAccountTask,
 
 	log.Infof("Summary account[%s] Symbol: %s start", account.AccountID, account.Symbol)
 
-	err = cli.summaryAccountProcess(account, key, account.Balance, sumSets, coin)
+	err = cli.summaryAccountProcess(account, accountTask, key, account.Balance, sumSets, coin)
 
 	log.Infof("Summary account[%s] Symbol: %s end", account.AccountID, account.Symbol)
 
@@ -274,7 +274,7 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 
 		log.Infof("Summary account[%s] Symbol: %s, token: %s start", account.AccountID, account.Symbol, token.Token)
 
-		err = cli.summaryAccountProcess(account, key, tokenBalance, sumSets, coin)
+		err = cli.summaryAccountProcess(account, accountTask, key, tokenBalance, sumSets, coin)
 
 		log.Infof("Summary account[%s] Symbol: %s, token: %s end", account.AccountID, account.Symbol, token.Token)
 
@@ -287,7 +287,7 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 }
 
 //summaryAccountProcess 汇总账户过程
-func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore.HDKey, balance string, sumSets openwsdk.SummarySetting, coin openwsdk.Coin) error {
+func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.SummaryAccountTask, key *hdkeystore.HDKey, balance string, sumSets openwsdk.SummarySetting, coin openwsdk.Coin) error {
 
 	const (
 		limit = 200
@@ -319,11 +319,11 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, key *hdkeystore
 
 			log.Infof("Create Summary Transaction in address range [%d...%d]", i, i+limit)
 
-			//TODO:记录汇总批次号
+			//:记录汇总批次号
 			sid := uuid.New().String()
 
 			err = cli.api.CreateSummaryTx(account.AccountID, sumSets.SumAddress, coin,
-				"", sumSets.MinTransfer, sumSets.RetainedBalance,
+				task.FeeRate, sumSets.MinTransfer, sumSets.RetainedBalance,
 				i, limit, sumSets.Confirms, sid, true,
 				func(status uint64, msg string, rawTxs []*openwsdk.RawTransaction) {
 					retRawTxs = rawTxs
