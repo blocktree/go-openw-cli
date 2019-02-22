@@ -23,10 +23,6 @@ const (
 	maxAddresNum = 2000
 )
 
-func init() {
-	owtp.Debug = true
-}
-
 type CLI struct {
 	mu               sync.RWMutex
 	config           *Config               //工具配置
