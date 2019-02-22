@@ -168,7 +168,7 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 	)
 
 	if len(name) == 0 {
-		return nil, nil, fmt.Errorf("wallet name is empty. ")
+		return nil, nil, fmt.Errorf("acount name is empty. ")
 	}
 
 	if len(password) == 0 {

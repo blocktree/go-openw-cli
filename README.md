@@ -70,7 +70,20 @@ $ xgo -h
 ...
 
 ```
+### 编译工具
 
+```shell
+
+# 进入目录
+$ $GOPATH/src/github.com/blocktree/go-openw-cli
+
+# 全部平台版本编译
+$ xgo .
+
+# 或自编译某个系统的版本
+$ xgo --targets=linux/amd64 .
+
+```
 ---
 
 ## openw-cli介绍
