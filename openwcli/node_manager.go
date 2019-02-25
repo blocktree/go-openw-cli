@@ -6,11 +6,11 @@ import (
 )
 
 //GenKeychain 生成新密钥对
-func (cli *CLI) GenKeychain() (*Keychain, error) {
+func GenKeychain() (*Keychain, error) {
 
-	if check := cli.checkConfig(); check != nil {
-		return nil, check
-	}
+	//if check := cli.checkConfig(); check != nil {
+	//	return nil, check
+	//}
 
 	//随机创建证书
 	cert := owtp.NewRandomCertificate()
@@ -20,18 +20,41 @@ func (cli *CLI) GenKeychain() (*Keychain, error) {
 
 	keychain := NewKeychain(cert)
 
+	return keychain, nil
+
+	////保存到数据库
+	//err := cli.db.Save(keychain)
+	//if err != nil {
+	//	return nil, fmt.Errorf("save new keychain failed. unexpected error: %v", err)
+	//}
+	//
+	//err = cli.db.Set(CLIBucket, CurrentKeychainKey, keychain.NodeID)
+	//if err != nil {
+	//	return nil, fmt.Errorf("update current keychain failed. unexpected error: %v", err)
+	//}
+
+	return keychain, nil
+}
+
+//SaveCurrentKeychain 保存新密钥对到本地缓存
+func (cli *CLI) SaveCurrentKeychain(keychain *Keychain) error {
+
+	if check := cli.checkConfig(); check != nil {
+		return check
+	}
+
 	//保存到数据库
 	err := cli.db.Save(keychain)
 	if err != nil {
-		return nil, fmt.Errorf("save new keychain failed. unexpected error: %v", err)
+		return fmt.Errorf("save new keychain failed. unexpected error: %v", err)
 	}
 
 	err = cli.db.Set(CLIBucket, CurrentKeychainKey, keychain.NodeID)
 	if err != nil {
-		return nil, fmt.Errorf("update current keychain failed. unexpected error: %v", err)
+		return fmt.Errorf("update current keychain failed. unexpected error: %v", err)
 	}
 
-	return keychain, nil
+	return nil
 }
 
 //GetKeychain
@@ -50,7 +73,6 @@ func (cli *CLI) GetKeychain() (*Keychain, error) {
 
 	return &keychain, nil
 }
-
 
 //RegisterOnServer 注册节点到openw-server
 func (cli *CLI) RegisterOnServer() error {
