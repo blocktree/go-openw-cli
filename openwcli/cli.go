@@ -111,6 +111,22 @@ func (cli *CLI) checkConfig() error {
 	return nil
 }
 
+
+//GenKeychainFlow 生成新的keychain流程
+func GenKeychainFlow() error {
+
+	//生成keychain
+	keychain, err := GenKeychain()
+	if err != nil {
+		return err
+	}
+
+	//打印密钥对
+	printKeychain(keychain)
+
+	return nil
+}
+
 //RegisterFlow 注册节点流程
 func (cli *CLI) RegisterFlow() error {
 
@@ -133,12 +149,17 @@ func (cli *CLI) RegisterFlow() error {
 
 	if confirm {
 		//生成keychain
-		keychain, err = cli.GenKeychain()
+		keychain, err = GenKeychain()
 		if err != nil {
 			return err
 		}
 
-		log.Info("Create keychain successfully.")
+		err = cli.SaveCurrentKeychain(keychain)
+		if err != nil {
+			return err
+		}
+
+		log.Info("Create new keychain successfully.")
 
 		//打印密钥对
 		printKeychain(keychain)

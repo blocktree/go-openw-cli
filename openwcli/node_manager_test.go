@@ -12,7 +12,7 @@ func TestCLI_GenKeychain(t *testing.T) {
 		return
 	}
 
-	keychain, err := cli.GenKeychain()
+	keychain, err := GenKeychain()
 	if err != nil {
 		log.Error("GenKeychain error:", err)
 		return

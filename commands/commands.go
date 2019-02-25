@@ -10,6 +10,14 @@ var (
 	// 通信节点命令
 	Commands = []cli.Command{
 		{
+			//生成keychain
+			Name:      "genkeychain",
+			Usage:     "Generate new keychain and print it",
+			ArgsUsage: "",
+			Action:    genkeychain,
+			Category:  "OPENW-CLI COMMANDS",
+		},
+		{
 			//登记节点
 			Name:      "noderegister",
 			Usage:     "create new keychain and register node to openw-server",
@@ -419,6 +427,17 @@ func trustserver(c *cli.Context) error {
 			log.Error("unexpected error: ", err)
 			return err
 		}
+	}
+
+	return nil
+}
+
+func genkeychain(c *cli.Context) error {
+
+	err := openwcli.GenKeychainFlow()
+	if err != nil {
+		log.Error("unexpected error: ", err)
+		return err
 	}
 
 	return nil

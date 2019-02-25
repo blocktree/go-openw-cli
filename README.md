@@ -182,6 +182,9 @@ logdebug = false
 
 ```shell
 
+# 临时生成随机的OWTP通信证书，不保存到本地缓存
+$ ./go-openw-cli genkeychain
+
 # 通过-c或-conf设置工具的配置文件路径
 $ ./go-openw-cli -c=./node.ini
 
