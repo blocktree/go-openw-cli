@@ -2,7 +2,7 @@ package openwcli
 
 import (
 	"github.com/astaxie/beego/config"
-	"github.com/blocktree/OpenWallet/common/file"
+	"github.com/blocktree/openwallet/common/file"
 	"path/filepath"
 )
 

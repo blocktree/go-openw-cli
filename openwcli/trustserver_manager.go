@@ -1,9 +1,9 @@
 package openwcli
 
 import (
-	"github.com/blocktree/OpenWallet/log"
-	"github.com/blocktree/OpenWallet/owtp"
-	"github.com/blocktree/OpenWallet/timer"
+	"github.com/blocktree/openwallet/log"
+	"github.com/blocktree/openwallet/owtp"
+	"github.com/blocktree/openwallet/timer"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"time"
 )
