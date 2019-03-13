@@ -62,6 +62,8 @@ logdebug = false
 
 	keyDirName = "key"
 	dbDirName  = "db"
+	exportDirName  = "export"
+	addressDirName  = "address"
 )
 
 //配置
@@ -103,6 +105,10 @@ type Config struct {
 	localname string
 	//是否输出LogDebugg日志
 	logdebug bool
+	//导出路径
+	exportdir string
+	//导出地址路径
+	exportaddressdir string
 }
 
 //初始化一个配置对象
@@ -127,12 +133,15 @@ func NewConfig(c config.Configer) *Config {
 
 	conf.keydir = filepath.Join(conf.datadir, keyDirName)
 	conf.dbdir = filepath.Join(conf.datadir, dbDirName)
+	conf.exportdir = filepath.Join(conf.datadir, exportDirName)
+	conf.exportaddressdir = filepath.Join(conf.exportdir, addressDirName)
 
 	//建立文件夹
 	file.MkdirAll(conf.datadir)
 	file.MkdirAll(conf.logdir)
 	file.MkdirAll(conf.keydir)
 	file.MkdirAll(conf.dbdir)
+	file.MkdirAll(conf.exportaddressdir)
 
 	return conf
 }
