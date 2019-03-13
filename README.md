@@ -177,7 +177,6 @@ logdebug = false
 > 命令输入结构: openw-cli [配置文件] [子命令] [可选参数...]
 > 如：openw-cli -c ./node.ini newwallet -s btc
 
-
 ### 命令示例
 
 ```shell
@@ -196,23 +195,67 @@ $ ./go-openw-cli -c=./node.ini noderegister
 # 查看节点的信息
 $ ./go-openw-cli -c=./node.ini nodeinfo
 
+# 更新区块链资料
+$ ./go-openw-cli -c=./node.ini updateinfo
 
 #### 钱包相关 ####
 
 # 创建钱包
 $ ./go-openw-cli -c=./node.ini newwallet
 
+# Enter wallet's name: MyWallet         //输入钱包名字
+# Enter wallet password:                //输入钱包密码
+# //创建成功后，显示钱包种子文件
+# Wallet create successfully, key path: openw/data/key/NASSUM-W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg.key
+
 # 查看节点本地已创建的钱包
 $ ./go-openw-cli -c=./node.ini listwallet
 
 # 创建钱包资产账户，先选择钱包
-$ ./go-openw-cli newaccount
+$ ./go-openw-cli -c=./node.ini newaccount
+
+# --------  -----------  ---------------------------------------  -------------
+#     No.         Name                                 WalletID       Accounts
+# --------  -----------  ---------------------------------------  -------------
+#       0      MyWallet       W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg              0
+# --------  -----------  ---------------------------------------  -------------
+
+# [Please select a wallet]
+# Enter wallet No.: 0               //输入No.序号，选择本地已有钱包
+# Enter wallet password:            //输入密码，解锁钱包
+# Enter account's name: NASSUM      //输入需要创建资产账户名
+# Enter account's symbol: NAS       //输入需要创建的币种symbol
+# //创建成功，默认显示资产账户ID和默认接收地址
+# create [NAS] account successfully
+# new accountID: 9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8
+# new address: n1EZVYXBx5tQ41L6QRyEhpqV4TpH6NwPrPE
 
 # 查看钱包资产账户，先选择钱包
 $ ./go-openw-cli -c=./node.ini listaccount
 
 # 创建新地址，先选择钱包，再选择资产账户
 $ ./go-openw-cli -c=./node.ini newaddress
+
+# --------  -----------  ---------------------------------------  -------------
+#     No.         Name                                 WalletID       Accounts
+# --------  -----------  ---------------------------------------  -------------
+#       0       NASSUM       W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg              1
+# --------  -----------  ---------------------------------------  -------------
+
+# [Please select a wallet]
+# Enter wallet No.: 0                               //输入No.序号，选择本地已有钱包
+# --------  -----------  -------------------------------------------------  -----------  ------------  
+#     No.         Name                                          AccountID       Symbol       Balance
+# --------  -----------  -------------------------------------------------  -----------  ------------  
+#       0       NASSUM       9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8          NAS             0 
+# --------  -----------  -------------------------------------------------  -----------  ------------  
+
+# [Please select a account]
+# Enter account No.: 0                              //输入No.序号，选择钱包已有的资产账户
+# Enter the number of addresses you want: 100       //输入需要创建地址的数量
+# create [100] addresses successfully
+# //创建地址成功，把新地址导出以下文件路径。
+# addresses has been exported into: openw/data/export/address/[9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8]-20190313163227.txt
 
 # 创建新地址，先选择钱包，再选择资产账户，输入offset和limit查询地址列表
 $ ./go-openw-cli -c=./node.ini listaddress
@@ -223,14 +266,110 @@ $ ./go-openw-cli -c=./node.ini searchaddress
 # 设置汇总，先选择钱包，再选择资产账户
 $ ./go-openw-cli -c=./node.ini setsum
 
+# --------  -----------  ---------------------------------------  -------------
+#     No.         Name                                 WalletID       Accounts
+# --------  -----------  ---------------------------------------  -------------
+#       0      MyWallet       W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg              0
+# --------  -----------  ---------------------------------------  -------------
+
+# [Please select a wallet]
+# Enter wallet No.: 0               //输入No.序号，选择本地已有钱包
+# Enter wallet password:            //输入密码，解锁钱包
+# Enter account's name: NASSUM      //输入需要创建资产账户名
+# Enter account's symbol: NAS       //输入需要创建的币种symbol
+# //创建成功，默认显示资产账户ID和默认接收地址
+# create [NAS] account successfully
+# new accountID: 9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8
+# new address: n1EZVYXBx5tQ41L6QRyEhpqV4TpH6NwPrPE
+
+# 查看钱包资产账户，先选择钱包
+$ ./go-openw-cli -c=./node.ini listaccount
+
+# 创建新地址，先选择钱包，再选择资产账户
+$ ./go-openw-cli -c=./node.ini newaddress
+
+# --------  -----------  ---------------------------------------  -------------
+#     No.         Name                                 WalletID       Accounts
+# --------  -----------  ---------------------------------------  -------------
+#       0       NASSUM       W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg              1
+# --------  -----------  ---------------------------------------  -------------
+
+# [Please select a wallet]
+# Enter wallet No.: 0                               //输入No.序号，选择本地已有钱包
+# --------  -----------  -------------------------------------------------  -----------  ------------  
+#     No.         Name                                          AccountID       Symbol       Balance
+# --------  -----------  -------------------------------------------------  -----------  ------------  
+#       0       NASSUM       9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8          NAS             0 
+# --------  -----------  -------------------------------------------------  -----------  ------------  
+
+# [Please select a account]
+# Enter account No.: 0                              //输入No.序号，选择钱包已有的资产账户
+# Enter account's summary address: n1EZVYXBx5tQ41L6QRyEhpqV4TpH6NwPrPE          //输入钱包汇总转账到的地址
+# Enter account's summary threshold: 2                                          //输入汇总阈值，账户总余额超过此值，执行汇总交易
+# Enter address's minimum transfer amount: 0.01                                 //输入地址最低转账额，地址余额超过此值才发起转账
+# Enter address's retained balance: 0                                           //输入地址保留余额，地址转账时需要剩余部分余额
+# Enter how many confirms can transfer: 1                                       //输入地址未花得到多少确认后才可用于转账交易
+# setup summary info successfully
+
 # 启动汇总定时器
 $ ./go-openw-cli -c=./node.ini startsum
+
+# Enter summary task json file path:            //输入汇总任务json文件，如果为空，则提供选择钱包和资产账户启动汇总
+
+# --------  -----------  ---------------------------------------  -------------
+#     No.         Name                                 WalletID       Accounts
+# --------  -----------  ---------------------------------------  -------------
+#       0       NASSUM       W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg              1
+# --------  -----------  ---------------------------------------  -------------
+# [Please select a wallet]
+# Enter wallet No.: 0                               //输入No.序号，选择本地已有钱包
+# --------  -----------  -------------------------------------------------  -----------  ------------  
+#     No.         Name                                          AccountID       Symbol       Balance
+# --------  -----------  -------------------------------------------------  -----------  ------------  
+#       0       NASSUM       9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8          NAS             0 
+# --------  -----------  -------------------------------------------------  -----------  ------------  
+# [Please select a account]
+# Enter account No.: 0                              //输入No.序号，选择钱包已有的资产账户
+
+# //汇总启动成功，定时执行任务
+# The timer for summary task start now. Execute by every 10 seconds.
+# [Summary Task Start]------2019-03-13 16:43:33
+# Summary account[9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8] Symbol: NAS start
+# Summary account[9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8] Current Balance: 0, below threshold: 2
+# Summary account[9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8] Symbol: NAS end
+# [Summary Task End]------2019-03-13 16:43:34
 
 # 启动汇总定时器，通过文件加载需要汇总的钱包和资产账户
 $ ./go-openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
 
-# 更新区块链资料
-$ ./go-openw-cli -c=./node.ini updateinfo
+```
+
+```json
+
+`汇总样例JSON`
+
+{
+    "wallets": [
+        {
+            "walletID": "1234qwer",       //钱包ID
+            "password": "12345678",       //钱包解锁密码
+            "accounts": [                 //需要汇总的账户列表
+                {
+                    "accountID": "123",   //资产账户ID
+                    "feeRate": "0.0001",  //交易费率，填空为推荐费率
+                    "contracts":[         //汇总代币合约
+                        "all",            //全部合约
+                        "3qoe2ll2=",      //指定的合约ID
+                    ]
+                },
+            ],
+        },
+    ]
+}
+
+```
+
+```shell
 
 # 查询主链列表
 $ ./go-openw-cli -c=./node.ini listsymbol

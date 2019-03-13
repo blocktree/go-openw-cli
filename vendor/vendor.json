@@ -126,7 +126,7 @@
 			"revisionTime": "2019-03-13T06:57:56Z"
 		},
 		{
-			"checksumSHA1": "Z62SCfkRAsVa6TLn7r8WyoMLgjM=",
+			"checksumSHA1": "XBIbCc06kIXa7MinYuZ6vsj0vR8=",
 			"path": "github.com/blocktree/openwallet/log",
 			"revision": "efba284eec5101a7e64329640a3de8f11a323a6a",
 			"revisionTime": "2019-03-13T06:57:56Z"
@@ -333,7 +333,7 @@
 			"revisionTime": "2019-03-13T07:25:35Z"
 		},
 		{
-			"checksumSHA1": "HyvwgEh7Ja47KY376Mah02WDLEc=",
+			"checksumSHA1": "e66DmNWQKgI97tvj4BH7rHYnyJs=",
 			"path": "golang.org/x/sys/unix",
 			"revision": "7138fd3d9dc8335c567ca206f4333fb75eb05d56",
 			"revisionTime": "2018-06-27T13:57:12Z"
