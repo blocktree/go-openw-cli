@@ -12,7 +12,9 @@ import (
 	"github.com/blocktree/OpenWallet/owtp"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/bndr/gotabulate"
+	"path/filepath"
 	"strings"
+	"time"
 )
 
 //CreateWalletOnServer
@@ -163,8 +165,8 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 		selectedSymbol *openwsdk.Symbol
 		retAccount     *openwsdk.Account
 		retAddresses   []*openwsdk.Address
-		err        error
-		retErr     error
+		err            error
+		retErr         error
 	)
 
 	if len(name) == 0 {
@@ -330,17 +332,39 @@ func (cli *CLI) CreateAddressOnServer(walletID, accountID string, count uint64) 
 		return fmt.Errorf("create address count can not 0. ")
 	}
 
-	cli.api.CreateAddress(walletID, accountID, count, true,
-		func(status uint64, msg string, addresses []*openwsdk.Address) {
+	err := cli.api.CreateBatchAddress(walletID, accountID, count, true,
+		func(status uint64, msg string, addresses []string) {
 			if status == owtp.StatusSuccess {
-				//TODO:保存到本地数据库
 				log.Infof("create [%d] addresses successfully", len(addresses))
+				//:保存到本地数据库，导出到文件夹
+				timestamp := time.Now()
+				filename := "["+accountID+"]-" + common.TimeFormat("20060102150405", timestamp) + ".txt"
+				filePath := filepath.Join(cli.config.exportaddressdir, filename)
+				if flag := cli.exportAddressToFile(addresses, filePath); flag {
+					log.Infof("addresses has been exported into: %s", filePath)
+				} else {
+					log.Infof("addresses export failed")
+				}
 			} else {
 				log.Error("create account on server failed, unexpected error:", msg)
 			}
 		})
 
-	return nil
+	return err
+}
+
+//exportAddressToFile 导出地址到文件中
+func (cli *CLI) exportAddressToFile(addresses []string, filePath string) bool {
+
+	var (
+		content string
+	)
+
+	for _, a := range addresses {
+		content = content + a + "\n"
+	}
+
+	return file.WriteFile(filePath, []byte(content), true)
 }
 
 //SearchAddressOnServer

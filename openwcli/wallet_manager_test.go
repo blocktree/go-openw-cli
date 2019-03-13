@@ -80,7 +80,7 @@ func TestCLI_CreateAddressOnServer(t *testing.T) {
 
 	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
 	accountID := "A3Mxhqm65kTgS2ybHLenNrZzZNtLGVobDFYdpc1ge4eK"
-	err := cli.CreateAddressOnServer(walletID, accountID, 20)
+	err := cli.CreateAddressOnServer(walletID, accountID, 1000)
 	if err != nil {
 		log.Error("CreateAddressOnServer error:", err)
 		return

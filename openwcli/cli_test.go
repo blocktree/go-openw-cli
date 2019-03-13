@@ -57,7 +57,7 @@ enablekeyagreement = true
 enablessl = false
 
 # Network request timeout, unit: second
-requesttimeout = 60
+requesttimeout = 120
 
 `
 
