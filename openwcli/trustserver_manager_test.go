@@ -2,7 +2,7 @@ package openwcli
 
 import (
 	"bytes"
-	"github.com/blocktree/OpenWallet/log"
+	"github.com/blocktree/openwallet/log"
 	"io/ioutil"
 	"net"
 	"net/http"

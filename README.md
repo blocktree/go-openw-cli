@@ -29,7 +29,7 @@ go get -u -v github.com/kardianos/govendor
 ```shell
 
 #进入到项目目录
-$ cd $GOPATH/src/github.com/blocktree/OpenWallet
+$ cd $GOPATH/src/github.com/blocktree/openwallet
 
 #初始化vendor目录
 $ govendor init

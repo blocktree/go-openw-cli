@@ -3,8 +3,8 @@ package openwcli
 import (
 	"fmt"
 	"github.com/astaxie/beego/logs"
-	"github.com/blocktree/OpenWallet/common/file"
-	"github.com/blocktree/OpenWallet/log"
+	"github.com/blocktree/openwallet/common/file"
+	"github.com/blocktree/openwallet/log"
 	"path/filepath"
 )
 

@@ -2,7 +2,7 @@ package openwcli
 
 import (
 	"encoding/json"
-	"github.com/blocktree/OpenWallet/log"
+	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/google/uuid"
 	"testing"

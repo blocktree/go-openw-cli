@@ -2,7 +2,7 @@ package openwcli
 
 import (
 	"fmt"
-	"github.com/blocktree/OpenWallet/log"
+	"github.com/blocktree/openwallet/log"
 	"testing"
 )
 

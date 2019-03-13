@@ -1,7 +1,7 @@
 package openwcli
 
 import (
-	"github.com/blocktree/OpenWallet/owtp"
+	"github.com/blocktree/openwallet/owtp"
 )
 
 const (
