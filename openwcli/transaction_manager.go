@@ -355,7 +355,9 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 				signedRawTxs = append(signedRawTxs, rawTx)
 			}
 
-			//continue
+			if len(signedRawTxs) == 0 {
+				continue
+			}
 
 			//	广播交易单
 			err = cli.api.SubmitTrade(signedRawTxs, true,
@@ -369,11 +371,11 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 					retFailed = failedRawTxs
 				})
 			if err != nil {
-				log.Warn("SubmitRawTransaction unexpected error: %v", err)
+				log.Warningf("SubmitRawTransaction unexpected error: %v", err)
 				continue
 			}
 			if createErr != nil {
-				log.Warn("SubmitRawTransaction unexpected error: %v", createErr)
+				log.Warningf("SubmitRawTransaction unexpected error: %v", createErr)
 				continue
 			}
 
