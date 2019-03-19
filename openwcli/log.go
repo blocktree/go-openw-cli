@@ -2,10 +2,11 @@ package openwcli
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/astaxie/beego/logs"
 	"github.com/blocktree/openwallet/common/file"
 	"github.com/blocktree/openwallet/log"
-	"path/filepath"
 )
 
 //SetupLog 配置日志
