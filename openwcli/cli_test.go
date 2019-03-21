@@ -51,7 +51,7 @@ enableexecutesummarytask = true
 enableeditsummarysettings = true
 
 # Enable key agreement on local node communicate with client server
-enablekeyagreement = true
+enablekeyagreement = false
 
 # Enable https or wss
 enablessl = false

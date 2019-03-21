@@ -389,6 +389,12 @@ func (cli *CLI) TransferFlow() error {
 		return err
 	}
 
+	// 等待用户费率
+	feeRate, err := console.InputRealNumber("Enter fee rate: ", true)
+	if err != nil {
+		return err
+	}
+
 	// 等待用户输入密码
 	password, err := console.InputPassword(false, 3)
 	if err != nil {
@@ -398,7 +404,7 @@ func (cli *CLI) TransferFlow() error {
 	//创建新交易单
 	sid := uuid.New().String()
 
-	_, _, err = cli.Transfer(wallet, account, contractAddress, to, amount, sid, "", "", password)
+	_, _, err = cli.Transfer(wallet, account, contractAddress, to, amount, sid, feeRate, "", password)
 	if err != nil {
 		return err
 	}
