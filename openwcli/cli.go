@@ -12,6 +12,7 @@ import (
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/coreos/bbolt"
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -390,10 +391,16 @@ func (cli *CLI) TransferFlow() error {
 	}
 
 	// 等待用户费率
-	feeRate, err := console.InputRealNumber("Enter fee rate: ", true)
+	feeRate, err := console.InputRealNumber("Enter fee rate: ", false)
 	if err != nil {
 		return err
 	}
+
+	feeRateDec, _ := decimal.NewFromString(feeRate)
+	if feeRateDec.LessThan(decimal.Zero) {
+		return fmt.Errorf("fee rate can not be negative")
+	}
+
 
 	// 等待用户输入密码
 	password, err := console.InputPassword(false, 3)
