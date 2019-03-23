@@ -258,35 +258,10 @@ $ ./go-openw-cli -c=./node.ini newaddress
 # addresses has been exported into: openw/data/export/address/[9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8]-20190313163227.txt
 
 # 创建新地址，先选择钱包，再选择资产账户，输入offset和limit查询地址列表
-$ ./go-openw-cli -c=./node.ini listaddress
-
-# 查询地址信息
 $ ./go-openw-cli -c=./node.ini searchaddress
 
 # 设置汇总，先选择钱包，再选择资产账户
 $ ./go-openw-cli -c=./node.ini setsum
-
-# --------  -----------  ---------------------------------------  -------------
-#     No.         Name                                 WalletID       Accounts
-# --------  -----------  ---------------------------------------  -------------
-#       0      MyWallet       W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg              0
-# --------  -----------  ---------------------------------------  -------------
-
-# [Please select a wallet]
-# Enter wallet No.: 0               //输入No.序号，选择本地已有钱包
-# Enter wallet password:            //输入密码，解锁钱包
-# Enter account's name: NASSUM      //输入需要创建资产账户名
-# Enter account's symbol: NAS       //输入需要创建的币种symbol
-# //创建成功，默认显示资产账户ID和默认接收地址
-# create [NAS] account successfully
-# new accountID: 9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8
-# new address: n1EZVYXBx5tQ41L6QRyEhpqV4TpH6NwPrPE
-
-# 查看钱包资产账户，先选择钱包
-$ ./go-openw-cli -c=./node.ini listaccount
-
-# 创建新地址，先选择钱包，再选择资产账户
-$ ./go-openw-cli -c=./node.ini newaddress
 
 # --------  -----------  ---------------------------------------  -------------
 #     No.         Name                                 WalletID       Accounts
@@ -303,13 +278,16 @@ $ ./go-openw-cli -c=./node.ini newaddress
 # --------  -----------  -------------------------------------------------  -----------  ------------  
 
 # [Please select a account]
-# Enter account No.: 0                              //输入No.序号，选择钱包已有的资产账户
+# Enter account No.: 0                                                          //输入No.序号，选择钱包已有的资产账户
 # Enter account's summary address: n1EZVYXBx5tQ41L6QRyEhpqV4TpH6NwPrPE          //输入钱包汇总转账到的地址
 # Enter account's summary threshold: 2                                          //输入汇总阈值，账户总余额超过此值，执行汇总交易
 # Enter address's minimum transfer amount: 0.01                                 //输入地址最低转账额，地址余额超过此值才发起转账
 # Enter address's retained balance: 0                                           //输入地址保留余额，地址转账时需要剩余部分余额
 # Enter how many confirms can transfer: 1                                       //输入地址未花得到多少确认后才可用于转账交易
 # setup summary info successfully
+
+# 查看已有账户的汇总设置信息
+$ ./go-openw-cli -c=./node.ini listsuminfo
 
 # 启动汇总定时器
 $ ./go-openw-cli -c=./node.ini startsum

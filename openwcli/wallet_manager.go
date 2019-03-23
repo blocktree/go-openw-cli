@@ -296,25 +296,58 @@ func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 		for i, w := range list {
 
 			//读取汇总信息
+			sumTips := ""
 			var sum openwsdk.SummarySetting
-			cli.db.One("AccountID", w.AccountID, &sum)
+			err := cli.db.One("AccountID", w.AccountID, &sum)
+			if err != nil {
+				sumTips = "X"
+			} else {
+				sumTips = "√"
+			}
 
 			tableInfo = append(tableInfo, []interface{}{
-				i, w.Alias, w.AccountID, w.Symbol, w.Balance, w.AddressIndex + 1,
-				sum.SumAddress, sum.Threshold, sum.MinTransfer, sum.RetainedBalance, sum.Confirms,
+				i, w.Alias, w.AccountID, w.Symbol, w.Balance, w.AddressIndex + 1, sumTips,
 			})
 		}
 
 		t := gotabulate.Create(tableInfo)
 		// Set Headers
 		t.SetHeaders([]string{"No.", "Name", "AccountID", "Symbol", "Balance", "Addresses",
-			"Summary Address", "Summary Threshold", "Min Transfer", "Retained Balance", "Confirms"})
+			"Setup summary info"})
 
 		//打印信息
 		fmt.Println(t.Render("simple"))
 	} else {
 		fmt.Println("No account was created locally. ")
 	}
+}
+
+
+//printAccountList 打印账户列表
+func (cli *CLI) printAccountSummaryInfo() {
+
+	//读取汇总信息
+	var sum []*openwsdk.SummarySetting
+	err := cli.db.All(&sum)
+	if err != nil {
+		fmt.Println("No account setup summary info. ")
+		return
+	}
+
+	tableInfo := make([][]interface{}, 0)
+
+	for _, s := range sum {
+		tableInfo = append(tableInfo, []interface{}{
+			s.AccountID, s.SumAddress, s.Threshold, s.MinTransfer, s.RetainedBalance, s.Confirms,
+		})
+	}
+
+	t := gotabulate.Create(tableInfo)
+	// Set Headers
+	t.SetHeaders([]string{"AccountID", "Summary Address", "Summary Threshold", "Min Transfer", "Retained Balance", "Confirms"})
+
+	//打印信息
+	fmt.Println(t.Render("simple"))
 }
 
 //CreateAddressOnServer

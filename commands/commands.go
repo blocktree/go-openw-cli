@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/go-openw-cli/openwcli"
+	"github.com/blocktree/openwallet/log"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -39,8 +39,7 @@ var (
 			Usage:    "show all wallet information",
 			Action:   listwallet,
 			Category: "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:    []cli.Flag{},
 		},
 		{
 			//创建钱包
@@ -49,8 +48,7 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    newwallet,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
 		},
 		{
 
@@ -59,8 +57,7 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    newaccount,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
 		},
 		{
 
@@ -69,8 +66,7 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    listaccount,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
 		},
 		{
 
@@ -79,8 +75,7 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    newaddress,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
 		},
 		{
 
@@ -89,8 +84,7 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    searchaddress,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
 		},
 		{
 
@@ -99,8 +93,16 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    transfer,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
+		},
+		{
+
+			Name:      "listsuminfo",
+			Usage:     "show assets account summary info",
+			ArgsUsage: "<symbol>",
+			Action:    listsuminfo,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
 		},
 		{
 
@@ -109,8 +111,7 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    setsum,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
 		},
 		{
 
@@ -130,8 +131,7 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    updateinfo,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
 		},
 		{
 
@@ -140,8 +140,7 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    listsymbol,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
 		},
 		{
 
@@ -150,8 +149,7 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    listtokencontract,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
 		},
 		{
 
@@ -160,8 +158,7 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    listaddress,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
 		},
 		{
 
@@ -170,10 +167,8 @@ var (
 			ArgsUsage: "<symbol>",
 			Action:    trustserver,
 			Category:  "WALLET COMMANDS",
-			Flags: []cli.Flag{
-			},
+			Flags:     []cli.Flag{},
 		},
-
 	}
 )
 
@@ -253,7 +248,6 @@ func listwallet(c *cli.Context) error {
 	return nil
 }
 
-
 //newaccount 创建账户
 func newaccount(c *cli.Context) error {
 
@@ -267,8 +261,6 @@ func newaccount(c *cli.Context) error {
 
 	return nil
 }
-
-
 
 //listaccount 账户列表
 func listaccount(c *cli.Context) error {
@@ -298,7 +290,6 @@ func newaddress(c *cli.Context) error {
 	return nil
 }
 
-
 //searchaddress 查询地址
 func searchaddress(c *cli.Context) error {
 
@@ -313,7 +304,6 @@ func searchaddress(c *cli.Context) error {
 	return nil
 }
 
-
 //transfer 转账交易
 func transfer(c *cli.Context) error {
 
@@ -327,7 +317,6 @@ func transfer(c *cli.Context) error {
 
 	return nil
 }
-
 
 //setsum 设置汇总
 func setsum(c *cli.Context) error {
@@ -359,7 +348,6 @@ func startsum(c *cli.Context) error {
 
 	return nil
 }
-
 
 //updateinfo 更新区块链资料库
 func updateinfo(c *cli.Context) error {
@@ -438,6 +426,19 @@ func genkeychain(c *cli.Context) error {
 	if err != nil {
 		log.Error("unexpected error: ", err)
 		return err
+	}
+
+	return nil
+}
+
+func listsuminfo(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.ListSumInfoFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
 	}
 
 	return nil

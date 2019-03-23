@@ -419,6 +419,12 @@ func (cli *CLI) TransferFlow() error {
 	return nil
 }
 
+//ListSumInfoFlow
+func (cli *CLI) ListSumInfoFlow() error {
+	cli.printAccountSummaryInfo()
+	return nil
+}
+
 //SetSumFlow
 func (cli *CLI) SetSumFlow() error {
 
