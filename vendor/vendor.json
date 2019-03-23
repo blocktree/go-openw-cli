@@ -80,14 +80,14 @@
 		{
 			"checksumSHA1": "cYmSCncgEuZwxYkr8eQqGToU9Vo=",
 			"path": "github.com/blocktree/go-owcdrivers/owkeychain",
-			"revision": "056e71551a8b0df38828c5b08a59b73d2c3b0d8c",
-			"revisionTime": "2019-03-23T01:26:26Z"
+			"revision": "97871ed714bb36b3dfe2dbf8c09b3e4d01e8d48a",
+			"revisionTime": "2019-03-23T07:33:51Z"
 		},
 		{
-			"checksumSHA1": "p1EzYPmgfefJfS/bUMR8p1GWR6w=",
+			"checksumSHA1": "1iJq5zI1/Z9ClGCx9wYpH0BKGpk=",
 			"path": "github.com/blocktree/go-owcdrivers/signatureSet",
-			"revision": "056e71551a8b0df38828c5b08a59b73d2c3b0d8c",
-			"revisionTime": "2019-03-23T01:26:26Z"
+			"revision": "97871ed714bb36b3dfe2dbf8c09b3e4d01e8d48a",
+			"revisionTime": "2019-03-23T07:33:51Z"
 		},
 		{
 			"checksumSHA1": "PADwSuFIdjari0KlsHNj8UE2S6o=",
