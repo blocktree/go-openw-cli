@@ -106,10 +106,10 @@ remoteserver = "www.openwallet.link"
 # API Version
 version = "1.0.0"
 
-# App Key
+# App ID
 appid = "1234qwer"
 
-# App Secret
+# App key
 appkey = "qwer1234"
 
 # Log file path

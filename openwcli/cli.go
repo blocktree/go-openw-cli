@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/asdine/storm"
+	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/console"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
 	"github.com/blocktree/openwallet/owtp"
 	"github.com/blocktree/openwallet/timer"
-	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/coreos/bbolt"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -90,6 +90,7 @@ func (cli *CLI) setupAPISDK(keychain *Keychain) error {
 			EnableKeyAgreement: cli.config.enablekeyagreement,
 			Cert:               cert,
 			TimeoutSEC:         cli.config.requesttimeout,
+			EnableSSL:          cli.config.enablessl,
 		}
 
 		apiSDK := openwsdk.NewAPINode(sdkConfig)
@@ -111,7 +112,6 @@ func (cli *CLI) checkConfig() error {
 	}
 	return nil
 }
-
 
 //GenKeychainFlow 生成新的keychain流程
 func GenKeychainFlow() error {
@@ -400,7 +400,6 @@ func (cli *CLI) TransferFlow() error {
 	if feeRateDec.LessThan(decimal.Zero) {
 		return fmt.Errorf("fee rate can not be negative")
 	}
-
 
 	// 等待用户输入密码
 	password, err := console.InputPassword(false, 3)

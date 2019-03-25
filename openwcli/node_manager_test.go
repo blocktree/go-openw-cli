@@ -26,7 +26,27 @@ func TestCLI_RegisterOnServer(t *testing.T) {
 		return
 	}
 
-	err := cli.RegisterOnServer()
+	//生成keychain
+	keychain, err := GenKeychain()
+	if err != nil {
+		log.Error("RegisterOnServer error:", err)
+		return
+	}
+
+	err = cli.SaveCurrentKeychain(keychain)
+	if err != nil {
+		log.Error("RegisterOnServer error:", err)
+		return
+	}
+
+	//配置APISDK
+	err = cli.setupAPISDK(keychain)
+	if err != nil {
+		log.Error("RegisterOnServer error:", err)
+		return
+	}
+
+	err = cli.RegisterOnServer()
 	if err != nil {
 		log.Error("RegisterOnServer error:", err)
 		return
