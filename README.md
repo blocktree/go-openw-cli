@@ -214,11 +214,6 @@ $ ./go-openw-cli -c=./node.ini listwallet
 # 创建钱包资产账户，先选择钱包
 $ ./go-openw-cli -c=./node.ini newaccount
 
-# --------  -----------  ---------------------------------------  -------------
-#     No.         Name                                 WalletID       Accounts
-# --------  -----------  ---------------------------------------  -------------
-#       0      MyWallet       W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg              0
-# --------  -----------  ---------------------------------------  -------------
 
 # [Please select a wallet]
 # Enter wallet No.: 0               //输入No.序号，选择本地已有钱包
@@ -236,20 +231,9 @@ $ ./go-openw-cli -c=./node.ini listaccount
 # 创建新地址，先选择钱包，再选择资产账户
 $ ./go-openw-cli -c=./node.ini newaddress
 
-# --------  -----------  ---------------------------------------  -------------
-#     No.         Name                                 WalletID       Accounts
-# --------  -----------  ---------------------------------------  -------------
-#       0       NASSUM       W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg              1
-# --------  -----------  ---------------------------------------  -------------
 
 # [Please select a wallet]
 # Enter wallet No.: 0                               //输入No.序号，选择本地已有钱包
-# --------  -----------  -------------------------------------------------  -----------  ------------  
-#     No.         Name                                          AccountID       Symbol       Balance
-# --------  -----------  -------------------------------------------------  -----------  ------------  
-#       0       NASSUM       9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8          NAS             0 
-# --------  -----------  -------------------------------------------------  -----------  ------------  
-
 # [Please select a account]
 # Enter account No.: 0                              //输入No.序号，选择钱包已有的资产账户
 # Enter the number of addresses you want: 100       //输入需要创建地址的数量
@@ -260,23 +244,36 @@ $ ./go-openw-cli -c=./node.ini newaddress
 # 创建新地址，先选择钱包，再选择资产账户，输入offset和limit查询地址列表
 $ ./go-openw-cli -c=./node.ini searchaddress
 
+
+# 选择资产账户，发起转账交易
+$ ./go-openw-cli -c=./node.ini transfer
+
+# [Please select a wallet]                                          //输入No.序号，选择本地已有钱包
+# Enter wallet No.: 0
+# [Please select a account]                                         //输入No.序号，选择钱包已有的资产账户
+# Enter account No.: 0
+# Enter contract address:                                           //如果是代币合约转账，输入合约地址，默认空
+# Enter received address: AR8LWKndC2ztfLoCobZhHEwkQCUZk1yKEsF       //输入转账的目标地址
+# Enter amount to send: 2.8                                         //输入转账数量
+# Enter fee rate:                                                   //输入手续费率，默认空（推荐）
+# Enter wallet password:                                            //输入钱包解锁密码
+# -----------------------------------------------                   //以下为转账日志信息
+# [VSYS  Transfer]
+# From Account: 33yYCwSeBump7V6AFX8r2KFsXqkJ7zxkg36UxyvYgy1o
+# To Address: AR8LWKndC2ztfLoCobZhHEwkQCUZk1yKEsF
+# Send Amount: 2.8
+# Fees: 0.1
+# FeeRate: 10000000
+# -----------------------------------------------
+# send transaction successfully.
+# transaction id: GbB1oQkXQTSDudTEhKwdhyvnUvunnHKngZqGE9Xfa3tn
+
 # 设置汇总，先选择钱包，再选择资产账户
 $ ./go-openw-cli -c=./node.ini setsum
 
-# --------  -----------  ---------------------------------------  -------------
-#     No.         Name                                 WalletID       Accounts
-# --------  -----------  ---------------------------------------  -------------
-#       0       NASSUM       W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg              1
-# --------  -----------  ---------------------------------------  -------------
 
 # [Please select a wallet]
 # Enter wallet No.: 0                               //输入No.序号，选择本地已有钱包
-# --------  -----------  -------------------------------------------------  -----------  ------------  
-#     No.         Name                                          AccountID       Symbol       Balance
-# --------  -----------  -------------------------------------------------  -----------  ------------  
-#       0       NASSUM       9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8          NAS             0 
-# --------  -----------  -------------------------------------------------  -----------  ------------  
-
 # [Please select a account]
 # Enter account No.: 0                                                          //输入No.序号，选择钱包已有的资产账户
 # Enter account's summary address: n1EZVYXBx5tQ41L6QRyEhpqV4TpH6NwPrPE          //输入钱包汇总转账到的地址
@@ -294,18 +291,9 @@ $ ./go-openw-cli -c=./node.ini startsum
 
 # Enter summary task json file path:            //输入汇总任务json文件，如果为空，则提供选择钱包和资产账户启动汇总
 
-# --------  -----------  ---------------------------------------  -------------
-#     No.         Name                                 WalletID       Accounts
-# --------  -----------  ---------------------------------------  -------------
-#       0       NASSUM       W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg              1
-# --------  -----------  ---------------------------------------  -------------
+
 # [Please select a wallet]
 # Enter wallet No.: 0                               //输入No.序号，选择本地已有钱包
-# --------  -----------  -------------------------------------------------  -----------  ------------  
-#     No.         Name                                          AccountID       Symbol       Balance
-# --------  -----------  -------------------------------------------------  -----------  ------------  
-#       0       NASSUM       9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8          NAS             0 
-# --------  -----------  -------------------------------------------------  -----------  ------------  
 # [Please select a account]
 # Enter account No.: 0                              //输入No.序号，选择钱包已有的资产账户
 
