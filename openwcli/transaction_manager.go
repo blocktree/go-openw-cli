@@ -3,11 +3,11 @@ package openwcli
 import (
 	"fmt"
 	"github.com/asdine/storm"
+	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/common"
 	"github.com/blocktree/openwallet/hdkeystore"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/owtp"
-	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	"time"
@@ -344,6 +344,7 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 
 			signedRawTxs := make([]*openwsdk.RawTransaction, 0)
 			txIDs := make([]string, 0)
+			sids := make([]string, 0)
 			for _, rawTx := range retRawTxs {
 				//签名交易
 				err = openwsdk.SignRawTransaction(rawTx, key)
@@ -391,7 +392,7 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 
 				totalCostFees = totalCostFees.Add(fees)
 				txIDs = append(txIDs, tx.Txid)
-
+				sids = append(sids, tx.Sid)
 				//统计汇总总数
 				for i, a := range tx.ToAddress {
 					if a == sumSets.SumAddress {
@@ -417,6 +418,7 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 				SuccessCount:   len(retTx),
 				FailCount:      len(retFailed),
 				TxIDs:          txIDs,
+				Sids:           sids,
 				TotalSumAmount: totalSumAmount.String(),
 				TotalCostFees:  totalCostFees.String(),
 				CreateTime:     time.Now().Unix(),
@@ -427,7 +429,6 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 			} else {
 				log.Infof("Save summary task log successfully")
 			}
-
 
 		}
 	} else {
@@ -528,7 +529,7 @@ func (cli *CLI) removeSummaryWalletTasks(walletID string, accountID string) {
 	}
 }
 
-func (cli *CLI)GetSummaryTaskLog(offset, limit int64) ([]*openwsdk.SummaryTaskLog, error) {
+func (cli *CLI) GetSummaryTaskLog(offset, limit int64) ([]*openwsdk.SummaryTaskLog, error) {
 	var summaryTaskLog []*openwsdk.SummaryTaskLog
 	//err := cli.db.All(&summaryTaskLog)
 	err := cli.db.AllByIndex("CreateTime", &summaryTaskLog,
