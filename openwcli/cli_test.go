@@ -33,7 +33,7 @@ logdir = "./testdata/logs/"
 datadir = "./testdata/data/"
 
 # Wallet Summary Period
-summaryperiod = "10s"
+summaryperiod = "30s"
 
 # The custom name of local node
 localname = "blocktree"
