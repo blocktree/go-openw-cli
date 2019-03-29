@@ -267,6 +267,11 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 	}
 
 	retTx, retFailed, err := cli.Transfer(wallet, account, contractAddress, address, amount, sid, feeRate, memo, password)
+	if err != nil {
+		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		return
+	}
+
 	ctx.Response(map[string]interface{}{
 		"failure": retFailed,
 		"success": retTx,
