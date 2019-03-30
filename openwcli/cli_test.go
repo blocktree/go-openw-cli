@@ -8,7 +8,7 @@ import (
 
 
 func init() {
-	owtp.Debug = false
+	owtp.Debug = true
 }
 
 func getTestOpenwCLI() *CLI {

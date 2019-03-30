@@ -17,9 +17,9 @@ import (
 func (cli *CLI) GetTokenBalance(account *openwsdk.Account, contractID string) string {
 	getBalance := "0"
 	cli.api.GetTokenBalanceByAccount(account.AccountID, contractID, true,
-		func(status uint64, msg string, balance string) {
+		func(status uint64, msg string, balance *openwsdk.TokenBalance) {
 			if status == owtp.StatusSuccess {
-				getBalance = balance
+				getBalance = balance.Balance.Balance
 			}
 		})
 	return getBalance

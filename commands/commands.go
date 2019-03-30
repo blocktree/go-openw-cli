@@ -169,6 +169,15 @@ var (
 			Category:  "WALLET COMMANDS",
 			Flags:     []cli.Flag{},
 		},
+		{
+
+			Name:      "listtokenbalance",
+			Usage:     "show account all token balance",
+			ArgsUsage: "<symbol>",
+			Action:    listtokenbalance,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
 	}
 )
 
@@ -435,6 +444,20 @@ func listsuminfo(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
 		err := cli.ListSumInfoFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+//listtokenbalance
+func listtokenbalance(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.ListTokenBalanceFlow()
 		if err != nil {
 			log.Error("unexpected error: ", err)
 			return err

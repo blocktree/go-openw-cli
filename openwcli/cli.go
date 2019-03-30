@@ -723,3 +723,26 @@ func (cli *CLI) selectAccountStep(walletID string) (*openwsdk.Account, error) {
 	account := accounts[num]
 	return account, nil
 }
+
+//ListTokenBalanceFlow
+func (cli *CLI) ListTokenBalanceFlow() error {
+
+	//:选择钱包
+	wallet, selectErr := cli.selectWalletStep()
+	if selectErr != nil {
+		return selectErr
+	}
+
+	//:选择账户
+	account, selectErr := cli.selectAccountStep(wallet.WalletID)
+	if selectErr != nil {
+		return selectErr
+	}
+
+	list, err := cli.GetAllTokenContractBalance(account.AccountID)
+	if err != nil {
+		return err
+	}
+	cli.printTokenContractBalanceList(list)
+	return nil
+}
