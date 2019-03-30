@@ -4,13 +4,13 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/asdine/storm/q"
+	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/common"
 	"github.com/blocktree/openwallet/common/file"
 	"github.com/blocktree/openwallet/hdkeystore"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
 	"github.com/blocktree/openwallet/owtp"
-	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/bndr/gotabulate"
 	"path/filepath"
 	"strings"
@@ -241,7 +241,7 @@ func (cli *CLI) GetAccountByAccountID(accountID string) (*openwsdk.Account, erro
 		retErr     error
 	)
 
-	err = cli.api.FindAccountByAccountID(accountID, true,
+	err = cli.api.FindAccountByAccountID(accountID, 0, true,
 		func(status uint64, msg string, account *openwsdk.Account) {
 			if status == owtp.StatusSuccess {
 				getAccount = account
@@ -322,7 +322,6 @@ func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 	}
 }
 
-
 //printAccountList 打印账户列表
 func (cli *CLI) printAccountSummaryInfo() {
 
@@ -371,7 +370,7 @@ func (cli *CLI) CreateAddressOnServer(walletID, accountID string, count uint64) 
 				log.Infof("create [%d] addresses successfully", len(addresses))
 				//:保存到本地数据库，导出到文件夹
 				timestamp := time.Now()
-				filename := "["+accountID+"]-" + common.TimeFormat("20060102150405", timestamp) + ".txt"
+				filename := "[" + accountID + "]-" + common.TimeFormat("20060102150405", timestamp) + ".txt"
 				filePath := filepath.Join(cli.config.exportaddressdir, filename)
 				if flag := cli.exportAddressToFile(addresses, filePath); flag {
 					log.Infof("addresses has been exported into: %s", filePath)
@@ -776,4 +775,73 @@ func (cli *CLI) getLocalKeyByWallet(wallet *openwsdk.Wallet, password string) (*
 		return nil, err
 	}
 	return key, nil
+}
+
+//GetAllTokenContractBalance 查询账户合约余额
+func (cli *CLI) GetAllTokenContractBalance(accountID string) ([]*openwsdk.TokenBalance, error) {
+
+	var (
+		getErr      error
+		getBalances []*openwsdk.TokenBalance
+	)
+	err := cli.api.GetAllTokenBalanceByAccount(accountID, true,
+		func(status uint64, msg string, balance []*openwsdk.TokenBalance) {
+			if status == owtp.StatusSuccess {
+				getBalances = balance
+			} else {
+				getErr = fmt.Errorf(msg)
+			}
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	if getErr != nil {
+		return nil, getErr
+	}
+
+	return getBalances, nil
+}
+
+func findTokenContractByID(tokenList []*openwsdk.TokenContract, contractID string) *openwsdk.TokenContract {
+	for _, c := range tokenList {
+		if c.ContractID == contractID {
+			return c
+		}
+	}
+	return nil
+}
+
+//printTokenContractBalanceList 打印账户代币合约余额列表
+func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.TokenBalance) {
+
+	if list != nil && len(list) > 0 {
+		tableInfo := make([][]interface{}, 0)
+
+		getTokenContracts, err := cli.GetTokenContractList()
+		if err != nil {
+			return
+		}
+
+		for _, w := range list {
+
+			token := findTokenContractByID(getTokenContracts, w.ContractID)
+			if token == nil {
+				continue
+			}
+
+			tableInfo = append(tableInfo, []interface{}{
+				w.ContractID, token.Symbol, token.Name, w.Token, token.Address, token.Protocol, w.Balance.Balance,
+			})
+		}
+
+		t := gotabulate.Create(tableInfo)
+		// Set Headers
+		t.SetHeaders([]string{"ContractID", "Symbol", "Name", "Token", "Address", "Protocol", "Balance"})
+
+		//打印信息
+		fmt.Println(t.Render("simple"))
+	} else {
+		fmt.Println("No TokenContract. ")
+	}
 }
