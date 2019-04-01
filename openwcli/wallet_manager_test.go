@@ -216,3 +216,17 @@ func TestCLI_SetSummaryInfo(t *testing.T) {
 	}
 	fmt.Printf("SummaryInfo: %+v\n", sumSets)
 }
+
+func TestCLI_GetAllTokenContractBalance(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+	accountID := "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF"
+	list, err := cli.GetAllTokenContractBalance(accountID)
+	if err != nil {
+		log.Error("GetAllTokenContractBalance error:", err)
+		return
+	}
+	cli.printTokenContractBalanceList(list, "TRX")
+}

@@ -225,7 +225,12 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 		return nil
 	}
 
-	tokens, err := cli.GetTokenContractList("Symbol", account.Symbol)
+	//tokens, err := cli.GetTokenContractList("Symbol", account.Symbol)
+	//if err != nil {
+	//	return err
+	//}
+
+	tokenBalances, err := cli.GetAllTokenContractBalance(account.AccountID)
 	if err != nil {
 		return err
 	}
@@ -251,7 +256,7 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 		return err
 	}
 
-	for _, token := range tokens {
+	for _, token := range tokenBalances {
 
 		//找不到已选合约跳到下一个
 		if !findSelectedTokensFunc(token.Address) {

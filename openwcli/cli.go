@@ -516,9 +516,10 @@ func (cli *CLI) StartSumFlow(file string) error {
 	if err == nil {
 
 		err = json.Unmarshal(taskJSON, &summaryTask)
-		if err == nil {
-			manual = false
+		if err != nil {
+			return err
 		}
+		manual = false
 	}
 
 	if manual {
@@ -743,6 +744,6 @@ func (cli *CLI) ListTokenBalanceFlow() error {
 	if err != nil {
 		return err
 	}
-	cli.printTokenContractBalanceList(list)
+	cli.printTokenContractBalanceList(list, account.Symbol)
 	return nil
 }

@@ -343,6 +343,9 @@ $ ./go-openw-cli -c=./node.ini listsymbol
 # 查询主链下的合约列表
 $ ./go-openw-cli -c=./node.ini listtokencontract
 
+# 选择钱包及账户，查看账户下拥有的代币余额
+$ ./go-openw-cli -c=./node.ini listtokenbalance
+
 # 启动后台托管钱包服务
 $ ./go-openw-cli -c=./node.ini trustserver
 
