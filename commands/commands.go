@@ -347,7 +347,6 @@ func startsum(c *cli.Context) error {
 	if cli := getCLI(c); cli != nil {
 
 		file := c.String("file")
-
 		err := cli.StartSumFlow(file)
 		if err != nil {
 			log.Error("unexpected error: ", err)

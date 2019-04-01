@@ -813,12 +813,12 @@ func findTokenContractByID(tokenList []*openwsdk.TokenContract, contractID strin
 }
 
 //printTokenContractBalanceList 打印账户代币合约余额列表
-func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.TokenBalance) {
+func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.TokenBalance, symbol string) {
 
 	if list != nil && len(list) > 0 {
 		tableInfo := make([][]interface{}, 0)
 
-		getTokenContracts, err := cli.GetTokenContractList()
+		getTokenContracts, err := cli.GetTokenContractList("Symbol", strings.ToUpper(symbol))
 		if err != nil {
 			return
 		}
