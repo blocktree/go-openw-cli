@@ -477,6 +477,8 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 				log.Errorf("Summary account[%s] summary address is empty!", account.AccountID)
 				return err
 			}
+
+			account.SummarySetting = &sumSets
 		}
 	}
 	return nil
