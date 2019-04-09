@@ -10,7 +10,7 @@ import (
 	"github.com/blocktree/openwallet/openwallet"
 	"github.com/blocktree/openwallet/owtp"
 	"github.com/blocktree/openwallet/timer"
-	"github.com/coreos/bbolt"
+	bolt "go.etcd.io/bbolt"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	"io/ioutil"

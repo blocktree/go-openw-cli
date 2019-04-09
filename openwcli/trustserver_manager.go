@@ -306,7 +306,7 @@ func (cli *CLI) setSummaryInfoViaTrustNode(ctx *owtp.Context) {
 func (cli *CLI) findSummaryInfoByWalletIDViaTrustNode(ctx *owtp.Context) {
 
 	var (
-		err     error
+		//err     error
 		sumSets []*openwsdk.SummarySetting
 	)
 
@@ -319,11 +319,11 @@ func (cli *CLI) findSummaryInfoByWalletIDViaTrustNode(ctx *owtp.Context) {
 	walletID := ctx.Params().Get("walletID").String()
 
 	//读取汇总配置
-	err = cli.db.Find("WalletID", walletID, &sumSets)
-	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, "can not find summary info")
-		return
-	}
+	cli.db.Find("WalletID", walletID, &sumSets)
+	//if err != nil {
+	//	ctx.Response(nil, owtp.ErrCustomError, "can not find summary info")
+	//	return
+	//}
 
 	ctx.Response(sumSets, owtp.StatusSuccess, "success")
 }
@@ -483,10 +483,10 @@ func (cli *CLI) getCurrentSummaryTaskViaTrustNode(ctx *owtp.Context) {
 		return
 	}
 
-	if cli.summaryTaskTimer == nil || !cli.summaryTaskTimer.Running() {
-		ctx.Response(nil, owtp.ErrCustomError, "summary task timer is not start")
-		return
-	}
+	//if cli.summaryTaskTimer == nil || !cli.summaryTaskTimer.Running() {
+	//	ctx.Response(nil, owtp.ErrCustomError, "summary task timer is not start")
+	//	return
+	//}
 
 	appID := ctx.Params().Get("appID").String()
 
