@@ -19,10 +19,16 @@ github.com/blocktree/go-openw-sdk v1.1.0 h1:6xYAWPM/la7wyDizdoYfYSfr/mwsioaW4JhN
 github.com/blocktree/go-openw-sdk v1.1.0/go.mod h1:NmxL9bLRUuzv6Mh9D3XqHXwqJhHXU3xJdNXxRamz76M=
 github.com/blocktree/go-owcdrivers v0.0.0-20190408033658-f85da0fa2917 h1:m7dnwpeFKk5ZwJL/7DEVvtbvrnMMjlJXSsuj+rhlCs8=
 github.com/blocktree/go-owcdrivers v0.0.0-20190408033658-f85da0fa2917/go.mod h1:AzbIxzzRcSszV/XwOiu83QqKuGTuWyCdCrVfGNt2bk8=
+github.com/blocktree/go-owcdrivers v1.0.0 h1:dMxbi+In7On3fq/2cfaO+IdKY35l++4cPFe6jcdJanM=
+github.com/blocktree/go-owcdrivers v1.0.0/go.mod h1:AzbIxzzRcSszV/XwOiu83QqKuGTuWyCdCrVfGNt2bk8=
 github.com/blocktree/go-owcrypt v0.0.0-20190409023833-5afac4a737d3 h1:hfw7iAeaoyljNBx8foUpEWOybUGRJ9g4fwe/OOyRET0=
 github.com/blocktree/go-owcrypt v0.0.0-20190409023833-5afac4a737d3/go.mod h1:5FCinL/4XVEqbmAFTOUgfMJVNJEw6WzVy624qsxzZC8=
+github.com/blocktree/go-owcrypt v1.0.0 h1:u3B59ZjmZ6vB8NrIicUvKKiiDY2oeJCInWsEq1swwSY=
+github.com/blocktree/go-owcrypt v1.0.0/go.mod h1:5FCinL/4XVEqbmAFTOUgfMJVNJEw6WzVy624qsxzZC8=
 github.com/blocktree/openwallet v1.2.0 h1:gJZL1K1o7xF2hJsJDIqjyePbcI2weuEZi8TYV3MKYPg=
 github.com/blocktree/openwallet v1.2.0/go.mod h1:5I+SjVPL1tg2RqsxCJrCLQ3O6rykVbk47tev+jedG70=
+github.com/blocktree/openwallet v1.2.1 h1:t+AsfEZvBGxkhUYZWcOsuAoeFdNxSMJ9I1VOPqplPGM=
+github.com/blocktree/openwallet v1.2.1/go.mod h1:7IxhXsLl0WOg4cz8EP/HCU6LBkal2jN1vdH4dNzHOzw=
 github.com/bndr/gotabulate v1.1.2 h1:yC9izuZEphojb9r+KYL4W9IJKO/ceIO8HDwxMA24U4c=
 github.com/bndr/gotabulate v1.1.2/go.mod h1:0+8yUgaPTtLRTjf49E8oju7ojpU11YmXyvq1LbPAb3U=
 github.com/bradfitz/gomemcache v0.0.0-20180710155616-bc664df96737/go.mod h1:PmM6Mmwb0LSuEubjR8N7PtNe1KxZLtOUHtbeikc5h60=
