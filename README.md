@@ -10,38 +10,20 @@
 The requirements to build OpenWallet are:
 
 - Golang version 1.10 or later
-- xgo (Go CGO cross compiler)
 - Properly configured Go language environment
 - Golang supported operating system
 
-## 源码编译跨平台工具
+## 源码工具
 
-### 安装xgo（支持跨平台编译C代码）
-
-[官方github](https://github.com/karalabe/xgo)
-
-xgo的使用依赖docker。并且把要跨平台编译的项目文件加入到File sharing。
 
 ```shell
 
-$ go get github.com/karalabe/xgo
-...
-$ xgo -h
-...
+# 如果不适用gomod，需要放在进入$GOPATH/src/github.com/blocktree目录下。
+$ cd $GOPATH/src/github.com/blocktree/go-openw-cli
 
-```
-### 编译工具
+# 编译工具
+$ go build
 
-```shell
-
-# 进入目录
-$ $GOPATH/src/github.com/blocktree/go-openw-cli
-
-# 全部平台版本编译
-$ xgo .
-
-# 或自编译某个系统的版本
-$ xgo --targets=linux/amd64 .
 
 ```
 ---
@@ -61,7 +43,7 @@ openw-cli是一款命令行工具，通过调用openw-server钱包服务API实�
 ```ini
 
 # Remote Server
-remoteserver = "www.openwallet.link"
+remoteserver = "api.openwallet.cn"
 
 # API Version
 version = "1.0.0"
