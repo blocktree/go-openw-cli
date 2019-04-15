@@ -33,6 +33,12 @@ github.com/blocktree/openwallet v1.2.0 h1:gJZL1K1o7xF2hJsJDIqjyePbcI2weuEZi8TYV3
 github.com/blocktree/openwallet v1.2.0/go.mod h1:5I+SjVPL1tg2RqsxCJrCLQ3O6rykVbk47tev+jedG70=
 github.com/blocktree/openwallet v1.2.1 h1:t+AsfEZvBGxkhUYZWcOsuAoeFdNxSMJ9I1VOPqplPGM=
 github.com/blocktree/openwallet v1.2.1/go.mod h1:7IxhXsLl0WOg4cz8EP/HCU6LBkal2jN1vdH4dNzHOzw=
+github.com/blocktree/openwallet v1.3.1 h1:cPUbQEga2RwF2fIXPKBzF0Bv60bxY06QlKZbrMV/cpM=
+github.com/blocktree/openwallet v1.3.1/go.mod h1:wVvKtOBgi2MIviiGyeX2uedTo53X7HjtMzfps5G3BWg=
+github.com/blocktree/openwallet v1.3.2 h1:rwF5C5SCxcZt0olgXLHdC2F9ZFdQh0GgXYMHsecrH3c=
+github.com/blocktree/openwallet v1.3.2/go.mod h1:wVvKtOBgi2MIviiGyeX2uedTo53X7HjtMzfps5G3BWg=
+github.com/blocktree/openwallet v1.3.3 h1:4oL01ZmSjhmjx6Eos98QuXCe4hXgieQN1vIql4nx3MM=
+github.com/blocktree/openwallet v1.3.3/go.mod h1:wVvKtOBgi2MIviiGyeX2uedTo53X7HjtMzfps5G3BWg=
 github.com/bndr/gotabulate v1.1.2 h1:yC9izuZEphojb9r+KYL4W9IJKO/ceIO8HDwxMA24U4c=
 github.com/bndr/gotabulate v1.1.2/go.mod h1:0+8yUgaPTtLRTjf49E8oju7ojpU11YmXyvq1LbPAb3U=
 github.com/bradfitz/gomemcache v0.0.0-20180710155616-bc664df96737/go.mod h1:PmM6Mmwb0LSuEubjR8N7PtNe1KxZLtOUHtbeikc5h60=

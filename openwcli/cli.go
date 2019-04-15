@@ -7,12 +7,11 @@ import (
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/console"
 	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openwallet"
 	"github.com/blocktree/openwallet/owtp"
 	"github.com/blocktree/openwallet/timer"
-	bolt "go.etcd.io/bbolt"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
+	bolt "go.etcd.io/bbolt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -27,7 +26,7 @@ const (
 type CLI struct {
 	mu               sync.RWMutex
 	config           *Config               //工具配置
-	db               *openwallet.StormDB   //本地数据库
+	db               *StormDB   //本地数据库
 	api              *openwsdk.APINode     //api
 	summaryTask      *openwsdk.SummaryTask //汇总任务
 	summaryTaskTimer *timer.TaskTimer      //汇总任务定时器
@@ -52,7 +51,7 @@ func NewCLI(c *Config) (*CLI, error) {
 	dbfile := filepath.Join(c.dbdir, c.appid+".db")
 
 	//加载数据
-	db, err := openwallet.OpenStormDB(
+	db, err := OpenStormDB(
 		dbfile,
 		storm.BoltOptions(0600, &bolt.Options{Timeout: 5 * time.Second}),
 	)

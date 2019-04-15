@@ -167,7 +167,7 @@ func (cli *CLI) getTrustNodeInfo(ctx *owtp.Context) {
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
@@ -184,7 +184,7 @@ func (cli *CLI) createWalletViaTrustNode(ctx *owtp.Context) {
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
@@ -204,7 +204,7 @@ func (cli *CLI) createAccountViaTrustNode(ctx *owtp.Context) {
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
@@ -234,14 +234,14 @@ func (cli *CLI) createAccountViaTrustNode(ctx *owtp.Context) {
 func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enablerequesttransfer {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [transfer] ability")
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [transfer] ability")
 		return
 	}
 
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
@@ -281,14 +281,14 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 func (cli *CLI) setSummaryInfoViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enableeditsummarysettings {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [edit summary settings] ability")
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [edit summary settings] ability")
 		return
 	}
 
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
@@ -313,7 +313,7 @@ func (cli *CLI) findSummaryInfoByWalletIDViaTrustNode(ctx *owtp.Context) {
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 	walletID := ctx.Params().Get("walletID").String()
@@ -331,19 +331,19 @@ func (cli *CLI) findSummaryInfoByWalletIDViaTrustNode(ctx *owtp.Context) {
 func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enableexecutesummarytask {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [execute summary task] ability")
 		return
 	}
 
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
 	if cli.summaryTaskTimer != nil && cli.summaryTaskTimer.Running() {
-		ctx.Response(nil, owtp.ErrCustomError, "summary task timer is running")
+		ctx.Response(nil, ErrorSummaryTaskTimerIsRunning, "summary task timer is running")
 		return
 	}
 
@@ -376,14 +376,14 @@ func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 func (cli *CLI) stopSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enableexecutesummarytask {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [execute summary task] ability")
 		return
 	}
 
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
@@ -402,7 +402,7 @@ func (cli *CLI) updateInfoViaTrustNode(ctx *owtp.Context) {
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
@@ -418,19 +418,19 @@ func (cli *CLI) updateInfoViaTrustNode(ctx *owtp.Context) {
 func (cli *CLI) appendSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enableexecutesummarytask {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [execute summary task] ability")
 		return
 	}
 
 	if cli.summaryTaskTimer == nil || !cli.summaryTaskTimer.Running() {
-		ctx.Response(nil, owtp.ErrCustomError, "summary task timer is not start")
+		ctx.Response(nil, ErrorSummaryTaskTimerIsNotStart, "summary task timer is not start")
 		return
 	}
 
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
@@ -452,12 +452,12 @@ func (cli *CLI) appendSummaryTaskViaTrustNode(ctx *owtp.Context) {
 func (cli *CLI) removeSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enableexecutesummarytask {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [execute summary task] ability")
 		return
 	}
 
 	if cli.summaryTaskTimer == nil || !cli.summaryTaskTimer.Running() {
-		ctx.Response(nil, owtp.ErrCustomError, "summary task timer is not start")
+		ctx.Response(nil, ErrorSummaryTaskTimerIsNotStart, "summary task timer is not start")
 		return
 	}
 
@@ -466,7 +466,7 @@ func (cli *CLI) removeSummaryTaskViaTrustNode(ctx *owtp.Context) {
 	accountID := ctx.Params().Get("accountID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
@@ -479,19 +479,19 @@ func (cli *CLI) removeSummaryTaskViaTrustNode(ctx *owtp.Context) {
 func (cli *CLI) getCurrentSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enableexecutesummarytask {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [execute summary task] ability")
 		return
 	}
 
 	//if cli.summaryTaskTimer == nil || !cli.summaryTaskTimer.Running() {
-	//	ctx.Response(nil, owtp.ErrCustomError, "summary task timer is not start")
+	//	ctx.Response(nil, ErrorSummaryTaskTimerIsNotStart, "summary task timer is not start")
 	//	return
 	//}
 
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
@@ -503,7 +503,7 @@ func (cli *CLI) getCurrentSummaryTaskViaTrustNode(ctx *owtp.Context) {
 func (cli *CLI) getSummaryTaskLogViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enableexecutesummarytask {
-		ctx.Response(nil, owtp.ErrCustomError, "the node has disabled [execute summary task] ability")
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [execute summary task] ability")
 		return
 	}
 
@@ -512,7 +512,7 @@ func (cli *CLI) getSummaryTaskLogViaTrustNode(ctx *owtp.Context) {
 	limit := ctx.Params().Get("limit").Int()
 
 	if appID != cli.config.appid {
-		ctx.Response(nil, owtp.ErrCustomError, "appID is incorrect")
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
 		return
 	}
 
