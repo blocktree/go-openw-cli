@@ -34,7 +34,7 @@ $ xgo -h
 $ make clean build
 
 # 跨平台编译wmd，更多可选平台可修改Makefile的$TARGETS变量
-$ make clean wmd
+$ make clean openw-cli
 
 
 ```
