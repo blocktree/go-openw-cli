@@ -328,7 +328,7 @@ func (cli *CLI) printAccountSummaryInfo() {
 	//读取汇总信息
 	var sum []*openwsdk.SummarySetting
 	err := cli.db.All(&sum)
-	if err != nil {
+	if err != nil || len(sum) == 0 {
 		fmt.Println("No account setup summary info. ")
 		return
 	}
