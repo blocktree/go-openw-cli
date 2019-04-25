@@ -9,20 +9,32 @@
 
 The requirements to build OpenWallet are:
 
-- Golang version 1.10 or later
+- Golang version 1.11 or later
 - Properly configured Go language environment
 - Golang supported operating system
 
 ## 源码工具
 
+### 安装xgo（支持跨平台编译C代码）
+
+[官方github（目前还不支持go module）](https://github.com/karalabe/xgo)
+[支持go module的xgo fork](https://github.com/gythialy/xgo)
+
+xgo的使用依赖docker。并且把要跨平台编译的项目文件加入到File sharing。
 
 ```shell
 
-# 如果不适用gomod，需要放在进入$GOPATH/src/github.com/blocktree目录下。
-$ cd $GOPATH/src/github.com/blocktree/go-openw-cli
+# 官方的目前还不支持go module编译，所以我们用了别人改造后能够给支持的fork版
+$ go get -u github.com/gythialy/xgo
+...
+$ xgo -h
+...
 
-# 编译工具
-$ go build
+# 本地系统编译
+$ make clean build
+
+# 跨平台编译wmd，更多可选平台可修改Makefile的$TARGETS变量
+$ make clean wmd
 
 
 ```
@@ -256,19 +268,38 @@ $ ./go-openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
 
 `汇总样例JSON`
 
+> 汇总任务配置，可重新制定每个账户的汇总信息（除汇总地址外，安全考虑）
+
 {
     "wallets": [
         {
-            "walletID": "1234qwer",       //钱包ID
-            "password": "12345678",       //钱包解锁密码
-            "accounts": [                 //需要汇总的账户列表
+            "walletID": "1234qwer", //钱包ID
+            "password": "12345678", //钱包解锁密码
+            "accounts": [ //需要汇总的账户列表
                 {
-                    "accountID": "123",   //资产账户ID
-                    "feeRate": "0.0001",  //交易费率，填空为推荐费率
-                    "contracts":[         //汇总代币合约
-                        "all",            //全部合约
-                        "3qoe2ll2=",      //指定的合约ID
-                    ]
+                    "accountID": "123",               //资产账户ID
+                    "threshold": "1000",              //账户总阈值
+                    "minTransfer": "1000",            //地址最低转账额
+                    "retainedBalance": "0",           //地址保留余额
+                    "confirms": 1,                    //未花大于该确认次数汇总中
+                    "feeRate": "0.0001",              //交易费率，填空为推荐费率
+                    "onlyContracts": false,           //只汇总代币, 为true时，contracts数组必须有值
+                    "contracts": {                            //汇总代币合约
+                        "all": {                              //全部合约
+                            "threshold": "1000",              //账户总阈值
+                            "minTransfer": "1000",            //地址最低转账额
+                            "retainedBalance": "0",           //地址保留余额
+                        },         
+                        "0x1234dcba": {                        //指定的合约地址或编号
+                            "threshold": "1000",      
+                            "minTransfer": "1000",
+                            "retainedBalance": "0",
+                        },
+                    },
+                    "feesSupportAccount": {         //主币余额不足时，可选择一个账户提供手续费
+                        "accountID": "12323",       //同钱包下的账户ID
+                        "lowBalanceWarning": "0.1"  //手续费账户余额过低警告阈值
+                    },
                 },
             ],
         },

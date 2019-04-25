@@ -543,7 +543,7 @@ func (cli *CLI) StartSumFlow(file string) error {
 
 		summaryAccountTask := &openwsdk.SummaryAccountTask{
 			AccountID: account.AccountID,
-			Contracts: []string{},
+			Contracts: map[string]*openwsdk.SummaryContractTask{},
 		}
 
 		summaryWalletTask := &openwsdk.SummaryWalletTask{
@@ -560,6 +560,11 @@ func (cli *CLI) StartSumFlow(file string) error {
 				summaryWalletTask,
 			},
 		}
+	}
+
+	err = cli.checkSummaryTaskIsHaveSettings(&summaryTask)
+	if err != nil {
+		return err
 	}
 
 	cli.mu.Lock()

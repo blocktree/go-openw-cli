@@ -10,21 +10,8 @@ import (
 )
 
 const (
-	VersionMajor = 1           // Major version component of the current release
-	VersionMinor = 2           // Minor version component of the current release
-	VersionPatch = 3           // Patch version component of the current release
-	VersionMeta  = "stable"    // Version metadata to append to the version string
 	Identifier   = "openw-cli" // Client identifier to advertise over the network
 )
-
-// Version holds the textual version string.
-var Version = func() string {
-	v := fmt.Sprintf("%d.%d.%d", VersionMajor, VersionMinor, VersionPatch)
-	if VersionMeta != "" {
-		v += "-" + VersionMeta
-	}
-	return v
-}()
 
 var (
 	CommandHelpTemplate = `{{.cmd.Name}}{{if .cmd.Subcommands}} command{{end}}{{if .cmd.Flags}} [command options]{{end}} [arguments...]
@@ -39,9 +26,8 @@ SUBCOMMANDS:
 {{end}}{{end}}`
 
 	// Git SHA1 commit hash of the release (set via linker flags)
-	gitCommit = ""
 	// The app that holds all commands and flags.
-	app = NewApp(gitCommit, "the Wallet Manager Driver command line interface")
+	app = NewApp(commands.GitRev, "the Wallet Manager Driver command line interface")
 )
 
 func init() {
@@ -68,9 +54,9 @@ func NewApp(gitCommit, usage string) *cli.App {
 	app.Author = ""
 	//app.Authors = nil
 	app.Email = ""
-	app.Version = Version
-	if len(gitCommit) >= 8 {
-		app.Version += "-" + gitCommit[:8]
+	app.Version = commands.Version
+	if len(gitCommit) >= 0 {
+		app.Version += "-" + gitCommit
 	}
 	app.Usage = usage
 	return app
@@ -82,7 +68,7 @@ func init() {
 	app.Action = openwcli
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2018 The OpenWallet Authors"
-	app.Version = Version
+	app.Version = commands.Version
 	app.Commands = commands.Commands
 	app.Flags = []cli.Flag{
 		commands.AppNameFlag,

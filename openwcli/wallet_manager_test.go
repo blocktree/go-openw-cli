@@ -79,7 +79,7 @@ func TestCLI_CreateAddressOnServer(t *testing.T) {
 	}
 
 	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
-	accountID := "A3Mxhqm65kTgS2ybHLenNrZzZNtLGVobDFYdpc1ge4eK"
+	accountID := "7ww2Gpfy8pN6HTngbMFBTEMAaVRGEpkmsiNkgAgqGQGf"
 	err := cli.CreateAddressOnServer(walletID, accountID, 1000)
 	if err != nil {
 		log.Error("CreateAddressOnServer error:", err)
@@ -96,7 +96,7 @@ func TestCLI_GetAddressesOnServer(t *testing.T) {
 	}
 
 	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
-	accountID := "3i26MQmtuWVVnw8GnRCVopG3pi8MaYU6RqWVV2E1hwJx"
+	accountID := "7ww2Gpfy8pN6HTngbMFBTEMAaVRGEpkmsiNkgAgqGQGf"
 
 	addresses, err := cli.GetAddressesOnServer(walletID, accountID, 0, 50)
 	if err != nil {
@@ -229,4 +229,12 @@ func TestCLI_GetAllTokenContractBalance(t *testing.T) {
 		return
 	}
 	cli.printTokenContractBalanceList(list, "TRX")
+}
+
+func TestCLI_printAccountSummaryInfo(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+	cli.printAccountSummaryInfo()
 }

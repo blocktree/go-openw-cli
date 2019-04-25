@@ -32,6 +32,8 @@ github.com/blocktree/ethereum-adapter v1.1.0/go.mod h1:rzB4pd6WnqSsuaaA0bYpl1cCy
 github.com/blocktree/go-openw-sdk v1.1.2/go.mod h1:bHm06oGKV00g9NXtXxSukhVI322rQSnGXM6O+zsgTHg=
 github.com/blocktree/go-openw-sdk v1.1.3 h1:/71wYkN7/2HcjWaXEU935OcW5hqyCRaGKcG4bzkOfg4=
 github.com/blocktree/go-openw-sdk v1.1.3/go.mod h1:3XxrY1ez4Qsr7j7CxSWhrsDrQPiWOFHJajyUjI7VtFU=
+github.com/blocktree/go-openw-sdk v1.1.4 h1:/2PFU1AubPhDtr77wXVn3pS/QzuvoWZ4Q+9upk7prfo=
+github.com/blocktree/go-openw-sdk v1.1.4/go.mod h1:3XxrY1ez4Qsr7j7CxSWhrsDrQPiWOFHJajyUjI7VtFU=
 github.com/blocktree/go-owcdrivers v1.0.0 h1:dMxbi+In7On3fq/2cfaO+IdKY35l++4cPFe6jcdJanM=
 github.com/blocktree/go-owcdrivers v1.0.0/go.mod h1:AzbIxzzRcSszV/XwOiu83QqKuGTuWyCdCrVfGNt2bk8=
 github.com/blocktree/go-owcdrivers v1.0.2/go.mod h1:AzbIxzzRcSszV/XwOiu83QqKuGTuWyCdCrVfGNt2bk8=

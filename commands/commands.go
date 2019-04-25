@@ -9,6 +9,7 @@ import (
 var (
 	// 通信节点命令
 	Commands = []cli.Command{
+		CmdVersion,
 		{
 			//生成keychain
 			Name:      "genkeychain",

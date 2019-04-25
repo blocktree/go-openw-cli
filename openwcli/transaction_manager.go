@@ -154,10 +154,12 @@ func (cli *CLI) SummaryTask() {
 				continue
 			}
 
-			//汇总账户主币
-			err = cli.SummaryAccountMainCoin(accountTask, account, key)
-			if err != nil {
-				log.Errorf("Summary wallet[%s] account[%s] main coin unexpected error: %v", task.WalletID, account.AccountID, err)
+			if !accountTask.OnlyContracts {
+				//汇总账户主币
+				err = cli.SummaryAccountMainCoin(accountTask, account, key)
+				if err != nil {
+					log.Errorf("Summary wallet[%s] account[%s] main coin unexpected error: %v", task.WalletID, account.AccountID, err)
+				}
 			}
 
 			//汇总账户主币
@@ -202,7 +204,7 @@ func (cli *CLI) SummaryAccountMainCoin(accountTask *openwsdk.SummaryAccountTask,
 
 	log.Infof("Summary account[%s] Symbol: %s start", account.AccountID, account.Symbol)
 
-	err = cli.summaryAccountProcess(account, accountTask, key, account.Balance, sumSets, coin)
+	err = cli.summaryAccountProcess(account, accountTask, key, account.Balance, *accountTask.SummarySetting, coin)
 
 	log.Infof("Summary account[%s] Symbol: %s end", account.AccountID, account.Symbol)
 
@@ -235,19 +237,19 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 		return err
 	}
 
-	//查询已选token过程
-	findSelectedTokensFunc := func(t string) bool {
+	//查询已选token过程，查地址
+	findSelectedTokensFunc := func(t string) (bool, *openwsdk.SummaryContractTask) {
 
-		if accountTask.Contracts[0] == "all" {
-			return true
+		if setting, ok := accountTask.Contracts["all"]; ok {
+			return true, setting
 		}
 
-		for _, c := range accountTask.Contracts {
+		for c, s := range accountTask.Contracts {
 			if c == t {
-				return true
+				return true, s
 			}
 		}
-		return false
+		return false, nil
 	}
 
 	//读取汇总信息
@@ -256,20 +258,27 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 		return err
 	}
 
+	if sumSets.SumAddress == "" {
+		log.Errorf("Summary account[%s] summary address is empty!")
+		return err
+	}
+
 	for _, token := range tokenBalances {
 
 		//找不到已选合约跳到下一个
-		if !findSelectedTokensFunc(token.Address) {
+		find, contrackTask := findSelectedTokensFunc(token.Address)
+		if !find {
 			continue
 		}
 
-		if sumSets.SumAddress == "" {
-			log.Errorf("Summary account[%s] summary address is empty!")
-			return err
+		if contrackTask.SummarySetting == nil {
+			contrackTask.SummarySetting = &sumSets
+		} else {
+			contrackTask.SummarySetting.SumAddress = sumSets.SumAddress
 		}
 
 		//查询合约余额
-		tokenBalance := cli.GetTokenBalance(account, token.ContractID)
+		//tokenBalance := cli.GetTokenBalance(account, token.ContractID)
 
 		coin := openwsdk.Coin{
 			Symbol:     account.Symbol,
@@ -279,7 +288,7 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 
 		log.Infof("Summary account[%s] Symbol: %s, token: %s start", account.AccountID, account.Symbol, token.Token)
 
-		err = cli.summaryAccountProcess(account, accountTask, key, tokenBalance, sumSets, coin)
+		err = cli.summaryAccountProcess(account, accountTask, key, token.Balance.Balance, *contrackTask.SummarySetting, coin)
 
 		log.Infof("Summary account[%s] Symbol: %s, token: %s end", account.AccountID, account.Symbol, token.Token)
 
@@ -346,6 +355,8 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 				log.Warn("CreateSummaryTransaction unexpected error:", createErr)
 				continue
 			}
+
+			//TODO: 余额不足时，使用手续费账户充值。
 
 			signedRawTxs := make([]*openwsdk.RawTransaction, 0)
 			txIDs := make([]string, 0)
@@ -478,7 +489,13 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 				return err
 			}
 
-			account.SummarySetting = &sumSets
+			if account.SummarySetting == nil {
+				account.SummarySetting = &sumSets
+			} else {
+				account.SummarySetting.SumAddress = sumSets.SumAddress
+			}
+
+			//account.SummarySetting = &sumSets
 		}
 	}
 	return nil
