@@ -562,6 +562,8 @@ func (cli *CLI) StartSumFlow(file string) error {
 		}
 	}
 
+
+
 	err = cli.checkSummaryTaskIsHaveSettings(&summaryTask)
 	if err != nil {
 		return err
