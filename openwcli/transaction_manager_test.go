@@ -56,42 +56,44 @@ func TestCLI_Summary_BTC(t *testing.T) {
 		return
 	}
 
-	accountID := "7ww2Gpfy8pN6HTngbMFBTEMAaVRGEpkmsiNkgAgqGQGf"
+	accountID := "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF"
 
 	plain := `
 
 {
-	"wallets": [{
-		"walletID": "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA",
-		"password": "12345678",
-		"accounts": [
-		{
-			"accountID": "7ww2Gpfy8pN6HTngbMFBTEMAaVRGEpkmsiNkgAgqGQGf",
-			"threshold": "10",              
-			"minTransfer": "1",            
-			"retainedBalance": "0",           
-			"confirms": 1,                  
-			"feeRate": "0.0001",            
-        	"onlyContracts": false,         
-          	"contracts": {                          
-   				"all": {                            
-        			"threshold": "30",             
-          			"minTransfer": "0",            
-           			"retainedBalance": "0"            
-          		},         
-          		"0xd26114cd6ee289accf82350c8d8487fedb8a0c07": {                      
-					"threshold": "20",      
-      				"minTransfer": "0",
-					"retainedBalance": "0"
-               	}
-			},
-			"feesSupportAccount": {         
-				"accountID": "7ww2Gpfy8pN6HTngbMFBTEMAaVRGEpkmsiNkgAgqGQGf",       
-				"lowBalanceWarning": "1"
-			}
-		}
-		]
-	}]
+    "wallets": [
+        {
+            "walletID": "W1ixmQVGWX78MnFacrZ38i8kAivVifa2d7",
+            "password": "",
+            "accounts": [
+                {
+                    "accountID": "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF",
+                    "onlyContracts": true,
+                    "threshold": "5",
+                    "minTransfer": "2",
+                    "retainedBalance": "0",
+                    "contracts": {
+                        "1002000": {
+                            "threshold": "30",
+                            "minTransfer": "20",
+                            "retainedBalance": "0"
+                        },
+                        "THvZvKPLHKLJhEFYKiyqj6j8G8nGgfg7ur": {
+                            "threshold": "10",
+                            "minTransfer": "0",
+                            "retainedBalance": "0"
+                        }
+                    },
+                    "feesSupportAccount": {         
+                        "accountID": "Bp38EW8An9DnNah7pYCYsRur24VMXXifgyBj9mHCtJ17",       
+                        "lowBalanceWarning": "10",
+                        "fixSupportAmount": "2",
+                        "feesScale": "2"
+                    }
+                }
+            ]
+        }
+    ]
 }
 
 `
@@ -107,11 +109,11 @@ func TestCLI_Summary_BTC(t *testing.T) {
 
 
 	err = cli.SetSummaryInfo(&openwsdk.SummarySetting{
-		"WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA",
+		"W1ixmQVGWX78MnFacrZ38i8kAivVifa2d7",
 		accountID,
-		"0x97e6d791bdc343df95a6044859291b0b0116ae84",
-		"0.2",
-		"0.001",
+		"TE7nDCrQFPQTfRzsXRBFCLmVHDbiiw6BW9",
+		"10000",
+		"0",
 		"0",
 		0,
 	})

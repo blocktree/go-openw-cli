@@ -47,7 +47,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	}
 
 	if wallet != nil {
-		_, _, err = cli.CreateAccountOnServer("helleo", "12345678", "BTC", wallet)
+		_, _, err = cli.CreateAccountOnServer("feesupportTRX", "12345678", "TRX", wallet)
 		if err != nil {
 			log.Error("CreateAccountOnServer error:", err)
 			return
@@ -96,7 +96,7 @@ func TestCLI_GetAddressesOnServer(t *testing.T) {
 	}
 
 	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
-	accountID := "7ww2Gpfy8pN6HTngbMFBTEMAaVRGEpkmsiNkgAgqGQGf"
+	accountID := "AHj8XkE6rU2n9fdsEba1gQ9KTTQnnNnWhwtcpyxjv4wJ"
 
 	addresses, err := cli.GetAddressesOnServer(walletID, accountID, 0, 50)
 	if err != nil {

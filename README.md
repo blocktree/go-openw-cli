@@ -136,26 +136,26 @@ logdebug = false
 ```shell
 
 # 临时生成随机的OWTP通信证书，不保存到本地缓存
-$ ./go-openw-cli genkeychain
+$ ./openw-cli genkeychain
 
 # 通过-c或-conf设置工具的配置文件路径
-$ ./go-openw-cli -c=./node.ini
+$ ./openw-cli -c=./node.ini
 
 #### 节点相关 ####
 
 # 登记到openw-server，成为应用的授权节点。
-$ ./go-openw-cli -c=./node.ini noderegister
+$ ./openw-cli -c=./node.ini noderegister
 
 # 查看节点的信息
-$ ./go-openw-cli -c=./node.ini nodeinfo
+$ ./openw-cli -c=./node.ini nodeinfo
 
 # 更新区块链资料
-$ ./go-openw-cli -c=./node.ini updateinfo
+$ ./openw-cli -c=./node.ini updateinfo
 
 #### 钱包相关 ####
 
 # 创建钱包
-$ ./go-openw-cli -c=./node.ini newwallet
+$ ./openw-cli -c=./node.ini newwallet
 
 # Enter wallet's name: MyWallet         //输入钱包名字
 # Enter wallet password:                //输入钱包密码
@@ -163,10 +163,10 @@ $ ./go-openw-cli -c=./node.ini newwallet
 # Wallet create successfully, key path: openw/data/key/NASSUM-W6zkTDtnWZWFd2SQPms9F62BBPfuqU2ETg.key
 
 # 查看节点本地已创建的钱包
-$ ./go-openw-cli -c=./node.ini listwallet
+$ ./openw-cli -c=./node.ini listwallet
 
 # 创建钱包资产账户，先选择钱包
-$ ./go-openw-cli -c=./node.ini newaccount
+$ ./openw-cli -c=./node.ini newaccount
 
 
 # [Please select a wallet]
@@ -180,10 +180,10 @@ $ ./go-openw-cli -c=./node.ini newaccount
 # new address: n1EZVYXBx5tQ41L6QRyEhpqV4TpH6NwPrPE
 
 # 查看钱包资产账户，先选择钱包
-$ ./go-openw-cli -c=./node.ini listaccount
+$ ./openw-cli -c=./node.ini listaccount
 
 # 创建新地址，先选择钱包，再选择资产账户
-$ ./go-openw-cli -c=./node.ini newaddress
+$ ./openw-cli -c=./node.ini newaddress
 
 
 # [Please select a wallet]
@@ -196,11 +196,11 @@ $ ./go-openw-cli -c=./node.ini newaddress
 # addresses has been exported into: openw/data/export/address/[9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8]-20190313163227.txt
 
 # 创建新地址，先选择钱包，再选择资产账户，输入offset和limit查询地址列表
-$ ./go-openw-cli -c=./node.ini searchaddress
+$ ./openw-cli -c=./node.ini searchaddress
 
 
 # 选择资产账户，发起转账交易
-$ ./go-openw-cli -c=./node.ini transfer
+$ ./openw-cli -c=./node.ini transfer
 
 # [Please select a wallet]                                          //输入No.序号，选择本地已有钱包
 # Enter wallet No.: 0
@@ -223,7 +223,7 @@ $ ./go-openw-cli -c=./node.ini transfer
 # transaction id: GbB1oQkXQTSDudTEhKwdhyvnUvunnHKngZqGE9Xfa3tn
 
 # 设置汇总，先选择钱包，再选择资产账户
-$ ./go-openw-cli -c=./node.ini setsum
+$ ./openw-cli -c=./node.ini setsum
 
 
 # [Please select a wallet]
@@ -238,10 +238,10 @@ $ ./go-openw-cli -c=./node.ini setsum
 # setup summary info successfully
 
 # 查看已有账户的汇总设置信息
-$ ./go-openw-cli -c=./node.ini listsuminfo
+$ ./openw-cli -c=./node.ini listsuminfo
 
 # 启动汇总定时器
-$ ./go-openw-cli -c=./node.ini startsum
+$ ./openw-cli -c=./node.ini startsum
 
 # Enter summary task json file path:            //输入汇总任务json文件，如果为空，则提供选择钱包和资产账户启动汇总
 
@@ -260,7 +260,7 @@ $ ./go-openw-cli -c=./node.ini startsum
 # [Summary Task End]------2019-03-13 16:43:34
 
 # 启动汇总定时器，通过文件加载需要汇总的钱包和资产账户
-$ ./go-openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
+$ ./openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
 
 ```
 
@@ -268,7 +268,7 @@ $ ./go-openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
 
 `汇总样例JSON`
 
-> 汇总任务配置，可重新制定每个账户的汇总信息（除汇总地址外，安全考虑）
+> 汇总任务配置，可重新制定每个账户的汇总信息(汇总地址只能通过setsum更改，安全考虑)。
 
 {
     "wallets": [
@@ -288,21 +288,24 @@ $ ./go-openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
                         "all": {                              //全部合约
                             "threshold": "1000",              //账户总阈值
                             "minTransfer": "1000",            //地址最低转账额
-                            "retainedBalance": "0",           //地址保留余额
+                            "retainedBalance": "0"            //地址保留余额
                         },         
                         "0x1234dcba": {                        //指定的合约地址或编号
                             "threshold": "1000",      
                             "minTransfer": "1000",
-                            "retainedBalance": "0",
+                            "retainedBalance": "0"
                         },
                     },
-                    "feesSupportAccount": {         //主币余额不足时，可选择一个账户提供手续费
-                        "accountID": "12323",       //同钱包下的账户ID
-                        "lowBalanceWarning": "0.1"  //手续费账户余额过低警告阈值
-                    },
-                },
+                    "feesSupportAccount": {           //主币余额不足时，可选择一个同钱包下的账户提供手续费
+                        "accountID": "12323",         //同钱包下的账户ID
+                        "lowBalanceWarning": "0.5",   //手续费账户余额过低警告阈值，打印警告
+                        "lowBalanceStop": "0.1",      //手续费账户余额过低停止工作阈值
+                        "fixSupportAmount": "2",      //手续费不足时，提供固定的数量支持
+                        "feesScale": "2"              //手续费不足时，提供所缺手续费 * 倍数
+                    }
+                }
             ],
-        },
+        }
     ]
 }
 
@@ -311,15 +314,15 @@ $ ./go-openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
 ```shell
 
 # 查询主链列表
-$ ./go-openw-cli -c=./node.ini listsymbol
+$ ./openw-cli -c=./node.ini listsymbol
 
 # 查询主链下的合约列表
-$ ./go-openw-cli -c=./node.ini listtokencontract
+$ ./openw-cli -c=./node.ini listtokencontract
 
 # 选择钱包及账户，查看账户下拥有的代币余额
-$ ./go-openw-cli -c=./node.ini listtokenbalance
+$ ./openw-cli -c=./node.ini listtokenbalance
 
 # 启动后台托管钱包服务
-$ ./go-openw-cli -c=./node.ini trustserver
+$ ./openw-cli -c=./node.ini trustserver
 
 ```
