@@ -1,10 +1,10 @@
 package openwcli
 
 import (
+	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/owtp"
 	"github.com/blocktree/openwallet/timer"
-	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"time"
 )
 
@@ -336,14 +336,10 @@ func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 	}
 
 	appID := ctx.Params().Get("appID").String()
+	operateType := ctx.Params().Get("operateType").Int()
 
 	if appID != cli.config.appid {
 		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
-		return
-	}
-
-	if cli.summaryTaskTimer != nil && cli.summaryTaskTimer.Running() {
-		ctx.Response(nil, ErrorSummaryTaskTimerIsRunning, "summary task timer is running")
 		return
 	}
 
@@ -357,19 +353,33 @@ func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 		return
 	}
 
-	cli.mu.Lock()
-	cli.summaryTask = summaryTask
-	cli.mu.Unlock()
+	switch operateType {
+	case openwsdk.SummaryTaskOperateTypeReset:
 
-	log.Infof("The timer for summary task start now. Execute by every %v seconds.", cycleSec)
+		cli.mu.Lock()
+		cli.summaryTask = summaryTask
+		cli.mu.Unlock()
 
-	//启动钱包汇总程序
-	sumTimer := timer.NewTask(time.Duration(cycleSec)*time.Second, cli.SummaryTask)
-	sumTimer.Start()
+	case openwsdk.SummaryTaskOperateTypeAdd:
+		cli.appendSummaryTasks(summaryTask)
+	}
 
-	cli.summaryTaskTimer = sumTimer
+	if cli.summaryTaskTimer != nil && cli.summaryTaskTimer.Running() {
+		log.Warning("summary task timer is running")
+		//ctx.Response(nil, ErrorSummaryTaskTimerIsRunning, "summary task timer is running")
+		//return
+	} else {
 
-	ctx.Response(nil, owtp.StatusSuccess, "success")
+		log.Infof("The timer for summary task start now. Execute by every %v seconds.", cycleSec)
+
+		//启动钱包汇总程序
+		sumTimer := timer.NewTask(time.Duration(cycleSec)*time.Second, cli.SummaryTask)
+		sumTimer.Start()
+		cli.summaryTaskTimer = sumTimer
+
+	}
+
+	ctx.Response(nil, owtp.StatusSuccess, "The timer for summary task start running")
 
 }
 
@@ -443,7 +453,7 @@ func (cli *CLI) appendSummaryTaskViaTrustNode(ctx *owtp.Context) {
 		return
 	}
 
-	cli.appendSummaryWalletTasks(summaryTask.Wallets)
+	cli.appendSummaryTasks(summaryTask)
 
 	ctx.Response(nil, owtp.StatusSuccess, "success")
 
@@ -483,10 +493,10 @@ func (cli *CLI) getCurrentSummaryTaskViaTrustNode(ctx *owtp.Context) {
 		return
 	}
 
-	//if cli.summaryTaskTimer == nil || !cli.summaryTaskTimer.Running() {
-	//	ctx.Response(nil, ErrorSummaryTaskTimerIsNotStart, "summary task timer is not start")
-	//	return
-	//}
+	if cli.summaryTaskTimer == nil || !cli.summaryTaskTimer.Running() {
+		ctx.Response(nil, ErrorSummaryTaskTimerIsNotStart, "summary task timer is not start")
+		return
+	}
 
 	appID := ctx.Params().Get("appID").String()
 
@@ -497,8 +507,6 @@ func (cli *CLI) getCurrentSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	ctx.Response(cli.summaryTask, owtp.StatusSuccess, "success")
 }
-
-
 
 func (cli *CLI) getSummaryTaskLogViaTrustNode(ctx *owtp.Context) {
 

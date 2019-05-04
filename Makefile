@@ -24,7 +24,7 @@ OPENWCLILDFLAGS="-X github.com/blocktree/go-openw-cli/commands.Version=${OPENWCL
 
 # OS platfom
 # options: windows-6.0/*,darwin-10.10/amd64,linux/amd64,linux/386,linux/arm64,linux/mips64, linux/mips64le
-TARGETS="darwin-10.10/amd64,linux/amd64"
+TARGETS="darwin-10.10/amd64,linux/amd64,windows-6.0/*"
 
 deps:
 	go get -u github.com/gythialy/xgo
