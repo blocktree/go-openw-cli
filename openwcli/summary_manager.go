@@ -534,11 +534,15 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 	return nil
 }
 
-func (cli *CLI) appendSummaryWalletTasks(sums []*openwsdk.SummaryWalletTask) {
+func (cli *CLI) appendSummaryTasks(sums *openwsdk.SummaryTask) {
 	cli.mu.Lock()
 	defer cli.mu.Unlock()
 
-	for _, newWalletTask := range sums {
+	if cli.summaryTask == nil {
+		cli.summaryTask = sums
+	}
+
+	for _, newWalletTask := range sums.Wallets {
 
 		//查找钱包是否汇总中
 		_, executingWallet := FindExistedSummaryWalletTask(newWalletTask.WalletID, cli.summaryTask.Wallets)
@@ -548,9 +552,15 @@ func (cli *CLI) appendSummaryWalletTasks(sums []*openwsdk.SummaryWalletTask) {
 				//查找账户是否汇总中
 				_, executingAccount := FindExistedSummaryAccountTask(newAccountTask.AccountID, executingWallet.Accounts)
 				if executingAccount != nil {
-					//账户汇总中...
-					//重置汇总的合约
-					executingAccount.Contracts = newAccountTask.Contracts
+
+					if executingAccount.Contracts == nil {
+						executingAccount.Contracts = make(map[string]*openwsdk.SummaryContractTask)
+					}
+					//executingAccount.Contracts = newAccountTask.Contracts
+					//追加或替换合约
+					for addr, newContractTask := range newAccountTask.Contracts {
+						executingAccount.Contracts[addr] = newContractTask
+					}
 				} else {
 					executingWallet.Accounts = append(executingWallet.Accounts, newAccountTask)
 					log.Infof("Summary account[%s] task has been appended ", newAccountTask.AccountID)
