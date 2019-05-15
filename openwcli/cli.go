@@ -581,6 +581,9 @@ func (cli *CLI) StartSumFlow(file string) error {
 
 	cli.summaryTaskTimer = sumTimer
 
+	//马上执行一次汇总
+	cli.SummaryTask()
+
 	<-endRunning
 
 	return nil

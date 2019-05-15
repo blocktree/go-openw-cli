@@ -44,7 +44,10 @@ github.com/blocktree/go-openw-sdk v1.1.7-0.20190504082658-a783a32f6185 h1:QLEgNN
 github.com/blocktree/go-openw-sdk v1.1.7-0.20190504082658-a783a32f6185/go.mod h1:hxJPP+TciMW1nzKri/BJjHrLr+/NjmMowu9j802yXmA=
 github.com/blocktree/go-openw-sdk v1.1.7 h1:JC8LS05zFjAswA8EEeup7AhLwr9vjuvNDQEyLL5sZOI=
 github.com/blocktree/go-openw-sdk v1.1.7/go.mod h1:hxJPP+TciMW1nzKri/BJjHrLr+/NjmMowu9j802yXmA=
+github.com/blocktree/go-openw-sdk v1.1.8 h1:TgLBfv6VfaRN+wDRQW2aeiBjqZmqMQr+PYannXDo6Pk=
 github.com/blocktree/go-openw-sdk v1.1.8/go.mod h1:pjJJStW1tisAT+4/eLX5UMvIW7ceXPVMpf1k/r/WnDQ=
+github.com/blocktree/go-openw-sdk v1.2.0 h1:mr8C08fTx18opANkq9ohdNWnPRNAK0UP1MKjYestIrQ=
+github.com/blocktree/go-openw-sdk v1.2.0/go.mod h1:pjJJStW1tisAT+4/eLX5UMvIW7ceXPVMpf1k/r/WnDQ=
 github.com/blocktree/go-owcdrivers v1.0.0 h1:dMxbi+In7On3fq/2cfaO+IdKY35l++4cPFe6jcdJanM=
 github.com/blocktree/go-owcdrivers v1.0.0/go.mod h1:AzbIxzzRcSszV/XwOiu83QqKuGTuWyCdCrVfGNt2bk8=
 github.com/blocktree/go-owcdrivers v1.0.2/go.mod h1:AzbIxzzRcSszV/XwOiu83QqKuGTuWyCdCrVfGNt2bk8=
@@ -55,6 +58,7 @@ github.com/blocktree/go-owcdrivers v1.0.4 h1:ojdUJiOD40fxuW1UrLU79RNTObtdFCMx0mi
 github.com/blocktree/go-owcdrivers v1.0.4/go.mod h1:HS5S8MYW1hdN6hEmwgqu/kWyFPkxvjGN9Le0zAGmFZM=
 github.com/blocktree/go-owcdrivers v1.0.5 h1:zc9HmHEOzrHi/lvJEKKaSSDVO17P97mNi3G/72SkT7U=
 github.com/blocktree/go-owcdrivers v1.0.5/go.mod h1:HS5S8MYW1hdN6hEmwgqu/kWyFPkxvjGN9Le0zAGmFZM=
+github.com/blocktree/go-owcdrivers v1.0.8 h1:HW9+lJXXLsAGOXoHA97DlvNJTw42tVvsGS3p0lBn6Hw=
 github.com/blocktree/go-owcdrivers v1.0.8/go.mod h1:TKevypdvkQD4ItBGscwMJqWWMOhDo9vXwnV1wacNs9w=
 github.com/blocktree/go-owcrypt v1.0.0 h1:u3B59ZjmZ6vB8NrIicUvKKiiDY2oeJCInWsEq1swwSY=
 github.com/blocktree/go-owcrypt v1.0.0/go.mod h1:5FCinL/4XVEqbmAFTOUgfMJVNJEw6WzVy624qsxzZC8=

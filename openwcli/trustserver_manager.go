@@ -376,6 +376,8 @@ func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 		sumTimer := timer.NewTask(time.Duration(cycleSec)*time.Second, cli.SummaryTask)
 		sumTimer.Start()
 		cli.summaryTaskTimer = sumTimer
+		//马上执行一次汇总
+		cli.SummaryTask()
 
 	}
 
