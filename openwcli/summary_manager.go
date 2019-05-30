@@ -72,6 +72,7 @@ func (cli *CLI) SummaryAccountMainCoin(accountTask *openwsdk.SummaryAccountTask,
 	var (
 		err     error
 		sumSets openwsdk.SummarySetting
+		symbol string
 	)
 
 	//读取汇总信息
@@ -88,16 +89,23 @@ func (cli *CLI) SummaryAccountMainCoin(accountTask *openwsdk.SummaryAccountTask,
 	//balance, _ := decimal.NewFromString(account.Balance)
 	//threshold, _ := decimal.NewFromString(sumSets.Threshold)
 
+	//检查是否需要切换symbol
+	if len(accountTask.SwitchSymbol) > 0 {
+		symbol = accountTask.SwitchSymbol
+	} else {
+		symbol = account.Symbol
+	}
+
 	coin := openwsdk.Coin{
-		Symbol:     account.Symbol,
+		Symbol:     symbol,
 		IsContract: false,
 	}
 
-	log.Infof("Summary account[%s] Symbol: %s start", account.AccountID, account.Symbol)
+	log.Infof("Summary account[%s] Symbol: %s start", account.AccountID, symbol)
 
 	err = cli.summaryAccountProcess(account, accountTask, key, account.Balance, *accountTask.SummarySetting, coin)
 
-	log.Infof("Summary account[%s] Symbol: %s end", account.AccountID, account.Symbol)
+	log.Infof("Summary account[%s] Symbol: %s end", account.AccountID, symbol)
 	log.Infof("----------------------------------------------------------------------------------------")
 
 	if err != nil {
@@ -113,6 +121,7 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 	var (
 		err     error
 		sumSets openwsdk.SummarySetting
+		symbol string
 	)
 
 	if len(accountTask.Contracts) == 0 {
@@ -155,6 +164,13 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 		return err
 	}
 
+	//检查是否需要切换symbol
+	if len(accountTask.SwitchSymbol) > 0 {
+		symbol = accountTask.SwitchSymbol
+	} else {
+		symbol = account.Symbol
+	}
+
 	for _, token := range tokenBalances {
 
 		//找不到已选合约跳到下一个
@@ -173,16 +189,16 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 		//tokenBalance := cli.GetTokenBalance(account, token.ContractID)
 
 		coin := openwsdk.Coin{
-			Symbol:     account.Symbol,
+			Symbol:     symbol,
 			IsContract: true,
 			ContractID: token.ContractID,
 		}
 
-		log.Infof("Summary account[%s] Symbol: %s, token: %s start", account.AccountID, account.Symbol, token.Token)
+		log.Infof("Summary account[%s] Symbol: %s, token: %s start", account.AccountID, symbol, token.Token)
 
 		err = cli.summaryAccountProcess(account, accountTask, key, token.Balance.Balance, *contrackTask.SummarySetting, coin)
 
-		log.Infof("Summary account[%s] Symbol: %s, token: %s end", account.AccountID, account.Symbol, token.Token)
+		log.Infof("Summary account[%s] Symbol: %s, token: %s end", account.AccountID, symbol, token.Token)
 
 		if err != nil {
 			continue
@@ -525,9 +541,26 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 					return fmt.Errorf("fees support account: %s walletID is not equal: %s", account.FeesSupportAccount.AccountID, accounInfo.WalletID)
 				}
 
-				if feesSupportAccountInfo.Symbol != accounInfo.Symbol {
-					return fmt.Errorf("fees support account: %s symbol is not equal summary task account: %s", account.FeesSupportAccount.AccountID, accounInfo.Symbol)
+
+				if len(account.SwitchSymbol) > 0 {
+
+					//SwitchSymbol是否存在
+					_, findErr := cli.GetSymbolInfo(account.SwitchSymbol)
+					if findErr != nil {
+						return fmt.Errorf("can not find switch symbol")
+					}
+
+					//允许切换账户的symbol
+					if feesSupportAccountInfo.Symbol != account.SwitchSymbol {
+						return fmt.Errorf("fees support account: %s symbol is not equal summary task account switch symbol: %s", account.FeesSupportAccount.AccountID, accounInfo.Symbol)
+					}
+				} else {
+					if feesSupportAccountInfo.Symbol != accounInfo.Symbol {
+						return fmt.Errorf("fees support account: %s symbol is not equal summary task account: %s", account.FeesSupportAccount.AccountID, accounInfo.Symbol)
+					}
 				}
+
+
 			}
 		}
 	}

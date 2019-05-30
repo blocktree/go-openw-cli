@@ -284,6 +284,7 @@ $ ./openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
                     "confirms": 1,                    //未花大于该确认次数汇总中
                     "feeRate": "0.0001",              //交易费率，填空为推荐费率
                     "onlyContracts": false,           //只汇总代币, 为true时，contracts数组必须有值
+                    "switchSymbol": "ETH",            //强制切换symbol（默认不设置，用于解决代币打错地址，需要切换网络汇总）
                     "contracts": {                            //汇总代币合约
                         "all": {                              //全部合约
                             "threshold": "1000",              //账户总阈值
