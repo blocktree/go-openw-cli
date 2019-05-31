@@ -294,8 +294,8 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 						if rawTx.ErrorMsg != nil && rawTx.ErrorMsg.Code != 0 {
 							log.Warning(rawTx.ErrorMsg.Err)
 						} else {
-							log.Infof("rawTx.AccountID: %s", rawTx.AccountID)
-							log.Infof("account.AccountID: %s", account.AccountID)
+							//log.Infof("rawTx.AccountID: %s", rawTx.AccountID)
+							//log.Infof("account.AccountID: %s", account.AccountID)
 							switch rawTx.AccountID {
 							case account.AccountID:
 								retRawTxs = append(retRawTxs, rawTx)
