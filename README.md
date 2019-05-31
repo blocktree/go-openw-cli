@@ -303,6 +303,8 @@ $ ./openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
                         "lowBalanceStop": "0.1",      //手续费账户余额过低停止工作阈值
                         "fixSupportAmount": "2",      //手续费不足时，提供固定的数量支持
                         "feesScale": "2"              //手续费不足时，提供所缺手续费 * 倍数
+                        "isTokenContract": true,      //是否用代币合约做手续费
+                        "contractAddress": "0200000000000000000000000000000000000000"   //代币合约地址，ONT使用ONG作为手续费
                     }
                 }
             ],

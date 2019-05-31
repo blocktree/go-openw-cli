@@ -238,3 +238,15 @@ func TestCLI_printAccountSummaryInfo(t *testing.T) {
 	}
 	cli.printAccountSummaryInfo()
 }
+
+func TestCLI_GetTokenBalanceByContractAddresss(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+	accountID := "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF"
+	address := "THvZvKPLHKLJhEFYKiyqj6j8G8nGgfg7ur"
+	account := &openwsdk.Account{Symbol: "TRX", AccountID: accountID}
+	balance := cli.GetTokenBalanceByContractAddress(account, address)
+	fmt.Printf("balance: %+v\n", balance)
+}
