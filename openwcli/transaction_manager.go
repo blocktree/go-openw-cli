@@ -19,6 +19,24 @@ func (cli *CLI) GetTokenBalance(account *openwsdk.Account, contractID string) st
 	return getBalance
 }
 
+//GetTokenBalanceByContractAddress 通过代币合约的地址获取代币余额
+func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, address string) string {
+	getBalance := "0"
+
+	token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", address)
+	if findErr != nil {
+		return getBalance
+	}
+	contractID := token[0].ContractID
+	cli.api.GetTokenBalanceByAccount(account.AccountID, contractID, true,
+		func(status uint64, msg string, balance *openwsdk.TokenBalance) {
+			if status == owtp.StatusSuccess {
+				getBalance = balance.Balance.Balance
+			}
+		})
+	return getBalance
+}
+
 //Transfer 转账交易
 func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, error) {
 

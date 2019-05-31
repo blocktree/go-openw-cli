@@ -72,7 +72,7 @@ func (cli *CLI) SummaryAccountMainCoin(accountTask *openwsdk.SummaryAccountTask,
 	var (
 		err     error
 		sumSets openwsdk.SummarySetting
-		symbol string
+		symbol  string
 	)
 
 	//读取汇总信息
@@ -121,7 +121,7 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 	var (
 		err     error
 		sumSets openwsdk.SummarySetting
-		symbol string
+		symbol  string
 	)
 
 	if len(accountTask.Contracts) == 0 {
@@ -216,14 +216,14 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 	)
 
 	var (
-		err       error
-		createErr error
-		retTx     []*openwsdk.Transaction
-		retFailed []*openwsdk.FailedRawTransaction
-		retRawTxs []*openwsdk.RawTransaction
+		err                  error
+		createErr            error
+		retTx                []*openwsdk.Transaction
+		retFailed            []*openwsdk.FailedRawTransaction
+		retRawTxs            []*openwsdk.RawTransaction
 		retRawFeesSupportTxs []*openwsdk.RawTransaction
-		feesSupportAccountID  string
-		feesSupportBalance = decimal.Zero
+		feesSupportAccountID string
+		feesSupportBalance   = decimal.Zero
 	)
 
 	balanceDec, _ := decimal.NewFromString(balance)
@@ -239,7 +239,21 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 		if err != nil {
 			return fmt.Errorf("fees support account: %s can not find", feesSupportAccountID)
 		}
-		feesSupportBalance, _ = decimal.NewFromString(feesSupportAccounInfo.Balance)
+
+		//手续费是否合约代币
+		if task.FeesSupportAccount.IsTokenContract {
+			//代币作为手续费
+			contractAddress := task.FeesSupportAccount.ContractAddress
+			if len(contractAddress) == 0 {
+				return fmt.Errorf("fees support account use token contract for fees, contract address is empty")
+			}
+			tokenBalance := cli.GetTokenBalanceByContractAddress(feesSupportAccounInfo, task.FeesSupportAccount.ContractAddress)
+			feesSupportBalance, _ = decimal.NewFromString(tokenBalance)
+		} else {
+			//主币作为手续费
+			feesSupportBalance, _ = decimal.NewFromString(feesSupportAccounInfo.Balance)
+		}
+
 		lowBalanceWarning, _ := decimal.NewFromString(task.FeesSupportAccount.LowBalanceWarning)
 		lowBalanceStop, _ := decimal.NewFromString(task.FeesSupportAccount.LowBalanceStop)
 		if feesSupportBalance.LessThan(lowBalanceWarning) {
@@ -276,9 +290,12 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 				func(status uint64, msg string, rawTxs []*openwsdk.RawTransaction) {
 
 					for _, rawTx := range rawTxs {
+
 						if rawTx.ErrorMsg != nil && rawTx.ErrorMsg.Code != 0 {
 							log.Warning(rawTx.ErrorMsg.Err)
 						} else {
+							log.Infof("rawTx.AccountID: %s", rawTx.AccountID)
+							log.Infof("account.AccountID: %s", account.AccountID)
 							switch rawTx.AccountID {
 							case account.AccountID:
 								retRawTxs = append(retRawTxs, rawTx)
@@ -314,6 +331,7 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 			txIDs := make([]string, 0)
 			sids := make([]string, 0)
 			for _, rawTx := range retRawTxs {
+				//log.Infof("retRawTxs: %+v", rawTx)
 				//签名交易
 				err = openwsdk.SignRawTransaction(rawTx, key)
 				if err != nil {
@@ -529,7 +547,6 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 				account.SummarySetting.SumAddress = sumSets.SumAddress
 			}
 
-
 			//:查询手续费账户是否存在，是否在当前钱包下，相同的symbol，并且检查手续费账户余额是否报警
 			if account.FeesSupportAccount != nil && account.FeesSupportAccount.AccountID != "" {
 
@@ -540,7 +557,6 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 				if feesSupportAccountInfo.WalletID != accounInfo.WalletID {
 					return fmt.Errorf("fees support account: %s walletID is not equal: %s", account.FeesSupportAccount.AccountID, accounInfo.WalletID)
 				}
-
 
 				if len(account.SwitchSymbol) > 0 {
 
@@ -559,7 +575,6 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 						return fmt.Errorf("fees support account: %s symbol is not equal summary task account: %s", account.FeesSupportAccount.AccountID, accounInfo.Symbol)
 					}
 				}
-
 
 			}
 		}
