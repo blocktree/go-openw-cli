@@ -56,39 +56,29 @@ func TestCLI_Summary_BTC(t *testing.T) {
 		return
 	}
 
-	accountID := "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF"
+	//accountID := "7u7CQNdkaJXVszoj528Bink88aWgfay3rDxb1rsmDywA"
 
 	plain := `
 
 {
     "wallets": [
         {
-            "walletID": "W1ixmQVGWX78MnFacrZ38i8kAivVifa2d7",
-            "password": "",
+            "walletID": "W6iq5mLbyCdXKmUDMZzFnDx4rFw8eTYddS",
+            "password": "1234qwer",
             "accounts": [
                 {
-                    "accountID": "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF",
+                    "accountID": "7u7CQNdkaJXVszoj528Bink88aWgfay3rDxb1rsmDywA",
                     "onlyContracts": true,
-                    "threshold": "5",
-                    "minTransfer": "2",
+                    "threshold": "1000",
+                    "minTransfer": "0",
                     "retainedBalance": "0",
+                    "switchSymbol": "ETH",
                     "contracts": {
-                        "1002000": {
-                            "threshold": "30",
-                            "minTransfer": "20",
-                            "retainedBalance": "0"
-                        },
-                        "THvZvKPLHKLJhEFYKiyqj6j8G8nGgfg7ur": {
-                            "threshold": "10",
+                        "all": {
+                            "threshold": "1000",
                             "minTransfer": "0",
                             "retainedBalance": "0"
                         }
-                    },
-                    "feesSupportAccount": {         
-                        "accountID": "Bp38EW8An9DnNah7pYCYsRur24VMXXifgyBj9mHCtJ17",       
-                        "lowBalanceWarning": "10",
-                        "fixSupportAmount": "2",
-                        "feesScale": "2"
                     }
                 }
             ]
@@ -106,21 +96,19 @@ func TestCLI_Summary_BTC(t *testing.T) {
 
 	cli.summaryTask = &summaryTask
 
-
-
-	err = cli.SetSummaryInfo(&openwsdk.SummarySetting{
-		"W1ixmQVGWX78MnFacrZ38i8kAivVifa2d7",
-		accountID,
-		"TE7nDCrQFPQTfRzsXRBFCLmVHDbiiw6BW9",
-		"10000",
-		"0",
-		"0",
-		0,
-	})
-	if err != nil {
-		log.Error("SetSummaryInfo error:", err)
-		return
-	}
+	//err = cli.SetSummaryInfo(&openwsdk.SummarySetting{
+	//	"W1ixmQVGWX78MnFacrZ38i8kAivVifa2d7",
+	//	accountID,
+	//	"TE7nDCrQFPQTfRzsXRBFCLmVHDbiiw6BW9",
+	//	"10000",
+	//	"0",
+	//	"0",
+	//	0,
+	//})
+	//if err != nil {
+	//	log.Error("SetSummaryInfo error:", err)
+	//	return
+	//}
 
 	err = cli.checkSummaryTaskIsHaveSettings(&summaryTask)
 	if err != nil {

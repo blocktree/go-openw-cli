@@ -48,6 +48,18 @@ func TestCLI_appendSummaryTasks(t *testing.T) {
                     }
                 }
             ]
+        },
+		{
+            "walletID": "W22222222",
+            "password": "",
+            "accounts": [
+                {
+                    "accountID": "234234234",
+                    "threshold": "5",
+                    "minTransfer": "0",
+                    "retainedBalance": "0"
+                }
+            ]
         }
     ]
 }

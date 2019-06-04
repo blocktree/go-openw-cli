@@ -128,12 +128,14 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 		return nil
 	}
 
-	//tokens, err := cli.GetTokenContractList("Symbol", account.Symbol)
-	//if err != nil {
-	//	return err
-	//}
+	//检查是否需要切换symbol
+	if len(accountTask.SwitchSymbol) > 0 {
+		symbol = accountTask.SwitchSymbol
+	} else {
+		symbol = account.Symbol
+	}
 
-	tokenBalances, err := cli.GetAllTokenContractBalance(account.AccountID)
+	tokenBalances, err := cli.GetAllTokenContractBalance(account.AccountID, symbol)
 	if err != nil {
 		return err
 	}
@@ -162,13 +164,6 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 	if sumSets.SumAddress == "" {
 		log.Errorf("Summary account[%s] summary address is empty!")
 		return err
-	}
-
-	//检查是否需要切换symbol
-	if len(accountTask.SwitchSymbol) > 0 {
-		symbol = accountTask.SwitchSymbol
-	} else {
-		symbol = account.Symbol
 	}
 
 	for _, token := range tokenBalances {
@@ -288,14 +283,13 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 				task.FeeRate, sumSets.MinTransfer, sumSets.RetainedBalance,
 				i, limit, sumSets.Confirms, sid, task.FeesSupportAccount, true,
 				func(status uint64, msg string, rawTxs []*openwsdk.RawTransaction) {
-
+					//log.Debugf("status: %d, msg: %s", status, msg)
 					for _, rawTx := range rawTxs {
-
+						//log.Debugf("rawTx: %+v", rawTx)
 						if rawTx.ErrorMsg != nil && rawTx.ErrorMsg.Code != 0 {
 							log.Warning(rawTx.ErrorMsg.Err)
 						} else {
-							//log.Infof("rawTx.AccountID: %s", rawTx.AccountID)
-							//log.Infof("account.AccountID: %s", account.AccountID)
+
 							switch rawTx.AccountID {
 							case account.AccountID:
 								retRawTxs = append(retRawTxs, rawTx)
@@ -326,95 +320,103 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 				continue
 			}
 
-			//发送汇总交易
-			signedRawTxs := make([]*openwsdk.RawTransaction, 0)
-			txIDs := make([]string, 0)
-			sids := make([]string, 0)
-			for _, rawTx := range retRawTxs {
-				//log.Infof("retRawTxs: %+v", rawTx)
-				//签名交易
-				err = openwsdk.SignRawTransaction(rawTx, key)
-				if err != nil {
-					log.Warn("SignRawTransaction unexpected error: %v", err)
+			//正常的汇总交易
+			if len(retRawTxs) > 0 {
+
+				//发送汇总交易
+				signedRawTxs := make([]*openwsdk.RawTransaction, 0)
+				txIDs := make([]string, 0)
+				sids := make([]string, 0)
+				for _, rawTx := range retRawTxs {
+
+					//签名交易
+					err = openwsdk.SignRawTransaction(rawTx, key)
+					if err != nil {
+						log.Warn("SignRawTransaction unexpected error: %v", err)
+						continue
+					}
+
+					signedRawTxs = append(signedRawTxs, rawTx)
+
+					//log.Debugf("retRawTxs: %+v", rawTx)
+				}
+
+				if len(signedRawTxs) == 0 {
 					continue
 				}
 
-				signedRawTxs = append(signedRawTxs, rawTx)
-			}
+				//	广播交易单
+				err = cli.api.SubmitTrade(signedRawTxs, true,
+					func(status uint64, msg string, successTx []*openwsdk.Transaction, failedRawTxs []*openwsdk.FailedRawTransaction) {
 
-			if len(signedRawTxs) == 0 {
-				continue
-			}
+						//log.Debugf("status: %d, msg: %s", status, msg)
+						if status != owtp.StatusSuccess {
+							createErr = fmt.Errorf(msg)
+							return
+						}
 
-			//	广播交易单
-			err = cli.api.SubmitTrade(signedRawTxs, true,
-				func(status uint64, msg string, successTx []*openwsdk.Transaction, failedRawTxs []*openwsdk.FailedRawTransaction) {
-					if status != owtp.StatusSuccess {
-						createErr = fmt.Errorf(msg)
-						return
-					}
+						retTx = successTx
+						retFailed = failedRawTxs
+					})
+				if err != nil {
+					log.Warningf("SubmitRawTransaction unexpected error: %v", err)
+					continue
+				}
+				if createErr != nil {
+					log.Warningf("SubmitRawTransaction unexpected error: %v", createErr)
+					continue
+				}
 
-					retTx = successTx
-					retFailed = failedRawTxs
-				})
-			if err != nil {
-				log.Warningf("SubmitRawTransaction unexpected error: %v", err)
-				continue
-			}
-			if createErr != nil {
-				log.Warningf("SubmitRawTransaction unexpected error: %v", createErr)
-				continue
-			}
+				//打印汇总交易结果
+				totalSumAmount := decimal.Zero
+				totalCostFees := decimal.Zero
 
-			//打印汇总交易结果
-			totalSumAmount := decimal.Zero
-			totalCostFees := decimal.Zero
+				for _, tx := range retTx {
 
-			for _, tx := range retTx {
+					//只计算汇总账户的 总的汇总数量，手续费
+					log.Infof("[Success] txid: %s", tx.Txid)
 
-				//只计算汇总账户的 总的汇总数量，手续费
-				log.Infof("[Success] txid: %s", tx.Txid)
+					fees, _ := decimal.NewFromString(tx.Fees)
 
-				fees, _ := decimal.NewFromString(tx.Fees)
-
-				totalCostFees = totalCostFees.Add(fees)
-				txIDs = append(txIDs, tx.Txid)
-				sids = append(sids, tx.Sid)
-				//统计汇总总数
-				for i, a := range tx.ToAddress {
-					if a == sumSets.SumAddress {
-						amount, _ := decimal.NewFromString(tx.ToAddressV[i])
-						totalSumAmount = totalSumAmount.Add(amount)
+					totalCostFees = totalCostFees.Add(fees)
+					txIDs = append(txIDs, tx.Txid)
+					sids = append(sids, tx.Sid)
+					//统计汇总总数
+					for i, a := range tx.ToAddress {
+						if a == sumSets.SumAddress {
+							amount, _ := decimal.NewFromString(tx.ToAddressV[i])
+							totalSumAmount = totalSumAmount.Add(amount)
+						}
 					}
 				}
-			}
 
-			for _, tx := range retFailed {
-				log.Warn("[Failed] reason:", tx.Reason)
-			}
+				for _, tx := range retFailed {
+					log.Warn("[Failed] reason:", tx.Reason)
+				}
 
-			//:记录汇总情况
-			totalSumAmount = totalSumAmount.Sub(totalCostFees)
-			summaryTaskLog := openwsdk.SummaryTaskLog{
-				Sid:            sid,
-				WalletID:       account.WalletID,
-				AccountID:      account.AccountID,
-				StartAddrIndex: i,
-				EndAddrIndex:   i + limit,
-				Coin:           coin,
-				SuccessCount:   len(retTx),
-				FailCount:      len(retFailed),
-				TxIDs:          txIDs,
-				Sids:           sids,
-				TotalSumAmount: totalSumAmount.String(),
-				TotalCostFees:  totalCostFees.String(),
-				CreateTime:     time.Now().Unix(),
-			}
-			err = cli.db.Save(&summaryTaskLog)
-			if err != nil {
-				log.Infof("Save summary task log failed: %s", err.Error())
-			} else {
-				log.Infof("Save summary task log successfully")
+				//:记录汇总情况
+				totalSumAmount = totalSumAmount.Sub(totalCostFees)
+				summaryTaskLog := openwsdk.SummaryTaskLog{
+					Sid:            sid,
+					WalletID:       account.WalletID,
+					AccountID:      account.AccountID,
+					StartAddrIndex: i,
+					EndAddrIndex:   i + limit,
+					Coin:           coin,
+					SuccessCount:   len(retTx),
+					FailCount:      len(retFailed),
+					TxIDs:          txIDs,
+					Sids:           sids,
+					TotalSumAmount: totalSumAmount.String(),
+					TotalCostFees:  totalCostFees.String(),
+					CreateTime:     time.Now().Unix(),
+				}
+				err = cli.db.Save(&summaryTaskLog)
+				if err != nil {
+					log.Infof("Save summary task log failed: %s", err.Error())
+				} else {
+					log.Infof("Save summary task log successfully")
+				}
 			}
 
 			//发送手续费账户交易单
@@ -423,7 +425,7 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 				log.Std.Notice("create fees support account transaction for summary task")
 				log.Std.Notice("current fees support account balance: %s %s ", feesSupportBalance.String(), coin.Symbol)
 
-				signedRawTxs = make([]*openwsdk.RawTransaction, 0)
+				signedRawTxs := make([]*openwsdk.RawTransaction, 0)
 				for _, rawTx := range retRawFeesSupportTxs {
 					//签名交易
 					err = openwsdk.SignRawTransaction(rawTx, key)

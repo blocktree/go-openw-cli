@@ -749,7 +749,7 @@ func (cli *CLI) ListTokenBalanceFlow() error {
 		return selectErr
 	}
 
-	list, err := cli.GetAllTokenContractBalance(account.AccountID)
+	list, err := cli.GetAllTokenContractBalance(account.AccountID, "")
 	if err != nil {
 		return err
 	}
