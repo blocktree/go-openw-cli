@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/asdine/storm v2.1.2+incompatible
 	github.com/astaxie/beego v1.11.1
-	github.com/blocktree/go-openw-sdk v1.2.2
+	github.com/blocktree/go-openw-sdk v1.2.3
 	github.com/blocktree/openwallet v1.4.3
 	github.com/bndr/gotabulate v1.1.2
 	github.com/google/uuid v1.1.1
@@ -14,4 +14,4 @@ require (
 	gopkg.in/urfave/cli.v1 v1.20.0
 )
 
-replace github.com/blocktree/go-openw-sdk => ../go-openw-sdk
+//replace github.com/blocktree/go-openw-sdk => ../go-openw-sdk
