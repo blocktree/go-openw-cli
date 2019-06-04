@@ -223,7 +223,7 @@ func TestCLI_GetAllTokenContractBalance(t *testing.T) {
 		return
 	}
 	accountID := "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF"
-	list, err := cli.GetAllTokenContractBalance(accountID)
+	list, err := cli.GetAllTokenContractBalance(accountID, "")
 	if err != nil {
 		log.Error("GetAllTokenContractBalance error:", err)
 		return

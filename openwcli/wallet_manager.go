@@ -778,13 +778,13 @@ func (cli *CLI) getLocalKeyByWallet(wallet *openwsdk.Wallet, password string) (*
 }
 
 //GetAllTokenContractBalance 查询账户合约余额
-func (cli *CLI) GetAllTokenContractBalance(accountID string) ([]*openwsdk.TokenBalance, error) {
+func (cli *CLI) GetAllTokenContractBalance(accountID string, symbol string) ([]*openwsdk.TokenBalance, error) {
 
 	var (
 		getErr      error
 		getBalances []*openwsdk.TokenBalance
 	)
-	err := cli.api.GetAllTokenBalanceByAccount(accountID, true,
+	err := cli.api.GetAllTokenBalanceByAccount(accountID, symbol, true,
 		func(status uint64, msg string, balance []*openwsdk.TokenBalance) {
 			if status == owtp.StatusSuccess {
 				getBalances = balance
