@@ -58,6 +58,9 @@ requesttimeout = 60
 # Terminal print log of debug 
 logdebug = false
 
+# Enable trusted server connect with https or wss
+enabletrustserverssl = false
+
 `
 
 	keyDirName = "key"
@@ -109,6 +112,8 @@ type Config struct {
 	exportdir string
 	//导出地址路径
 	exportaddressdir string
+	//开启SSL访问授信节点
+	enabletrustserverssl bool
 }
 
 //初始化一个配置对象
@@ -130,6 +135,7 @@ func NewConfig(c config.Configer) *Config {
 	conf.enablessl, _ = c.Bool("enablessl")
 	conf.requesttimeout, _ = c.Int("requesttimeout")
 	conf.logdebug, _ = c.Bool("logdebug")
+	conf.enabletrustserverssl, _ = c.Bool("enabletrustserverssl")
 
 	conf.keydir = filepath.Join(conf.datadir, keyDirName)
 	conf.dbdir = filepath.Join(conf.datadir, dbDirName)
