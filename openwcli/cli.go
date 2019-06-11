@@ -400,6 +400,12 @@ func (cli *CLI) TransferFlow() error {
 		return fmt.Errorf("fee rate can not be negative")
 	}
 
+	// 等待用户费率
+	memo, err := console.InputText("Enter memo: ", false)
+	if err != nil {
+		return err
+	}
+
 	// 等待用户输入密码
 	password, err := console.InputPassword(false, 3)
 	if err != nil {
@@ -409,7 +415,7 @@ func (cli *CLI) TransferFlow() error {
 	//创建新交易单
 	sid := uuid.New().String()
 
-	_, _, err = cli.Transfer(wallet, account, contractAddress, to, amount, sid, feeRate, "", password)
+	_, _, err = cli.Transfer(wallet, account, contractAddress, to, amount, sid, feeRate, memo, password)
 	if err != nil {
 		return err
 	}
