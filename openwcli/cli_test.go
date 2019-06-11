@@ -15,6 +15,7 @@ func init() {
 func getTestOpenwCLI() *CLI {
 
 	confFile := filepath.Join("conf", "node.ini")
+	//confFile := filepath.Join("conf", "prod.ini")
 
 	c, err := config.NewConfig("ini", confFile)
 	if err != nil {

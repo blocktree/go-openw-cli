@@ -62,7 +62,7 @@ func (cli *CLI) connectTransmitNode() error {
 	connectCfg := owtp.ConnectConfig{}
 	connectCfg.Address = cli.config.trustedserver
 	connectCfg.ConnectType = owtp.Websocket
-	connectCfg.EnableSSL = cli.config.enablessl
+	connectCfg.EnableSSL = cli.config.enabletrustserverssl
 	connectCfg.EnableSignature = false
 
 	//建立连接
