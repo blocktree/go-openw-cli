@@ -281,7 +281,7 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 
 			err = cli.api.CreateSummaryTx(account.AccountID, sumSets.SumAddress, coin,
 				task.FeeRate, sumSets.MinTransfer, sumSets.RetainedBalance,
-				i, limit, sumSets.Confirms, sid, task.FeesSupportAccount, true,
+				i, limit, sumSets.Confirms, sid, task.FeesSupportAccount, task.Memo, true,
 				func(status uint64, msg string, rawTxs []*openwsdk.RawTransaction) {
 					//log.Debugf("status: %d, msg: %s", status, msg)
 					for _, rawTx := range rawTxs {

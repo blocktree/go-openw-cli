@@ -96,6 +96,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	log.Infof("Send Amount: %s", amount)
 	log.Infof("Fees: %v", retRawTx.Fees)
 	log.Infof("FeeRate: %v", retRawTx.FeeRate)
+	log.Infof("Memo: %v", memo)
 	log.Infof("-----------------------------------------------")
 
 	//签名交易单

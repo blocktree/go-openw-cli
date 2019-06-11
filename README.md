@@ -210,6 +210,7 @@ $ ./openw-cli -c=./node.ini transfer
 # Enter received address: AR8LWKndC2ztfLoCobZhHEwkQCUZk1yKEsF       //输入转账的目标地址
 # Enter amount to send: 2.8                                         //输入转账数量
 # Enter fee rate:                                                   //输入手续费率，默认空（推荐）
+# Enter memo: hello                                                 //输入备注，适用于可添加备注的交易
 # Enter wallet password:                                            //输入钱包解锁密码
 # -----------------------------------------------                   //以下为转账日志信息
 # [VSYS  Transfer]
@@ -218,6 +219,7 @@ $ ./openw-cli -c=./node.ini transfer
 # Send Amount: 2.8
 # Fees: 0.1
 # FeeRate: 10000000
+# Memo: hlls
 # -----------------------------------------------
 # send transaction successfully.
 # transaction id: GbB1oQkXQTSDudTEhKwdhyvnUvunnHKngZqGE9Xfa3tn
@@ -285,6 +287,7 @@ $ ./openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
                     "feeRate": "0.0001",              //交易费率，填空为推荐费率
                     "onlyContracts": false,           //只汇总代币, 为true时，contracts数组必须有值
                     "switchSymbol": "ETH",            //强制切换symbol（默认不设置，用于解决代币打错地址，需要切换网络汇总）
+                    "memo": "hello",                  //备注，适用于可添加备注的交易单
                     "contracts": {                            //汇总代币合约
                         "all": {                              //全部合约
                             "threshold": "1000",              //账户总阈值
