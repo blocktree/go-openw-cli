@@ -23,6 +23,7 @@ func (cli *CLI) CreateWalletOnServer(name, password string) (*openwsdk.Wallet, e
 	var (
 		key       *hdkeystore.HDKey
 		retWallet *openwsdk.Wallet
+		retErr error
 	)
 
 	if len(name) == 0 {
@@ -47,20 +48,23 @@ func (cli *CLI) CreateWalletOnServer(name, password string) (*openwsdk.Wallet, e
 	}
 
 	//登记钱包的openw-server
-	cli.api.CreateWallet(name, key.KeyID, true,
+	err = cli.api.CreateWallet(name, key.KeyID, true,
 		func(status uint64, msg string, wallet *openwsdk.Wallet) {
 			if status == owtp.StatusSuccess {
 				log.Info("Wallet create successfully, key path:", filePath)
 				retWallet = wallet
 			} else {
 				log.Error("create wallet on server failed, unexpected error:", msg)
-
+				retErr = openwallet.Errorf(status, msg)
 				//创建失败，删除key文件
 				file.Delete(filePath)
 			}
 		})
+	if err != nil {
+		return nil, err
+	}
 
-	return retWallet, nil
+	return retWallet, retErr
 }
 
 //GetWalletsByKeyDir 通过给定的文件路径加载keystore文件得到钱包列表
@@ -72,12 +76,15 @@ func (cli *CLI) GetWalletsOnServer() ([]*openwsdk.Wallet, error) {
 	serverWallets := make([]*openwsdk.Wallet, 0)
 
 	for _, w := range localWallets {
-		cli.api.FindWalletByWalletID(w.WalletID, true,
+		callErr := cli.api.FindWalletByWalletID(w.WalletID, true,
 			func(status uint64, msg string, wallet *openwsdk.Wallet) {
 				if status == owtp.StatusSuccess && wallet != nil {
 					serverWallets = append(serverWallets, wallet)
 				}
 			})
+		if callErr != nil {
+			return nil, callErr
+		}
 	}
 
 	return serverWallets, nil
@@ -352,6 +359,10 @@ func (cli *CLI) printAccountSummaryInfo() {
 //CreateAddressOnServer
 func (cli *CLI) CreateAddressOnServer(walletID, accountID string, count uint64) error {
 
+	var (
+		retErr *openwallet.Error
+	)
+
 	if len(accountID) == 0 {
 		return fmt.Errorf("accountID is empty. ")
 	}
@@ -379,10 +390,15 @@ func (cli *CLI) CreateAddressOnServer(walletID, accountID string, count uint64) 
 				}
 			} else {
 				log.Error("create account on server failed, unexpected error:", msg)
+				retErr = openwallet.Errorf(status, msg)
 			}
 		})
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return retErr
 }
 
 //exportAddressToFile 导出地址到文件中
@@ -402,26 +418,38 @@ func (cli *CLI) exportAddressToFile(addresses []string, filePath string) bool {
 //SearchAddressOnServer
 func (cli *CLI) SearchAddressOnServer(address string) (*openwsdk.Address, error) {
 
+	var (
+		retErr *openwallet.Error
+	)
+
 	if len(address) == 0 {
 		return nil, fmt.Errorf("address is empty. ")
 	}
 
 	var addr *openwsdk.Address
 
-	cli.api.FindAddressByAddress(address, true,
+	err := cli.api.FindAddressByAddress(address, true,
 		func(status uint64, msg string, address *openwsdk.Address) {
 			if status == owtp.StatusSuccess {
 				addr = address
 			} else {
 				log.Error("search address on server failed, unexpected error:", msg)
+				retErr = openwallet.Errorf(status, msg)
 			}
 		})
+	if err != nil {
+		return nil, err
+	}
 
-	return addr, nil
+	return addr, retErr
 }
 
 //GetAddressesOnServer
 func (cli *CLI) GetAddressesOnServer(walletID, accountID string, offset, limit int) ([]*openwsdk.Address, error) {
+
+	var (
+		retErr *openwallet.Error
+	)
 
 	list := make([]*openwsdk.Address, 0)
 
@@ -433,16 +461,20 @@ func (cli *CLI) GetAddressesOnServer(walletID, accountID string, offset, limit i
 		return nil, fmt.Errorf("walleID is empty. ")
 	}
 
-	cli.api.FindAddressByAccountID(accountID, offset, limit, true,
+	err := cli.api.FindAddressByAccountID(accountID, offset, limit, true,
 		func(status uint64, msg string, addresses []*openwsdk.Address) {
 			if status == owtp.StatusSuccess {
 				list = addresses
 			} else {
 				log.Error("get address on server failed, unexpected error:", msg)
+				retErr = openwallet.Errorf(status, msg)
 			}
 		})
+	if err != nil {
+		return nil, err
+	}
 
-	return list, nil
+	return list, retErr
 }
 
 //printAddressList 打印地址列表
