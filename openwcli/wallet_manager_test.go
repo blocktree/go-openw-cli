@@ -39,7 +39,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
+	walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
 	wallet, err := cli.GetWalletByWalletID(walletID)
 	if err != nil {
 		log.Error("GetWalletByWalletID error:", err)
@@ -61,7 +61,7 @@ func TestCLI_GetAccountsOnServer(t *testing.T) {
 		return
 	}
 
-	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
+	walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
 	accounts, err := cli.GetAccountsOnServer(walletID)
 	if err != nil {
 		log.Error("GetAccountsOnServer error:", err)
