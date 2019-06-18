@@ -360,7 +360,7 @@ func (cli *CLI) printAccountSummaryInfo() {
 func (cli *CLI) CreateAddressOnServer(walletID, accountID string, count uint64) error {
 
 	var (
-		retErr *openwallet.Error
+		retErr error
 	)
 
 	if len(accountID) == 0 {
@@ -419,7 +419,7 @@ func (cli *CLI) exportAddressToFile(addresses []string, filePath string) bool {
 func (cli *CLI) SearchAddressOnServer(address string) (*openwsdk.Address, error) {
 
 	var (
-		retErr *openwallet.Error
+		retErr error
 	)
 
 	if len(address) == 0 {
@@ -448,7 +448,7 @@ func (cli *CLI) SearchAddressOnServer(address string) (*openwsdk.Address, error)
 func (cli *CLI) GetAddressesOnServer(walletID, accountID string, offset, limit int) ([]*openwsdk.Address, error) {
 
 	var (
-		retErr *openwallet.Error
+		retErr error
 	)
 
 	list := make([]*openwsdk.Address, 0)
