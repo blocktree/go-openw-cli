@@ -90,9 +90,18 @@ var (
 		{
 
 			Name:      "transfer",
-			Usage:     "create a transaction",
+			Usage:     "transfer certain amount of coins/tokens to destination address",
 			ArgsUsage: "<symbol>",
 			Action:    transfer,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
+		{
+
+			Name:      "transferall",
+			Usage:     "transfer all of coins/token to destination address",
+			ArgsUsage: "<symbol>",
+			Action:    transferall,
 			Category:  "WALLET COMMANDS",
 			Flags:     []cli.Flag{},
 		},
@@ -319,6 +328,20 @@ func transfer(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
 		err := cli.TransferFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+//transferall 转账全部资产交易
+func transferall(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.TransferAllFlow()
 		if err != nil {
 			log.Error("unexpected error: ", err)
 			return err

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/log"
+	"github.com/blocktree/openwallet/openwallet"
 	"github.com/blocktree/openwallet/owtp"
 )
 
@@ -20,21 +21,32 @@ func (cli *CLI) GetTokenBalance(account *openwsdk.Account, contractID string) st
 }
 
 //GetTokenBalanceByContractAddress 通过代币合约的地址获取代币余额
-func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, address string) string {
-	getBalance := "0"
+func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, address string) (*openwsdk.TokenBalance, error) {
+	var (
+		getBalance *openwsdk.TokenBalance
+		callErr error
+	)
 
 	token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", address)
 	if findErr != nil {
-		return getBalance
+		return nil, findErr
 	}
 	contractID := token[0].ContractID
-	cli.api.GetTokenBalanceByAccount(account.AccountID, contractID, true,
+	err := cli.api.GetTokenBalanceByAccount(account.AccountID, contractID, true,
 		func(status uint64, msg string, balance *openwsdk.TokenBalance) {
 			if status == owtp.StatusSuccess {
-				getBalance = balance.Balance.Balance
+				getBalance = balance
+			} else {
+				callErr = openwallet.Errorf(status, msg)
 			}
 		})
-	return getBalance
+	if err != nil {
+		return nil, err
+	}
+	if callErr != nil {
+		return nil, err
+	}
+	return getBalance, nil
 }
 
 //Transfer 转账交易
