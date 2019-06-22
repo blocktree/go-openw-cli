@@ -247,6 +247,10 @@ func TestCLI_GetTokenBalanceByContractAddresss(t *testing.T) {
 	accountID := "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF"
 	address := "THvZvKPLHKLJhEFYKiyqj6j8G8nGgfg7ur"
 	account := &openwsdk.Account{Symbol: "TRX", AccountID: accountID}
-	balance := cli.GetTokenBalanceByContractAddress(account, address)
+	balance, err := cli.GetTokenBalanceByContractAddress(account, address)
+	if err != nil {
+		t.Errorf("GetAllTokenContractBalance error:", err)
+		return
+	}
 	fmt.Printf("balance: %+v\n", balance)
 }

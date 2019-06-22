@@ -227,6 +227,24 @@ $ ./openw-cli -c=./node.ini transfer
 # send transaction successfully.
 # transaction id: GbB1oQkXQTSDudTEhKwdhyvnUvunnHKngZqGE9Xfa3tn
 
+# 选择资产账户，转账账户下所有地址的资产到目标地址
+$ ./openw-cli -c=./node.ini transferall
+
+# [Please select a account]
+# Enter account No.: 15
+# Enter contract address:
+# Enter received address: TRJJ9Mq4aMjdmKWpTDJAgbYNoY2P9Facg5        //目标地址
+# Enter fee rate:
+# Enter memo:
+# Enter wallet password:
+# Summary account[9Z4ivqhr5mniEBzpxkRQn7w5r1YgeoB6qTLLas3VV6Z] Symbol: TRX, token:
+# Summary account[9Z4ivqhr5mniEBzpxkRQn7w5r1YgeoB6qTLLas3VV6Z] Current Balance = 9.9
+# Summary account[9Z4ivqhr5mniEBzpxkRQn7w5r1YgeoB6qTLLas3VV6Z] Summary Address = TRJJ9Mq4aMjdmKWpTDJAgbYNoY2P9Facg5
+# Summary account[9Z4ivqhr5mniEBzpxkRQn7w5r1YgeoB6qTLLas3VV6Z] Start Create Summary Transaction
+# Create Summary Transaction in address range [0...200]
+# [Success] txid: 4106a2a1dff1647d4e12b14d181ed45d4c847d710e6685588125674a481c42af
+# Save summary task log successfully
+
 # 设置汇总，先选择钱包，再选择资产账户
 $ ./openw-cli -c=./node.ini setsum
 

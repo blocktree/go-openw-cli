@@ -423,6 +423,69 @@ func (cli *CLI) TransferFlow() error {
 	return nil
 }
 
+
+
+//TransferAllFlow
+func (cli *CLI) TransferAllFlow() error {
+	//:选择钱包
+	wallet, err := cli.selectWalletStep()
+	if err != nil {
+		return err
+	}
+
+	//:选择账户
+	account, err := cli.selectAccountStep(wallet.WalletID)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入合约地址
+	contractAddress, err := console.InputText("Enter contract address: ", false)
+	if err != nil {
+		return err
+	}
+	// 等待用户输入接收地址
+	to, err := console.InputText("Enter received address: ", true)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户费率
+	feeRate, err := console.InputRealNumber("Enter fee rate: ", false)
+	if err != nil {
+		return err
+	}
+
+	feeRateDec, _ := decimal.NewFromString(feeRate)
+	if feeRateDec.LessThan(decimal.Zero) {
+		return fmt.Errorf("fee rate can not be negative")
+	}
+
+	// 等待用户费率
+	memo, err := console.InputText("Enter memo: ", false)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入密码
+	password, err := console.InputPassword(false, 3)
+	if err != nil {
+		return err
+	}
+
+	//创建新交易单
+	sid := uuid.New().String()
+
+	err = cli.TransferAll(wallet, account, contractAddress, to, sid, feeRate, memo, password)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
+
 //ListSumInfoFlow
 func (cli *CLI) ListSumInfoFlow() error {
 	cli.printAccountSummaryInfo()
