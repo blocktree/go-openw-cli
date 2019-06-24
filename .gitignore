@@ -2,3 +2,8 @@ build
 go.sum
 openwcli/conf
 openwcli/testenv
+.idea
+openwcli/testdata
+testdata
+node.ini
+sumtask.json
