@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
+	"github.com/blocktree/openwallet/openwallet"
 	"github.com/google/uuid"
 	"testing"
 )
@@ -15,6 +16,93 @@ func testFindAccountByID(accountID string, list []*openwsdk.Account) *openwsdk.A
 		}
 	}
 	return nil
+}
+
+
+func testCLITransfer(walletID, accountID, amount, to, password string) *openwallet.Error {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return openwallet.Errorf(openwallet.ErrUnknownException, "init cli error")
+	}
+
+	wallet, err := cli.GetWalletByWalletID(walletID)
+	if err != nil {
+		//log.Error("GetWalletByWalletID error:", err)
+		return openwallet.ConvertError(err)
+	}
+
+	account, err := cli.GetAccountByAccountID(accountID)
+	if err != nil {
+		//log.Error("GetAccountByAccountID error:", err)
+		return openwallet.ConvertError(err)
+	}
+
+	if account != nil {
+		sid := uuid.New().String()
+		_, _, exErr := cli.Transfer(wallet, account, "", to, amount, sid, "", "", password)
+		if exErr != nil {
+			//log.Error("Transfer error code: %d, msg: %s", exErr.Code(), exErr.Error())
+			return exErr
+		}
+	}
+
+	return nil
+}
+
+
+func testCLITransferAll(walletID, accountID, to, password string) *openwallet.Error {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return openwallet.Errorf(openwallet.ErrUnknownException, "init cli error")
+	}
+
+	wallet, err := cli.GetWalletByWalletID(walletID)
+	if err != nil {
+		//log.Error("GetWalletByWalletID error:", err)
+		return openwallet.ConvertError(err)
+	}
+
+	account, err := cli.GetAccountByAccountID(accountID)
+	if err != nil {
+		//log.Error("GetAccountByAccountID error:", err)
+		return openwallet.ConvertError(err)
+	}
+
+	if account != nil {
+		sid := uuid.New().String()
+		exErr := cli.TransferAll(wallet, account, "", to, sid, "", "", password)
+		if exErr != nil {
+			//log.Error("Transfer error code: %d, msg: %s", exErr.Code(), exErr.Error())
+			return openwallet.ConvertError(err)
+		}
+	}
+
+	return nil
+}
+
+func TestCLI_Transfer_LTC(t *testing.T) {
+	walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
+	accountID := "PgHCcfMbcw1zXRNZo23NFjRdBmcN5tzrb1j5McRLJbG"
+	amount := "0.001"
+	to := "LcaFc1pmJBsS7MQyMvZaboppuuvGFubD49"
+	password := "12345678"
+	err := testCLITransfer(walletID, accountID, amount, to, password)
+	if err != nil {
+		t.Errorf("Transfer error code: %d, msg: %s", err.Code(), err.Error())
+		return
+	}
+}
+
+func TestCLI_TransferAll_LTC(t *testing.T) {
+	walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
+	accountID := "PgHCcfMbcw1zXRNZo23NFjRdBmcN5tzrb1j5McRLJbG"
+	to := "LcaFc1pmJBsS7MQyMvZaboppuuvGFubD49"
+	password := "12345678"
+	err := testCLITransferAll(walletID, accountID, to, password)
+	if err != nil {
+		t.Errorf("Transfer All error code: %d, msg: %s", err.Code(), err.Error())
+		return
+	}
 }
 
 func TestCLI_Transfer_BTC(t *testing.T) {
@@ -40,9 +128,9 @@ func TestCLI_Transfer_BTC(t *testing.T) {
 
 		if account != nil {
 			sid := uuid.New().String()
-			_, _, err = cli.Transfer(wallets[0], accounts[0], "", "mp1JDsi7Dr2PkcWu1j4SUSTXJqXjFMaeVx", "0.023", sid, "", "", "12345678")
+			_, _, exErr := cli.Transfer(wallets[0], accounts[0], "", "mp1JDsi7Dr2PkcWu1j4SUSTXJqXjFMaeVx", "0.023", sid, "", "", "12345678")
 			if err != nil {
-				log.Error("Transfer error:", err)
+				log.Error("Transfer error code: %d, msg: %s", exErr.Code(), exErr.Error())
 				return
 			}
 		}

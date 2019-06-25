@@ -1,7 +1,6 @@
 package openwcli
 
 import (
-	"fmt"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
@@ -50,7 +49,7 @@ func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, addr
 }
 
 //Transfer 转账交易
-func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, error) {
+func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, *openwallet.Error) {
 
 	var (
 		isContract  bool
@@ -58,7 +57,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 		retFailed   []*openwsdk.FailedRawTransaction
 		retRawTx    *openwsdk.RawTransaction
 		err         error
-		createErr   error
+		createErr   *openwallet.Error
 		contractID  string
 		tokenSymbol string
 	)
@@ -66,14 +65,14 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	//获取种子文件
 	key, err := cli.getLocalKeyByWallet(wallet, password)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, err.Error())
 	}
 
 	if len(contractAddress) > 0 {
 		isContract = true
 		token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", contractAddress)
 		if findErr != nil {
-			return nil, nil, findErr
+			return nil, nil, openwallet.ConvertError(findErr)
 		}
 		contractID = token[0].ContractID
 		tokenSymbol = token[0].Token
@@ -88,13 +87,13 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	err = api.CreateTrade(account.AccountID, sid, coin, amount, to, feeRate, memo, true,
 		func(status uint64, msg string, rawTx *openwsdk.RawTransaction) {
 			if status != owtp.StatusSuccess {
-				createErr = fmt.Errorf(msg)
+				createErr = openwallet.Errorf(status, msg)
 				return
 			}
 			retRawTx = rawTx
 		})
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, openwallet.ConvertError(err)
 	}
 	if createErr != nil {
 		return nil, nil, createErr
@@ -114,14 +113,14 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	//签名交易单
 	err = openwsdk.SignRawTransaction(retRawTx, key)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, openwallet.Errorf(openwallet.ErrSignRawTransactionFailed, err.Error())
 	}
 
 	//广播交易单
 	err = api.SubmitTrade([]*openwsdk.RawTransaction{retRawTx}, true,
 		func(status uint64, msg string, successTx []*openwsdk.Transaction, failedRawTxs []*openwsdk.FailedRawTransaction) {
 			if status != owtp.StatusSuccess {
-				createErr = fmt.Errorf(msg)
+				createErr = openwallet.Errorf(status, msg)
 				return
 			}
 
@@ -129,7 +128,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 			retFailed = failedRawTxs
 		})
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, openwallet.ConvertError(err)
 	}
 	if createErr != nil {
 		return nil, nil, createErr

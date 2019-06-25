@@ -566,7 +566,7 @@ func (cli *CLI) UpdateSymbols() error {
 	)
 
 	var getSymbols []*openwsdk.Symbol
-	err := cli.api.GetSymbolList(0, limit, true,
+	err := cli.api.GetSymbolList(0, limit, 0, true,
 		func(status uint64, msg string, symbols []*openwsdk.Symbol) {
 			getSymbols = symbols
 		})

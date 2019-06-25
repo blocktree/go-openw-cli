@@ -2,9 +2,10 @@ package openwcli
 
 import (
 	"fmt"
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"testing"
+
+	"github.com/blocktree/go-openw-sdk/openwsdk"
+	"github.com/blocktree/openwallet/log"
 )
 
 func TestCLI_CreateWalletOnServer(t *testing.T) {
@@ -47,7 +48,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	}
 
 	if wallet != nil {
-		_, _, err = cli.CreateAccountOnServer("feesupportTRX", "12345678", "TRX", wallet)
+		_, _, err = cli.CreateAccountOnServer("mainnetLTC", "12345678", "LTC", wallet)
 		if err != nil {
 			log.Error("CreateAccountOnServer error:", err)
 			return
@@ -70,6 +71,21 @@ func TestCLI_GetAccountsOnServer(t *testing.T) {
 	for i, w := range accounts {
 		log.Info("account[", i, "]:", w)
 	}
+}
+
+func TestCLI_GetAccountOnServer(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+
+	accountID := "PgHCcfMbcw1zXRNZo23NFjRdBmcN5tzrb1j5McRLJbG"
+	account, err := cli.GetAccountByAccountID(accountID)
+	if err != nil {
+		log.Error("GetAccountByAccountID error:", err)
+		return
+	}
+	log.Infof("account: %+v", account)
 }
 
 func TestCLI_CreateAddressOnServer(t *testing.T) {
@@ -95,8 +111,8 @@ func TestCLI_GetAddressesOnServer(t *testing.T) {
 		return
 	}
 
-	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
-	accountID := "AHj8XkE6rU2n9fdsEba1gQ9KTTQnnNnWhwtcpyxjv4wJ"
+	walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
+	accountID := "PgHCcfMbcw1zXRNZo23NFjRdBmcN5tzrb1j5McRLJbG"
 
 	addresses, err := cli.GetAddressesOnServer(walletID, accountID, 0, 50)
 	if err != nil {
@@ -249,7 +265,7 @@ func TestCLI_GetTokenBalanceByContractAddresss(t *testing.T) {
 	account := &openwsdk.Account{Symbol: "TRX", AccountID: accountID}
 	balance, err := cli.GetTokenBalanceByContractAddress(account, address)
 	if err != nil {
-		t.Errorf("GetAllTokenContractBalance error:", err)
+		t.Errorf("GetAllTokenContractBalance error: %v", err)
 		return
 	}
 	fmt.Printf("balance: %+v\n", balance)

@@ -3,6 +3,7 @@ package openwcli
 import (
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/log"
+	"github.com/blocktree/openwallet/openwallet"
 	"github.com/blocktree/openwallet/owtp"
 	"github.com/blocktree/openwallet/timer"
 	"time"
@@ -256,7 +257,7 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 
 	account, err := cli.GetAccountByAccountID(accountID)
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		ctx.Response(nil, openwallet.ErrAccountNotFound, err.Error())
 		return
 	}
 
@@ -266,9 +267,9 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 		return
 	}
 
-	retTx, retFailed, err := cli.Transfer(wallet, account, contractAddress, address, amount, sid, feeRate, memo, password)
-	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+	retTx, retFailed, exErr := cli.Transfer(wallet, account, contractAddress, address, amount, sid, feeRate, memo, password)
+	if exErr != nil {
+		ctx.Response(nil, exErr.Code(), exErr.Error())
 		return
 	}
 
