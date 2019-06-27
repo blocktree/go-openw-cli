@@ -60,7 +60,7 @@ func (cli *CLI) TransferAll(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 	log.Infof("Summary account[%s] Symbol: %s, token: %s ", account.AccountID, account.Symbol, tokenSymbol)
 
 	//汇总账户
-	err = cli.summaryAccount(account, accountTask, key, balance, *accountTask.SummarySetting, coin)
+	err = cli.summaryAccount(account, accountTask, key, balance, *accountTask.SummarySetting, coin, "", decimal.Zero)
 	if err != nil {
 		return fmt.Errorf("Summary wallet[%s] account[%s] main coin unexpected error: %v ", wallet.WalletID, account.AccountID, err)
 	}
@@ -309,14 +309,16 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 
 	//如果余额大于阀值，汇总的地址
 	if balanceDec.GreaterThan(threshold) {
-		return cli.summaryAccount(account, task, key, balance, sumSets, coin)
+		return cli.summaryAccount(account, task, key, balance, sumSets, coin, feesSupportAccountID, feesSupportBalance)
 	}
 
 	return nil
 }
 
 //summaryAccount 汇总单个账户
-func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.SummaryAccountTask, key *hdkeystore.HDKey, balance string, sumSets openwsdk.SummarySetting, coin openwsdk.Coin) error {
+func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.SummaryAccountTask,
+	key *hdkeystore.HDKey, balance string, sumSets openwsdk.SummarySetting, coin openwsdk.Coin,
+	feesSupportAccountID string, feesSupportBalance decimal.Decimal) error {
 
 	const (
 		limit = 200
@@ -329,8 +331,6 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 		retFailed            []*openwsdk.FailedRawTransaction
 		retRawTxs            []*openwsdk.RawTransaction
 		retRawFeesSupportTxs []*openwsdk.RawTransaction
-		feesSupportAccountID string
-		feesSupportBalance   = decimal.Zero
 	)
 
 	log.Infof("Summary account[%s] Current Balance = %v ", account.AccountID, balance)
@@ -349,12 +349,12 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 
 		//:记录汇总批次号
 		sid := uuid.New().String()
-
+		//log.Debugf("sid: %+v", sid)
 		err = cli.api.CreateSummaryTx(account.AccountID, sumSets.SumAddress, coin,
 			task.FeeRate, sumSets.MinTransfer, sumSets.RetainedBalance,
 			i, limit, sumSets.Confirms, sid, task.FeesSupportAccount, task.Memo, true,
 			func(status uint64, msg string, rawTxs []*openwsdk.RawTransaction) {
-				//log.Debugf("status: %d, msg: %s", status, msg)
+				log.Debugf("status: %d, msg: %s", status, msg)
 				for _, rawTx := range rawTxs {
 					//log.Debugf("rawTx: %+v", rawTx)
 					if rawTx.ErrorMsg != nil && rawTx.ErrorMsg.Code != 0 {
