@@ -415,9 +415,9 @@ func (cli *CLI) TransferFlow() error {
 	//创建新交易单
 	sid := uuid.New().String()
 
-	_, _, err = cli.Transfer(wallet, account, contractAddress, to, amount, sid, feeRate, memo, password)
-	if err != nil {
-		return err
+	_, _, exErr := cli.Transfer(wallet, account, contractAddress, to, amount, sid, feeRate, memo, password)
+	if exErr != nil {
+		return exErr
 	}
 
 	return nil
