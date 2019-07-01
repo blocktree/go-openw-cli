@@ -214,6 +214,13 @@ func (cli *CLI) createAccountViaTrustNode(ctx *owtp.Context) {
 	symbol := ctx.Params().Get("symbol").String()
 	password := ctx.Params().Get("password").String()
 
+	if len(password) == 0 {
+		//钱包是否已经解锁
+		if p, exist := cli.unlockWallets[walletID]; exist {
+			password = p
+		}
+	}
+
 	wallet, err := cli.GetWalletByWalletID(walletID)
 	if err != nil {
 		ctx.Response(nil, owtp.ErrCustomError, err.Error())
@@ -255,6 +262,7 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 	feeRate := ctx.Params().Get("feeRate").String()
 	memo := ctx.Params().Get("memo").String()
 
+
 	account, err := cli.GetAccountByAccountID(accountID)
 	if err != nil {
 		ctx.Response(nil, openwallet.ErrAccountNotFound, err.Error())
@@ -265,6 +273,13 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 	if err != nil {
 		ctx.Response(nil, owtp.ErrCustomError, err.Error())
 		return
+	}
+
+	if len(password) == 0 {
+		//钱包是否已经解锁
+		if p, exist := cli.unlockWallets[wallet.WalletID]; exist {
+			password = p
+		}
 	}
 
 	retTx, retFailed, exErr := cli.Transfer(wallet, account, contractAddress, address, amount, sid, feeRate, memo, password)
