@@ -101,18 +101,18 @@ func (cli *CLI) SummaryTask() {
 				continue
 			}
 
+			//汇总账户主币
+			err = cli.SummaryAccountTokenContracts(accountTask, account, key)
+			if err != nil {
+				log.Errorf("Summary wallet[%s] account[%s] token contracts unexpected error: %v", task.WalletID, account.AccountID, err)
+			}
+
 			if !accountTask.OnlyContracts {
 				//汇总账户主币
 				err = cli.SummaryAccountMainCoin(accountTask, account, key)
 				if err != nil {
 					log.Errorf("Summary wallet[%s] account[%s] main coin unexpected error: %v", task.WalletID, account.AccountID, err)
 				}
-			}
-
-			//汇总账户主币
-			err = cli.SummaryAccountTokenContracts(accountTask, account, key)
-			if err != nil {
-				log.Errorf("Summary wallet[%s] account[%s] token contracts unexpected error: %v", task.WalletID, account.AccountID, err)
 			}
 
 		}
