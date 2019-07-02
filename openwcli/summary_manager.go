@@ -1,6 +1,7 @@
 package openwcli
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/asdine/storm"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
@@ -100,18 +101,18 @@ func (cli *CLI) SummaryTask() {
 				continue
 			}
 
+			//汇总账户主币
+			err = cli.SummaryAccountTokenContracts(accountTask, account, key)
+			if err != nil {
+				log.Errorf("Summary wallet[%s] account[%s] token contracts unexpected error: %v", task.WalletID, account.AccountID, err)
+			}
+
 			if !accountTask.OnlyContracts {
 				//汇总账户主币
 				err = cli.SummaryAccountMainCoin(accountTask, account, key)
 				if err != nil {
 					log.Errorf("Summary wallet[%s] account[%s] main coin unexpected error: %v", task.WalletID, account.AccountID, err)
 				}
-			}
-
-			//汇总账户主币
-			err = cli.SummaryAccountTokenContracts(accountTask, account, key)
-			if err != nil {
-				log.Errorf("Summary wallet[%s] account[%s] token contracts unexpected error: %v", task.WalletID, account.AccountID, err)
 			}
 
 		}
@@ -349,14 +350,14 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 
 		//:记录汇总批次号
 		sid := uuid.New().String()
-		//log.Debugf("sid: %+v", sid)
+		log.Infof("SID: %s", sid)
 		err = cli.api.CreateSummaryTx(account.AccountID, sumSets.SumAddress, coin,
 			task.FeeRate, sumSets.MinTransfer, sumSets.RetainedBalance,
 			i, limit, sumSets.Confirms, sid, task.FeesSupportAccount, task.Memo, true,
 			func(status uint64, msg string, rawTxs []*openwsdk.RawTransaction) {
-				log.Debugf("status: %d, msg: %s", status, msg)
+				//log.Debugf("status: %d, msg: %s", status, msg)
 				for _, rawTx := range rawTxs {
-					//log.Debugf("rawTx: %+v", rawTx)
+					//log.Debugf("rawTx.ErrorMsg: %s", rawTx.ErrorMsg.Err)
 					if rawTx.ErrorMsg != nil && rawTx.ErrorMsg.Code != 0 {
 						log.Warning(rawTx.ErrorMsg.Err)
 					} else {
@@ -410,6 +411,15 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 				signedRawTxs = append(signedRawTxs, rawTx)
 
 				//log.Debugf("retRawTxs: %+v", rawTx)
+
+				//if rawTx != nil {
+				//	for accountID, signatures := range rawTx.Signatures {
+				//		log.Warningf("[Signed] accountID: %s", accountID)
+				//		for _, keySignature := range signatures {
+				//			log.Warningf("[Signed] keySignature: %+v", keySignature)
+				//		}
+				//	}
+				//}
 			}
 
 			if len(signedRawTxs) == 0 {
@@ -462,7 +472,19 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 			}
 
 			for _, tx := range retFailed {
-				log.Warn("[Failed] reason:", tx.Reason)
+				log.Warningf("[Failed] reason: %s", tx.Reason)
+				if tx.RawTx != nil {
+					log.Warningf("[Failed] rawHex: %s", tx.RawTx.RawHex)
+					for accountID, signatures := range tx.RawTx.Signatures {
+						log.Warningf("[Failed] signature accountID: %s", accountID)
+						for _, keySignature := range signatures {
+							signaturesJSON, jsonErr := json.Marshal(keySignature)
+							if jsonErr == nil {
+								log.Warningf("[Failed] keySignature: %s", string(signaturesJSON))
+							}
+						}
+					}
+				}
 			}
 
 			//:记录汇总情况
@@ -594,6 +616,18 @@ func FindExistedSummaryAccountTask(accountID string, tasks []*openwsdk.SummaryAc
 func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error {
 
 	for _, w := range task.Wallets {
+
+		wallet, err := cli.GetWalletByWalletIDOnLocal(w.WalletID)
+		if err != nil {
+			return fmt.Errorf("can not find local wallet: %s-%s", wallet.Alias, wallet.WalletID)
+		}
+
+		//解锁密码是否正确
+		_, err = cli.getLocalKeyByWallet(wallet, w.Password)
+		if err != nil {
+			return fmt.Errorf("unlock wallet with ID: %s, failedpassword is invalid", w.WalletID)
+		}
+
 		for _, account := range w.Accounts {
 
 			accounInfo, err := cli.GetAccountByAccountID(account.AccountID)

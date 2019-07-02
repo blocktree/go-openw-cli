@@ -25,12 +25,13 @@ const (
 
 type CLI struct {
 	mu               sync.RWMutex
-	config           *Config               //工具配置
-	db               *StormDB   //本地数据库
-	api              *openwsdk.APINode     //api
-	summaryTask      *openwsdk.SummaryTask //汇总任务
-	summaryTaskTimer *timer.TaskTimer      //汇总任务定时器
-	transmitNode     *owtp.OWTPNode        //转发节点，被托管钱包种子的节点
+	config           *Config                      //工具配置
+	db               *StormDB                     //本地数据库
+	api              *openwsdk.APINode            //api
+	summaryTask      *openwsdk.SummaryTask        //汇总任务
+	summaryTaskTimer *timer.TaskTimer             //汇总任务定时器
+	transmitNode     *owtp.OWTPNode               //转发节点，被托管钱包种子的节点
+	unlockWallets    map[string]string 			  //已解锁的钱包
 }
 
 // 初始化工具
@@ -60,8 +61,9 @@ func NewCLI(c *Config) (*CLI, error) {
 	}
 
 	cli := &CLI{
-		config: c,
-		db:     db,
+		config:        c,
+		db:            db,
+		unlockWallets: make(map[string]string),
 	}
 
 	//配置日志
@@ -423,8 +425,6 @@ func (cli *CLI) TransferFlow() error {
 	return nil
 }
 
-
-
 //TransferAllFlow
 func (cli *CLI) TransferAllFlow() error {
 	//:选择钱包
@@ -483,8 +483,6 @@ func (cli *CLI) TransferAllFlow() error {
 
 	return nil
 }
-
-
 
 //ListSumInfoFlow
 func (cli *CLI) ListSumInfoFlow() error {
@@ -629,9 +627,28 @@ func (cli *CLI) StartSumFlow(file string) error {
 				summaryWalletTask,
 			},
 		}
+	} else {
+		//检查文件是否有解锁密码
+		for _, w := range summaryTask.Wallets {
+
+			wallet, err := cli.GetWalletByWalletIDOnLocal(w.WalletID)
+			if err != nil {
+				return fmt.Errorf("can not find local wallet with ID: %s", w.WalletID)
+			}
+			w.Wallet = wallet
+
+			if len(w.Password) == 0 {
+				//要求输入钱包解锁密码
+				log.Std.Notice("[Please enter password to unlock wallet: %s-%s]", wallet.Alias, w.WalletID)
+				// 等待用户输入密码
+				password, selectErr := console.InputPassword(false, 3)
+				if selectErr != nil {
+					return selectErr
+				}
+				w.Password = password
+			}
+		}
 	}
-
-
 
 	err = cli.checkSummaryTaskIsHaveSettings(&summaryTask)
 	if err != nil {
@@ -740,9 +757,20 @@ func (cli *CLI) StartTrustServerFlow() error {
 
 	var (
 		endRunning = make(chan bool, 1)
+		err        error
 	)
 
-	err := cli.ServeTransmitNode(true)
+	confirm, _ := console.Stdin.PromptConfirm("Do you want to unlock local wallets?")
+
+	if confirm {
+		// 是否需要解锁本地的钱包，解锁后，发起转账和汇总不需要输入密码。
+		err = cli.unlockLocalWalletsByInputPassword()
+		if err != nil {
+			return err
+		}
+	}
+
+	err = cli.ServeTransmitNode(true)
 	if err != nil {
 		return err
 	}
@@ -823,5 +851,37 @@ func (cli *CLI) ListTokenBalanceFlow() error {
 		return err
 	}
 	cli.printTokenContractBalanceList(list, account.Symbol)
+	return nil
+}
+
+//unlockLocalWalletsByInputPassword 输入密码解锁钱包
+func (cli *CLI) unlockLocalWalletsByInputPassword() error {
+
+	localWallets, err := cli.GetWalletsOnServer()
+	if err != nil {
+		return err
+	}
+
+	for _, w := range localWallets {
+
+		log.Std.Notice("[Please enter password to unlock wallet: %s-%s]", w.Alias, w.WalletID)
+
+		// 等待用户输入密码
+		password, err := console.InputPassword(false, 3)
+		if err != nil {
+			return err
+		}
+
+		_, err = cli.getLocalKeyByWallet(w, password)
+		if err != nil {
+			return err
+		}
+
+		cli.mu.Lock()
+		cli.unlockWallets[w.WalletID] = password
+		cli.mu.Unlock()
+
+	}
+
 	return nil
 }

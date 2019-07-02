@@ -62,6 +62,11 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 		tokenSymbol string
 	)
 
+
+	if len(password) == 0 {
+		return nil, nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, "unlock wallet password is empty. ")
+	}
+
 	//获取种子文件
 	key, err := cli.getLocalKeyByWallet(wallet, password)
 	if err != nil {

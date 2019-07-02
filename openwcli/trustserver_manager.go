@@ -41,6 +41,7 @@ func (cli *CLI) ServeTransmitNode(autoReconnect bool) error {
 	cli.transmitNode.HandleFunc("removeSummaryTaskViaTrustNode", cli.removeSummaryTaskViaTrustNode)
 	cli.transmitNode.HandleFunc("getCurrentSummaryTaskViaTrustNode", cli.getCurrentSummaryTaskViaTrustNode)
 	cli.transmitNode.HandleFunc("getSummaryTaskLogViaTrustNode", cli.getSummaryTaskLogViaTrustNode)
+	cli.transmitNode.HandleFunc("getLocalWalletListViaTrustNode", cli.getLocalWalletListViaTrustNode)
 
 	//自动连接
 	if autoReconnect {
@@ -214,6 +215,13 @@ func (cli *CLI) createAccountViaTrustNode(ctx *owtp.Context) {
 	symbol := ctx.Params().Get("symbol").String()
 	password := ctx.Params().Get("password").String()
 
+	if len(password) == 0 {
+		//钱包是否已经解锁
+		if p, exist := cli.unlockWallets[walletID]; exist {
+			password = p
+		}
+	}
+
 	wallet, err := cli.GetWalletByWalletID(walletID)
 	if err != nil {
 		ctx.Response(nil, owtp.ErrCustomError, err.Error())
@@ -265,6 +273,13 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 	if err != nil {
 		ctx.Response(nil, owtp.ErrCustomError, err.Error())
 		return
+	}
+
+	if len(password) == 0 {
+		//钱包是否已经解锁
+		if p, exist := cli.unlockWallets[wallet.WalletID]; exist {
+			password = p
+		}
 	}
 
 	retTx, retFailed, exErr := cli.Transfer(wallet, account, contractAddress, address, amount, sid, feeRate, memo, password)
@@ -346,6 +361,16 @@ func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	summaryTask := openwsdk.NewSummaryTask(ctx.Params().Get("summaryTask"))
 	cycleSec := ctx.Params().Get("cycleSec").Int()
+
+	//检查汇总任务的参数是否传入密码
+	for _, summaryWalletTask := range summaryTask.Wallets {
+		if len(summaryWalletTask.Password) == 0 {
+			//钱包是否已经解锁
+			if p, exist := cli.unlockWallets[summaryWalletTask.WalletID]; exist {
+				summaryWalletTask.Password = p
+			}
+		}
+	}
 
 	//:先检查汇总任务是否有汇总配置
 	err := cli.checkSummaryTaskIsHaveSettings(summaryTask)
@@ -449,6 +474,16 @@ func (cli *CLI) appendSummaryTaskViaTrustNode(ctx *owtp.Context) {
 
 	summaryTask := openwsdk.NewSummaryTask(ctx.Params().Get("summaryTask"))
 
+	//检查汇总任务的参数是否传入密码
+	for _, summaryWalletTask := range summaryTask.Wallets {
+		if len(summaryWalletTask.Password) == 0 {
+			//钱包是否已经解锁
+			if p, exist := cli.unlockWallets[summaryWalletTask.WalletID]; exist {
+				summaryWalletTask.Password = p
+			}
+		}
+	}
+
 	//:先检查汇总任务是否有汇总配置
 	err := cli.checkSummaryTaskIsHaveSettings(summaryTask)
 	if err != nil {
@@ -534,4 +569,22 @@ func (cli *CLI) getSummaryTaskLogViaTrustNode(ctx *owtp.Context) {
 	}
 
 	ctx.Response(logs, owtp.StatusSuccess, "success")
+}
+
+func (cli *CLI) getLocalWalletListViaTrustNode(ctx *owtp.Context) {
+
+	appID := ctx.Params().Get("appID").String()
+
+	if appID != cli.config.appid {
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
+		return
+	}
+
+	wallets, err := cli.GetWalletsOnServer()
+	if err != nil {
+		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		return
+	}
+
+	ctx.Response(wallets, owtp.StatusSuccess, "success")
 }

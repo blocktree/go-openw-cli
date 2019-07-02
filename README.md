@@ -297,7 +297,7 @@ $ ./openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
     "wallets": [
         {
             "walletID": "1234qwer", //钱包ID
-            "password": "12345678", //钱包解锁密码
+            "password": "12345678", //钱包解锁密码，不填时，执行命令时要求输入
             "accounts": [ //需要汇总的账户列表
                 {
                     "accountID": "123",               //资产账户ID
@@ -349,7 +349,7 @@ $ ./openw-cli -c=./node.ini listtokencontract
 # 选择钱包及账户，查看账户下拥有的代币余额
 $ ./openw-cli -c=./node.ini listtokenbalance
 
-# 启动后台托管钱包服务
+# 启动后台托管钱包服务，执行时会要求是否解锁钱包
 $ ./openw-cli -c=./node.ini trustserver
 
 ```
