@@ -29,4 +29,5 @@ func getTestOpenwCLI() *CLI {
 		return nil
 	}
 	return cli
+
 }
