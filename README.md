@@ -199,8 +199,10 @@ $ ./openw-cli -c=./node.ini newaddress
 # addresses has been exported into: openw/data/export/address/[9HqxxcNSMxdt225Dis3mdnzT18egbV7Cg3R85y6AUPx8]-20190313163227.txt
 
 # 创建新地址，先选择钱包，再选择资产账户，输入offset和limit查询地址列表
-$ ./openw-cli -c=./node.ini searchaddress
+$ ./openw-cli -c=./node.ini listaddress
 
+# 输出地址，查询地址属于哪个钱包及资产账户下，同时可以解锁钱包以查看地址私钥，可选查看地址的代币余额列表。
+$ ./openw-cli -c=./node.ini searchaddress
 
 # 选择资产账户，发起转账交易
 $ ./openw-cli -c=./node.ini transfer
@@ -245,7 +247,7 @@ $ ./openw-cli -c=./node.ini transferall
 # [Success] txid: 4106a2a1dff1647d4e12b14d181ed45d4c847d710e6685588125674a481c42af
 # Save summary task log successfully
 
-# 设置汇总，先选择钱包，再选择资产账户
+# 设置汇总，先选择钱包，输入密码完成解锁，再选择资产账户，录入账户的默认汇总资料
 $ ./openw-cli -c=./node.ini setsum
 
 

@@ -247,6 +247,21 @@ func TestCLI_GetAllTokenContractBalance(t *testing.T) {
 	cli.printTokenContractBalanceList(list, "TRX")
 }
 
+func TestCLI_GetAllTokenContractBalanceByAddress(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+	accountID := "BBxgBEn7AoRhNqsS7vjD625B5SafFFdY1QMX7Zq8M9jn"
+	address := "WhWV4XcD7UJzt2bAcVe48PN1Cxwh8HAyoi"
+	list, err := cli.GetAllTokenContractBalanceByAddress(accountID, address, "WICC")
+	if err != nil {
+		log.Error("GetAllTokenContractBalance error:", err)
+		return
+	}
+	cli.printTokenContractBalanceList(list, "WICC")
+}
+
 func TestCLI_printAccountSummaryInfo(t *testing.T) {
 	cli := getTestOpenwCLI()
 	if cli == nil {
@@ -269,4 +284,17 @@ func TestCLI_GetTokenBalanceByContractAddresss(t *testing.T) {
 		return
 	}
 	fmt.Printf("balance: %+v\n", balance)
+}
+
+func TestCLI_UpdateSymbols(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+	err := cli.UpdateSymbols()
+	if err != nil {
+		t.Errorf("UpdateSymbols error: %v", err)
+		return
+	}
+	log.Infof("update info success")
 }

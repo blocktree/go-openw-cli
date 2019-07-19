@@ -23,7 +23,7 @@ func (cli *CLI) CreateWalletOnServer(name, password string) (*openwsdk.Wallet, e
 	var (
 		key       *hdkeystore.HDKey
 		retWallet *openwsdk.Wallet
-		retErr error
+		retErr    error
 	)
 
 	if len(name) == 0 {
@@ -835,6 +835,32 @@ func (cli *CLI) GetAllTokenContractBalance(accountID string, symbol string) ([]*
 	return getBalances, nil
 }
 
+//GetAllTokenContractBalanceByAddress 查询地址合约余额
+func (cli *CLI) GetAllTokenContractBalanceByAddress(accountID, address, symbol string) ([]*openwsdk.TokenBalance, error) {
+
+	var (
+		getErr      error
+		getBalances []*openwsdk.TokenBalance
+	)
+	err := cli.api.GetAllTokenBalanceByAddress(accountID, address, symbol, true,
+		func(status uint64, msg string, balance []*openwsdk.TokenBalance) {
+			if status == owtp.StatusSuccess {
+				getBalances = balance
+			} else {
+				getErr = fmt.Errorf(msg)
+			}
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	if getErr != nil {
+		return nil, getErr
+	}
+
+	return getBalances, nil
+}
+
 func findTokenContractByID(tokenList []*openwsdk.TokenContract, contractID string) *openwsdk.TokenContract {
 	for _, c := range tokenList {
 		if c.ContractID == contractID {
@@ -852,6 +878,7 @@ func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.TokenBalance, sym
 
 		getTokenContracts, err := cli.GetTokenContractList("Symbol", strings.ToUpper(symbol))
 		if err != nil {
+			fmt.Println("Please execute command 'updateinfo' first. ")
 			return
 		}
 
@@ -865,6 +892,11 @@ func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.TokenBalance, sym
 			tableInfo = append(tableInfo, []interface{}{
 				w.ContractID, token.Symbol, token.Name, w.Token, token.Address, token.Protocol, w.Balance.Balance,
 			})
+		}
+
+		if len(tableInfo) == 0 {
+			fmt.Println("Please execute command 'updateinfo' first. ")
+			return
 		}
 
 		t := gotabulate.Create(tableInfo)
