@@ -7,3 +7,6 @@ openwcli/testdata
 testdata
 node.ini
 sumtask.json
+*.ini
+*.log
+release/
