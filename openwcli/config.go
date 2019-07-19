@@ -114,6 +114,8 @@ type Config struct {
 	exportaddressdir string
 	//开启SSL访问授信节点
 	enabletrustserverssl bool
+	//db是否只读模式
+	//dbReadOnlyMode bool
 }
 
 //初始化一个配置对象

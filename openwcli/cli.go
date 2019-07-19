@@ -25,13 +25,13 @@ const (
 
 type CLI struct {
 	mu               sync.RWMutex
-	config           *Config                      //工具配置
-	db               *StormDB                     //本地数据库
-	api              *openwsdk.APINode            //api
-	summaryTask      *openwsdk.SummaryTask        //汇总任务
-	summaryTaskTimer *timer.TaskTimer             //汇总任务定时器
-	transmitNode     *owtp.OWTPNode               //转发节点，被托管钱包种子的节点
-	unlockWallets    map[string]string 			  //已解锁的钱包
+	config           *Config               //工具配置
+	db               *StormDB              //本地数据库
+	api              *openwsdk.APINode     //api
+	summaryTask      *openwsdk.SummaryTask //汇总任务
+	summaryTaskTimer *timer.TaskTimer      //汇总任务定时器
+	transmitNode     *owtp.OWTPNode        //转发节点，被托管钱包种子的节点
+	unlockWallets    map[string]string     //已解锁的钱包
 }
 
 // 初始化工具
@@ -54,7 +54,12 @@ func NewCLI(c *Config) (*CLI, error) {
 	//加载数据
 	db, err := OpenStormDB(
 		dbfile,
-		storm.BoltOptions(0600, &bolt.Options{Timeout: 5 * time.Second}),
+		storm.BoltOptions(
+			0600,
+			&bolt.Options{
+				Timeout:  5 * time.Second,
+				//ReadOnly: true,
+			}),
 	)
 	if err != nil {
 		return nil, err
@@ -357,6 +362,16 @@ func (cli *CLI) SearchAddressFlow() error {
 
 	cli.printAddressList(address.WalletID, []*openwsdk.Address{address}, password)
 
+	//是否需要显示地址私钥，需要必须填入密码
+	show, _ := console.Stdin.PromptConfirm("Do want to show address token balance?")
+	if show {
+		balances, err := cli.GetAllTokenContractBalanceByAddress(address.AccountID, address.Address, address.Symbol)
+		if err != nil {
+			return err
+		}
+		cli.printTokenContractBalanceList(balances, address.Symbol)
+	}
+
 	return nil
 }
 
@@ -497,6 +512,18 @@ func (cli *CLI) SetSumFlow() error {
 	wallet, err := cli.selectWalletStep()
 	if err != nil {
 		return err
+	}
+
+	// 等待用户输入密码
+	password, err := console.InputPassword(false, 3)
+	if err != nil {
+		return err
+	}
+
+	//验证钱包密码
+	_, err = cli.getLocalKeyByWallet(wallet, password)
+	if err != nil {
+		return fmt.Errorf("wallet password is incorrect")
 	}
 
 	//:选择账户
