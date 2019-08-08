@@ -74,6 +74,9 @@ func (cli *CLI) SummaryTask() {
 
 	log.Infof("[Summary Task Start]------%s", common.TimeFormat("2006-01-02 15:04:05"))
 
+	//更新币种信息，保证完整
+	cli.UpdateSymbols()
+
 	cli.mu.RLock()
 	defer cli.mu.RUnlock()
 	//读取参与汇总的钱包

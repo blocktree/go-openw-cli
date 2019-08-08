@@ -797,6 +797,13 @@ func (cli *CLI) StartTrustServerFlow() error {
 		}
 	}
 
+	updateInfo := func() {
+		cli.UpdateSymbols()
+	}
+	//定时1个小时执行一次更新主链信息
+	updateInfoTimer := timer.NewTask(1 * time.Hour, updateInfo)
+	updateInfoTimer.Start()
+
 	err = cli.ServeTransmitNode(true)
 	if err != nil {
 		return err
