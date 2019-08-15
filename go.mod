@@ -6,7 +6,7 @@ require (
 	github.com/asdine/storm v2.1.2+incompatible
 	github.com/astaxie/beego v1.11.1
 	github.com/blocktree/go-openw-sdk v1.3.4
-	github.com/blocktree/go-owcdrivers v1.1.6 // indirect
+	github.com/blocktree/go-owcdrivers v1.1.8 // indirect
 	github.com/blocktree/openwallet v1.4.8
 	github.com/bndr/gotabulate v1.1.2
 	github.com/google/uuid v1.1.1
