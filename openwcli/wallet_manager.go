@@ -47,8 +47,13 @@ func (cli *CLI) CreateWalletOnServer(name, password string) (*openwsdk.Wallet, e
 		return nil, err
 	}
 
+	walletParam := &openwsdk.Wallet{
+		Alias:    name,
+		WalletID: key.KeyID,
+	}
+
 	//登记钱包的openw-server
-	err = cli.api.CreateWallet(name, key.KeyID, true,
+	err = cli.api.CreateWallet(walletParam, true,
 		func(status uint64, msg string, wallet *openwsdk.Wallet) {
 			if status == owtp.StatusSuccess {
 				log.Info("Wallet create successfully, key path:", filePath)
