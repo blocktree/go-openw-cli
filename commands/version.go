@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/blocktree/go-openw-cli/openwcli"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -24,6 +25,7 @@ var (
 
 //walletConfig 钱包配置
 func version(c *cli.Context) error {
+	fmt.Printf("FixAppID: %s\n", openwcli.FixAppID)
 	fmt.Printf("Version: %s\n", Version)
 	fmt.Printf("GitRev: %s\n", GitRev)
 	fmt.Printf("BuildTime: %s\n", BuildTime)
