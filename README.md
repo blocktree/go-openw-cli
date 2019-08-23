@@ -33,10 +33,12 @@ $ xgo -h
 # 本地系统编译
 $ make clean build
 
-# 跨平台编译wmd，更多可选平台可修改Makefile的$TARGETS变量
+# 跨平台编译，更多可选平台可修改Makefile的$TARGETS变量
 $ make clean openw-cli
 
 # 以固定的AppID和AppKey编译程序，这样做不需要在配置文件制定appid和appkey参数
+$ make clean build  APPID=1245qwer APPKEY=qwer1234
+
 $ make clean openw-cli  APPID=1245qwer APPKEY=qwer1234
 
 
