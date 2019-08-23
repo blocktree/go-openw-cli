@@ -69,6 +69,12 @@ enabletrustserverssl = false
 	addressDirName  = "address"
 )
 
+var (
+	// 固定应用信息
+	FixAppID  = ""
+	FixAppKey = ""
+)
+
 //配置
 type Config struct {
 
@@ -123,8 +129,6 @@ func NewConfig(c config.Configer) *Config {
 	conf := &Config{}
 	conf.remoteserver = c.String("remoteserver")
 	conf.version = c.String("version")
-	conf.appkey = c.String("appkey")
-	conf.appid = c.String("appid")
 	conf.logdir = c.String("logdir")
 	conf.datadir = c.String("datadir")
 	conf.summaryperiod = c.String("summaryperiod")
@@ -143,6 +147,23 @@ func NewConfig(c config.Configer) *Config {
 	conf.dbdir = filepath.Join(conf.datadir, dbDirName)
 	conf.exportdir = filepath.Join(conf.datadir, exportDirName)
 	conf.exportaddressdir = filepath.Join(conf.exportdir, addressDirName)
+
+	//默认使用命令行编译时附带的appid和appkey
+	conf.appid = FixAppID
+	conf.appkey = FixAppKey
+
+	//读取配置文件的appkey和appid
+	appkey := c.String("appkey")
+	appid := c.String("appid")
+
+	//配置文件的appid和appkey有值即覆盖填充
+	if len(appkey) > 0 {
+		conf.appkey = appkey
+	}
+	if len(appid) > 0 {
+		conf.appid = appid
+	}
+
 
 	//建立文件夹
 	file.MkdirAll(conf.datadir)

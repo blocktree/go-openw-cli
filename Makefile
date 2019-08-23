@@ -20,7 +20,9 @@ BUILDTIME = $(shell date +'%Y-%m-%d_%T')
 
 OPENWCLILDFLAGS="-X github.com/blocktree/go-openw-cli/commands.Version=${OPENWCLIVERSION} \
 	-X github.com/blocktree/go-openw-cli/commands.GitRev=${GITREV} \
-	-X github.com/blocktree/go-openw-cli/commands.BuildTime=${BUILDTIME}"
+	-X github.com/blocktree/go-openw-cli/commands.BuildTime=${BUILDTIME} \
+	-X github.com/blocktree/go-openw-cli/openwcli.FixAppID=${APPID} \
+	-X github.com/blocktree/go-openw-cli/openwcli.FixAppKey=${APPKEY}"
 
 # OS platfom
 # options: windows-6.0/*,darwin-10.10/amd64,linux/amd64,linux/386,linux/arm64,linux/mips64, linux/mips64le
