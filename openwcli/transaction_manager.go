@@ -116,7 +116,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	log.Infof("-----------------------------------------------")
 
 	//签名交易单
-	err = openwsdk.SignRawTransaction(retRawTx, key)
+	err = cli.txSigner(retRawTx, key)
 	if err != nil {
 		return nil, nil, openwallet.Errorf(openwallet.ErrSignRawTransactionFailed, err.Error())
 	}
