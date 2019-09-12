@@ -6,6 +6,7 @@ import (
 	"github.com/asdine/storm"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/console"
+	"github.com/blocktree/openwallet/hdkeystore"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/owtp"
 	"github.com/blocktree/openwallet/timer"
@@ -23,15 +24,18 @@ const (
 	maxAddresNum = 2000
 )
 
+type SignRawTransactionFunc func(rawTx *openwsdk.RawTransaction, key *hdkeystore.HDKey) error
+
 type CLI struct {
 	mu               sync.RWMutex
-	config           *Config               //工具配置
-	db               *StormDB              //本地数据库
-	api              *openwsdk.APINode     //api
-	summaryTask      *openwsdk.SummaryTask //汇总任务
-	summaryTaskTimer *timer.TaskTimer      //汇总任务定时器
-	transmitNode     *owtp.OWTPNode        //转发节点，被托管钱包种子的节点
-	unlockWallets    map[string]string     //已解锁的钱包
+	config           *Config                //工具配置
+	db               *StormDB               //本地数据库
+	api              *openwsdk.APINode      //api
+	summaryTask      *openwsdk.SummaryTask  //汇总任务
+	summaryTaskTimer *timer.TaskTimer       //汇总任务定时器
+	transmitNode     *owtp.OWTPNode         //转发节点，被托管钱包种子的节点
+	unlockWallets    map[string]string      //已解锁的钱包
+	txSigner         SignRawTransactionFunc //自定义签名函数
 }
 
 // 初始化工具
@@ -57,7 +61,7 @@ func NewCLI(c *Config) (*CLI, error) {
 		storm.BoltOptions(
 			0600,
 			&bolt.Options{
-				Timeout:  5 * time.Second,
+				Timeout: 5 * time.Second,
 				//ReadOnly: true,
 			}),
 	)
@@ -69,6 +73,7 @@ func NewCLI(c *Config) (*CLI, error) {
 		config:        c,
 		db:            db,
 		unlockWallets: make(map[string]string),
+		txSigner:      openwsdk.SignRawTransaction,	//默认签名方法为openwsdk提供的
 	}
 
 	//配置日志
@@ -251,7 +256,7 @@ func (cli *CLI) ListWalletFlow() error {
 func (cli *CLI) NewAccountFlow() error {
 
 	//:选择钱包
-	wallet, err := cli.selectWalletStep()
+	wallet, err := cli.SelectWalletStep()
 	if err != nil {
 		return err
 	}
@@ -290,7 +295,7 @@ func (cli *CLI) NewAccountFlow() error {
 func (cli *CLI) ListAccountFlow() error {
 
 	//:选择钱包
-	wallet, err := cli.selectWalletStep()
+	wallet, err := cli.SelectWalletStep()
 	if err != nil {
 		return err
 	}
@@ -304,7 +309,7 @@ func (cli *CLI) ListAccountFlow() error {
 func (cli *CLI) NewAddressFlow() error {
 
 	//:选择钱包
-	wallet, err := cli.selectWalletStep()
+	wallet, err := cli.SelectWalletStep()
 	if err != nil {
 		return err
 	}
@@ -378,7 +383,7 @@ func (cli *CLI) SearchAddressFlow() error {
 //TransferFlow
 func (cli *CLI) TransferFlow() error {
 	//:选择钱包
-	wallet, err := cli.selectWalletStep()
+	wallet, err := cli.SelectWalletStep()
 	if err != nil {
 		return err
 	}
@@ -443,7 +448,7 @@ func (cli *CLI) TransferFlow() error {
 //TransferAllFlow
 func (cli *CLI) TransferAllFlow() error {
 	//:选择钱包
-	wallet, err := cli.selectWalletStep()
+	wallet, err := cli.SelectWalletStep()
 	if err != nil {
 		return err
 	}
@@ -509,7 +514,7 @@ func (cli *CLI) ListSumInfoFlow() error {
 func (cli *CLI) SetSumFlow() error {
 
 	//:选择钱包
-	wallet, err := cli.selectWalletStep()
+	wallet, err := cli.SelectWalletStep()
 	if err != nil {
 		return err
 	}
@@ -618,7 +623,7 @@ func (cli *CLI) StartSumFlow(file string) error {
 	if manual {
 
 		//:选择钱包
-		wallet, selectErr := cli.selectWalletStep()
+		wallet, selectErr := cli.SelectWalletStep()
 		if selectErr != nil {
 			return selectErr
 		}
@@ -745,7 +750,7 @@ func (cli *CLI) ListTokenContractFlow() error {
 func (cli *CLI) ListAddressFlow() error {
 
 	//:选择钱包
-	wallet, err := cli.selectWalletStep()
+	wallet, err := cli.SelectWalletStep()
 	if err != nil {
 		return err
 	}
@@ -801,7 +806,7 @@ func (cli *CLI) StartTrustServerFlow() error {
 		cli.UpdateSymbols()
 	}
 	//定时1个小时执行一次更新主链信息
-	updateInfoTimer := timer.NewTask(1 * time.Hour, updateInfo)
+	updateInfoTimer := timer.NewTask(1*time.Hour, updateInfo)
 	updateInfoTimer.Start()
 
 	err = cli.ServeTransmitNode(true)
@@ -814,8 +819,8 @@ func (cli *CLI) StartTrustServerFlow() error {
 	return nil
 }
 
-//selectWalletStep 选择钱包操作
-func (cli *CLI) selectWalletStep() (*openwsdk.Wallet, error) {
+//SelectWalletStep 选择钱包操作
+func (cli *CLI) SelectWalletStep() (*openwsdk.Wallet, error) {
 
 	wallets, _ := cli.GetWalletsOnServer()
 	cli.printWalletList(wallets)
@@ -869,7 +874,7 @@ func (cli *CLI) selectAccountStep(walletID string) (*openwsdk.Account, error) {
 func (cli *CLI) ListTokenBalanceFlow() error {
 
 	//:选择钱包
-	wallet, selectErr := cli.selectWalletStep()
+	wallet, selectErr := cli.SelectWalletStep()
 	if selectErr != nil {
 		return selectErr
 	}
@@ -918,4 +923,23 @@ func (cli *CLI) unlockLocalWalletsByInputPassword() error {
 	}
 
 	return nil
+}
+
+// SetSignRawTransactionFunc 设置签名方法
+func (cli *CLI) SetSignRawTransactionFunc(txSigner SignRawTransactionFunc) error {
+	if txSigner == nil {
+		return fmt.Errorf("SignRawTransactionFunc is nil")
+	}
+	cli.txSigner = txSigner
+	return nil
+}
+
+// GetConfig 返回CLI配置
+func (cli *CLI) GetConfig() *Config {
+	return cli.config
+}
+
+// APINode 返回CLI的API实例
+func (cli *CLI) APINode() *openwsdk.APINode {
+	return cli.api
 }

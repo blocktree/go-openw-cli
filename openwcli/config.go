@@ -186,3 +186,8 @@ func LoadConfig(path string) (*Config, error) {
 	conf := NewConfig(c)
 	return conf, nil
 }
+
+// GetKeyDir
+func (c *Config) GetKeyDir() string {
+	return c.keydir
+}

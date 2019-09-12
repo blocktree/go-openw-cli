@@ -405,7 +405,7 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 			for _, rawTx := range retRawTxs {
 
 				//签名交易
-				err = openwsdk.SignRawTransaction(rawTx, key)
+				err = cli.txSigner(rawTx, key)
 				if err != nil {
 					log.Warn("SignRawTransaction unexpected error: %v", err)
 					continue
@@ -524,7 +524,7 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 			signedRawTxs := make([]*openwsdk.RawTransaction, 0)
 			for _, rawTx := range retRawFeesSupportTxs {
 				//签名交易
-				err = openwsdk.SignRawTransaction(rawTx, key)
+				err = cli.txSigner(rawTx, key)
 				if err != nil {
 					log.Warn("SignRawTransaction unexpected error: %v", err)
 					continue
@@ -582,7 +582,7 @@ func (cli *CLI) signSummaryRawTransaction(retRawTxs []*openwsdk.RawTransaction, 
 	signedRawTxs := make([]*openwsdk.RawTransaction, 0)
 	for _, rawTx := range retRawTxs {
 		//签名交易
-		err := openwsdk.SignRawTransaction(rawTx, key)
+		err := cli.txSigner(rawTx, key)
 		if err != nil {
 			log.Warn("SignRawTransaction unexpected error: %v", err)
 			return nil, err
