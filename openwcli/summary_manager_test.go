@@ -28,6 +28,7 @@ func TestCLI_appendSummaryTasks(t *testing.T) {
                     "threshold": "5",
                     "minTransfer": "2",
                     "retainedBalance": "0",
+					"addressLimit": 20,
                     "contracts": {
                         "1002000": {
                             "threshold": "30",
@@ -83,6 +84,7 @@ func TestCLI_appendSummaryTasks(t *testing.T) {
 			for addr, _ := range a.Contracts {
 				log.Infof("contractAddr: %s", addr)
 			}
+			log.Infof("addressLimit: %d", a.AddressLimit)
 		}
 	}
 

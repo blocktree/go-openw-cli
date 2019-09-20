@@ -317,6 +317,7 @@ $ ./openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
                     "onlyContracts": false,           //只汇总代币, 为true时，contracts数组必须有值
                     "switchSymbol": "ETH",            //强制切换symbol（默认不设置，用于解决代币打错地址，需要切换网络汇总）
                     "memo": "hello",                  //备注，适用于可添加备注的交易单
+                    "addressLimit": 50,               //地址分页数量限制，不填写，默认为200 
                     "contracts": {                            //汇总代币合约
                         "all": {                              //全部合约
                             "threshold": "1000",              //账户总阈值
