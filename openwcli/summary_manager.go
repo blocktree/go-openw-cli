@@ -325,7 +325,7 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 	feesSupportAccountID string, feesSupportBalance decimal.Decimal) error {
 
 	const (
-		limit = 200
+		defaultLimit = 200
 	)
 
 	var (
@@ -335,28 +335,35 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 		retFailed            []*openwsdk.FailedRawTransaction
 		retRawTxs            []*openwsdk.RawTransaction
 		retRawFeesSupportTxs []*openwsdk.RawTransaction
+		addressLimit         = 0
 	)
 
 	log.Infof("Summary account[%s] Current Balance = %v ", account.AccountID, balance)
 	log.Infof("Summary account[%s] Summary Address = %v ", account.AccountID, sumSets.SumAddress)
 	log.Infof("Summary account[%s] Start Create Summary Transaction", account.AccountID)
 
+	if sumSets.AddressLimit == 0 {
+		addressLimit = defaultLimit
+	} else {
+		addressLimit = int(sumSets.AddressLimit)
+	}
+
 	//分页汇总交易
-	for i := 0; i < int(account.AddressIndex)+1; i = i + limit {
+	for i := 0; i < int(account.AddressIndex)+1; i = i + addressLimit {
 		err = nil
 		retRawTxs = make([]*openwsdk.RawTransaction, 0)
 		retRawFeesSupportTxs = make([]*openwsdk.RawTransaction, 0)
 		retTx = nil
 		retFailed = nil
 
-		log.Infof("Create Summary Transaction in address range [%d...%d]", i, i+limit)
+		log.Infof("Create Summary Transaction in address range [%d...%d]", i, i+addressLimit)
 
 		//:记录汇总批次号
 		sid := uuid.New().String()
 		log.Infof("SID: %s", sid)
 		err = cli.api.CreateSummaryTx(account.AccountID, sumSets.SumAddress, coin,
 			task.FeeRate, sumSets.MinTransfer, sumSets.RetainedBalance,
-			i, limit, sumSets.Confirms, sid, task.FeesSupportAccount, task.Memo, true,
+			i, addressLimit, sumSets.Confirms, sid, task.FeesSupportAccount, task.Memo, true,
 			func(status uint64, msg string, rawTxs []*openwsdk.RawTransaction) {
 				//log.Debugf("status: %d, msg: %s", status, msg)
 				for _, rawTx := range rawTxs {
@@ -497,7 +504,7 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 				WalletID:       account.WalletID,
 				AccountID:      account.AccountID,
 				StartAddrIndex: i,
-				EndAddrIndex:   i + limit,
+				EndAddrIndex:   i + addressLimit,
 				Coin:           coin,
 				SuccessCount:   len(retTx),
 				FailCount:      len(retFailed),
