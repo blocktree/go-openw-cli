@@ -23,6 +23,5 @@ jobs:
       uses: elgohr/Github-Release-Action@1.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_REF: ${{ GITHUB_REF }}
       with:
         args: $GITHUB_REF
