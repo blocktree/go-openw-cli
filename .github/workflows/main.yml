@@ -10,7 +10,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@master
     - name: Build with xgo
-      uses: crazy-max/ghaction-xgo@master
+      uses: crazy-max/ghaction-xgo@0.3.0
       with:
         go_version: 1.12.4
         dest: build
@@ -19,3 +19,9 @@ jobs:
         v: true
         x: true
         ldflags: -s -w
+    - name: Github Release
+      uses: elgohr/Github-Release-Action@1.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: ${{ GITHUB_REF }}
