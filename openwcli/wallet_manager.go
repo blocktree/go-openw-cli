@@ -789,7 +789,23 @@ func (cli *CLI) GetTokenContractInfo(contractID string) (*openwsdk.TokenContract
 
 //SetSummaryInfo 设置账户的汇总设置
 func (cli *CLI) SetSummaryInfo(obj *openwsdk.SummarySetting) error {
-	//TODO:查询钱包和账户是否存在
+
+	//检查账户是否存在
+	account, err := cli.GetAccountByAccountID(obj.AccountID)
+	if err != nil {
+		return err
+	}
+
+	//把汇总地址添加到信任名单
+	trustAddr := openwsdk.NewTrustAddress(
+		obj.SumAddress,
+		account.Symbol,
+		"summary address")
+	err = cli.AddTrustAddress(trustAddr)
+	if err != nil {
+		return err
+	}
+
 	return cli.db.Save(obj)
 }
 
@@ -919,10 +935,12 @@ func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.TokenBalance, sym
 func (cli *CLI) AddTrustAddress(trustAddress *openwsdk.TrustAddress) error {
 
 	//检查symbol是否存在
-	_, err := cli.GetSymbolInfo(trustAddress.Symbol)
+	s, err := cli.GetSymbolInfo(trustAddress.Symbol)
 	if err != nil {
 		return err
 	}
+
+	trustAddress.Symbol = s.Coin
 
 	err = cli.db.Save(trustAddress)
 	if err != nil {
@@ -936,7 +954,7 @@ func (cli *CLI) ListTrustAddress(symbol string) ([]*openwsdk.TrustAddress, error
 
 	var (
 		list []*openwsdk.TrustAddress
-		err error
+		err  error
 	)
 	if symbol == "" {
 		err = cli.db.All(&list)
@@ -947,7 +965,7 @@ func (cli *CLI) ListTrustAddress(symbol string) ([]*openwsdk.TrustAddress, error
 	if err != nil {
 		return nil, nil
 	}
-	return  list, nil
+	return list, nil
 }
 
 //printListTrustAddress 白名单地址列表
@@ -964,7 +982,7 @@ func (cli *CLI) printListTrustAddress(addrs []*openwsdk.TrustAddress) {
 		t := time.Unix(s.CreateTime, 0)
 		strTime := common.TimeFormat("2006-01-02 15:04:05", t)
 		tableInfo = append(tableInfo, []interface{}{
-			s.Address, s.Symbol, s.Memo, strTime,
+			s.Address, strings.ToUpper(s.Symbol), s.Memo, strTime,
 		})
 	}
 
@@ -976,8 +994,56 @@ func (cli *CLI) printListTrustAddress(addrs []*openwsdk.TrustAddress) {
 	fmt.Println(t.Render("simple"))
 }
 
+
+// importSummaryAddressToTrustAddress 导入汇总地址到信任地址列表
+func (cli *CLI) importSummaryAddressToTrustAddress() error {
+
+	//读取汇总信息
+	var sum []*openwsdk.SummarySetting
+	cli.db.All(&sum)
+	if len(sum) > 0 {
+		for _, s := range sum {
+
+			//检查账户是否存在
+			account, err := cli.GetAccountByAccountID(s.AccountID)
+			if err != nil {
+				return err
+			}
+
+			//把汇总地址添加到信任名单
+			trustAddr := openwsdk.NewTrustAddress(
+				s.SumAddress,
+				account.Symbol,
+				"summary address")
+			err = cli.AddTrustAddress(trustAddr)
+			if err != nil {
+				return err
+			}
+
+		}
+	}
+	return nil
+}
+
 // EnableTrustAddress
 func (cli *CLI) EnableTrustAddress() error {
+
+	var inited bool
+	cli.db.Get(CLIBucket, InitTrustAddress, &inited)
+
+	//第一次初始化都把现有的汇总地址导入到信任地址名单
+	if !inited {
+
+		err := cli.importSummaryAddressToTrustAddress()
+		if err != nil {
+			return err
+		}
+
+		err = cli.db.Set(CLIBucket, InitTrustAddress, true)
+		if err != nil {
+			return fmt.Errorf("Init Trust Address, unexpected error: %v ", err)
+		}
+	}
 
 	err := cli.db.Set(CLIBucket, EnableTrustAddress, true)
 	if err != nil {
@@ -1017,7 +1083,7 @@ func (cli *CLI) printTrustAddressStatus() {
 func (cli *CLI) IsTrustAddress(address, symbol string) bool {
 	var (
 		list []*openwsdk.TrustAddress
-		err error
+		err  error
 	)
 
 	if cli.TrustAddressStatus() {

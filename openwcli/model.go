@@ -8,6 +8,7 @@ const (
 	CLIBucket          = "CLIBucket"
 	CurrentKeychainKey = "current_keychain"
 	EnableTrustAddress = "enable_trust_address"
+	InitTrustAddress   = "init_trust_address"
 )
 
 //密钥对
@@ -37,4 +38,3 @@ func NewKeychain(cert owtp.Certificate) *Keychain {
 func (keychain *Keychain) Certificate() (owtp.Certificate, error) {
 	return owtp.NewCertificate(keychain.PrivateKey, "")
 }
-

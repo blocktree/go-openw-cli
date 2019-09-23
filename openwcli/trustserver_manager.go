@@ -42,6 +42,7 @@ func (cli *CLI) ServeTransmitNode(autoReconnect bool) error {
 	cli.transmitNode.HandleFunc("getCurrentSummaryTaskViaTrustNode", cli.getCurrentSummaryTaskViaTrustNode)
 	cli.transmitNode.HandleFunc("getSummaryTaskLogViaTrustNode", cli.getSummaryTaskLogViaTrustNode)
 	cli.transmitNode.HandleFunc("getLocalWalletListViaTrustNode", cli.getLocalWalletListViaTrustNode)
+	cli.transmitNode.HandleFunc("getTrustAddressListViaTrustNode", cli.getTrustAddressListViaTrustNode)
 
 	//自动连接
 	if autoReconnect {
@@ -587,4 +588,29 @@ func (cli *CLI) getLocalWalletListViaTrustNode(ctx *owtp.Context) {
 	}
 
 	ctx.Response(wallets, owtp.StatusSuccess, "success")
+}
+
+func (cli *CLI) getTrustAddressListViaTrustNode(ctx *owtp.Context) {
+
+	appID := ctx.Params().Get("appID").String()
+	symbol := ctx.Params().Get("symbol").String()
+
+	if appID != cli.config.appid {
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
+		return
+	}
+
+	list, err := cli.ListTrustAddress(symbol)
+	if err != nil {
+		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		return
+	}
+
+	status := cli.TrustAddressStatus()
+
+	ctx.Response(map[string]interface{}{
+		"trustAddressList": list,
+		"enableTrustAddress": status,
+	}, owtp.StatusSuccess, "success")
+
 }

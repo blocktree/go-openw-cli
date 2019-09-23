@@ -365,3 +365,24 @@ func TestCLI_IsTrustAddress(t *testing.T) {
 	flag = cli.IsTrustAddress("WhWV4XcD7UJzt2bAcVe48PN1Cxwh8HAyoi", "WICC")
 	log.Infof("WhWV4XcD7UJzt2bAcVe48PN1Cxwh8HAyoi: %v", flag)
 }
+
+func TestCLI_SetSummaryInfo(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+
+	obj := &openwsdk.SummarySetting{
+		WalletID:        "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx",
+		AccountID:       "AEeBZy321NzbLWPFkjyGfFyUn8hHX2g93f4wMBVumin4",
+		SumAddress:      "",
+		Threshold:       "1",
+		MinTransfer:     "0",
+		RetainedBalance: "0",
+		Confirms:        1,
+	}
+
+
+	cli.SetSummaryInfo(obj)
+
+}

@@ -977,7 +977,7 @@ func (cli *CLI) AddTrustAddressFlow() error {
 // ListTrustAddressFlow
 func (cli *CLI) ListTrustAddressFlow() error {
 
-	symbol, err := console.InputText("Enter symbol: ", true)
+	symbol, err := console.InputText("Enter symbol: ", false)
 	if err != nil {
 		return err
 	}

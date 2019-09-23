@@ -188,6 +188,42 @@ var (
 			Category:  "WALLET COMMANDS",
 			Flags:     []cli.Flag{},
 		},
+		{
+
+			Name:      "addtrustaddress",
+			Usage:     "add trust address",
+			ArgsUsage: "<symbol>",
+			Action:    addtrustaddress,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
+		{
+
+			Name:      "listtrustaddress",
+			Usage:     "show trust address list",
+			ArgsUsage: "<symbol>",
+			Action:    listtrustaddress,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
+		{
+
+			Name:      "enabletrustaddress",
+			Usage:     "enable trust address",
+			ArgsUsage: "<symbol>",
+			Action:    enabletrustaddress,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
+		{
+
+			Name:      "disabletrustaddress",
+			Usage:     "disable trust address",
+			ArgsUsage: "<symbol>",
+			Action:    disabletrustaddress,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
 	}
 )
 
