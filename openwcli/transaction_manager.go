@@ -151,4 +151,3 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	return retTx, retFailed, nil
 }
 
-

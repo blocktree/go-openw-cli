@@ -7,6 +7,7 @@ import (
 const (
 	CLIBucket          = "CLIBucket"
 	CurrentKeychainKey = "current_keychain"
+	EnableTrustAddress = "enable_trust_address"
 )
 
 //密钥对

@@ -489,3 +489,59 @@ func listtokenbalance(c *cli.Context) error {
 
 	return nil
 }
+
+// addtrustaddress
+func addtrustaddress(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.AddTrustAddressFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+// listtrustaddress
+func listtrustaddress(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.ListTrustAddressFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+// enabletrustaddress
+func enabletrustaddress(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.EnableTrustAddressFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+// disabletrustaddress
+func disabletrustaddress(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.DisableTrustAddressFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}

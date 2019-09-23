@@ -914,3 +914,121 @@ func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.TokenBalance, sym
 		fmt.Println("No TokenContract. ")
 	}
 }
+
+// AddTrustAddress 添加白名单地址
+func (cli *CLI) AddTrustAddress(trustAddress *openwsdk.TrustAddress) error {
+
+	//检查symbol是否存在
+	_, err := cli.GetSymbolInfo(trustAddress.Symbol)
+	if err != nil {
+		return err
+	}
+
+	err = cli.db.Save(trustAddress)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// ListTrustAddress 白名单地址列表
+func (cli *CLI) ListTrustAddress(symbol string) ([]*openwsdk.TrustAddress, error) {
+
+	var (
+		list []*openwsdk.TrustAddress
+		err error
+	)
+	if symbol == "" {
+		err = cli.db.All(&list)
+	} else {
+		err = cli.db.Find("Symbol", symbol, &list)
+	}
+
+	if err != nil {
+		return nil, nil
+	}
+	return  list, nil
+}
+
+//printListTrustAddress 白名单地址列表
+func (cli *CLI) printListTrustAddress(addrs []*openwsdk.TrustAddress) {
+
+	if len(addrs) == 0 {
+		fmt.Println("No Trust Address info. ")
+		return
+	}
+
+	tableInfo := make([][]interface{}, 0)
+
+	for _, s := range addrs {
+		t := time.Unix(s.CreateTime, 0)
+		strTime := common.TimeFormat("2006-01-02 15:04:05", t)
+		tableInfo = append(tableInfo, []interface{}{
+			s.Address, s.Symbol, s.Memo, strTime,
+		})
+	}
+
+	t := gotabulate.Create(tableInfo)
+	// Set Headers
+	t.SetHeaders([]string{"Address", "Symbol", "Memo", "CreateTime"})
+
+	//打印信息
+	fmt.Println(t.Render("simple"))
+}
+
+// EnableTrustAddress
+func (cli *CLI) EnableTrustAddress() error {
+
+	err := cli.db.Set(CLIBucket, EnableTrustAddress, true)
+	if err != nil {
+		return fmt.Errorf("Enable Trust Address, unexpected error: %v ", err)
+	}
+	return nil
+}
+
+// DisableTrustAddress
+func (cli *CLI) DisableTrustAddress() error {
+
+	err := cli.db.Set(CLIBucket, EnableTrustAddress, false)
+	if err != nil {
+		return fmt.Errorf("Enable Trust Address, unexpected error: %v ", err)
+	}
+	return nil
+}
+
+// TrustAddressStatus
+func (cli *CLI) TrustAddressStatus() bool {
+	var status bool
+	cli.db.Get(CLIBucket, EnableTrustAddress, &status)
+	return status
+}
+
+// printTrustAddressStatus
+func (cli *CLI) printTrustAddressStatus() {
+
+	if cli.TrustAddressStatus() {
+		fmt.Printf("######## Trust address is enabled. ######## \n")
+	} else {
+		fmt.Printf("######## Trust address is disabled. ######## \n")
+	}
+}
+
+// IsTrustAddress
+func (cli *CLI) IsTrustAddress(address, symbol string) bool {
+	var (
+		list []*openwsdk.TrustAddress
+		err error
+	)
+
+	if cli.TrustAddressStatus() {
+		err = cli.db.Select(
+			q.And(
+				q.Eq("Address", address),
+				q.Eq("Symbol", symbol),
+			)).Find(&list)
+		if err != nil {
+			return false
+		}
+	}
+	return true
+}
