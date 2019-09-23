@@ -19,9 +19,7 @@ jobs:
         v: true
         x: true
         ldflags: -s -w
-    - name: Github Release
-      uses: elgohr/Github-Release-Action@1.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        args: $GITHUB_REF
+    - name: Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
