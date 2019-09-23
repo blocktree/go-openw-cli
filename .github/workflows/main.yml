@@ -4,10 +4,6 @@ on: [push]
 
 jobs:
   build:
-    strategy:
-      matrix:
-        go_version:
-          - 1.12.4
     runs-on: ubuntu-latest
     
     steps:
@@ -16,7 +12,7 @@ jobs:
     - name: Build with xgo
         uses: crazy-max/ghaction-xgo@master
         with:
-          go_version: ${{ matrix.go_version }}
+          go_version: 1.12.4
           dest: build
           prefix: openw-cli
           targets: windows/386,windows/amd64,linux/386,linux/amd64,darwin/386,darwin/amd64
