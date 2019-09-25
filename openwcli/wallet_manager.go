@@ -3,6 +3,10 @@ package openwcli
 import (
 	"encoding/hex"
 	"fmt"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/asdine/storm/q"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/common"
@@ -12,9 +16,6 @@ import (
 	"github.com/blocktree/openwallet/openwallet"
 	"github.com/blocktree/openwallet/owtp"
 	"github.com/bndr/gotabulate"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 //CreateWalletOnServer
@@ -911,6 +912,6 @@ func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.TokenBalance, sym
 		//打印信息
 		fmt.Println(t.Render("simple"))
 	} else {
-		fmt.Println("No TokenContract. ")
+		fmt.Println("No Token Contract Balance.")
 	}
 }
