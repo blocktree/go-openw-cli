@@ -520,16 +520,16 @@ func (cli *CLI) SetSumFlow() error {
 	}
 
 	// 等待用户输入密码
-	password, err := console.InputPassword(false, 3)
-	if err != nil {
-		return err
-	}
+	//password, err := console.InputPassword(false, 3)
+	//if err != nil {
+	//	return err
+	//}
 
 	//验证钱包密码
-	_, err = cli.getLocalKeyByWallet(wallet, password)
-	if err != nil {
-		return fmt.Errorf("wallet password is incorrect")
-	}
+	//_, err = cli.getLocalKeyByWallet(wallet, password)
+	//if err != nil {
+	//	return fmt.Errorf("wallet password is incorrect")
+	//}
 
 	//:选择账户
 	account, err := cli.selectAccountStep(wallet.WalletID)
@@ -942,4 +942,81 @@ func (cli *CLI) GetConfig() *Config {
 // APINode 返回CLI的API实例
 func (cli *CLI) APINode() *openwsdk.APINode {
 	return cli.api
+}
+
+// AddTrustAddressFlow
+func (cli *CLI) AddTrustAddressFlow() error {
+
+	addr, err := console.InputText("Enter address: ", true)
+	if err != nil {
+		return err
+	}
+
+	symbol, err := console.InputText("Enter symbol: ", true)
+	if err != nil {
+		return err
+	}
+
+	memo, err := console.InputText("Enter memo: ", false)
+	if err != nil {
+		return err
+	}
+
+	trustAddr := openwsdk.NewTrustAddress(addr, symbol, memo)
+	err = cli.AddTrustAddress(trustAddr)
+	if err != nil {
+		return err
+	}
+
+	log.Infof("add trust address successfully")
+
+	return nil
+}
+
+
+// ListTrustAddressFlow
+func (cli *CLI) ListTrustAddressFlow() error {
+
+	symbol, err := console.InputText("Enter symbol: ", false)
+	if err != nil {
+		return err
+	}
+	addrs, err := cli.ListTrustAddress(symbol)
+	if err != nil {
+		return err
+	}
+
+	cli.printListTrustAddress(addrs)
+	cli.printTrustAddressStatus()
+
+	return nil
+}
+
+
+// EnableTrustAddressFlow
+func (cli *CLI) EnableTrustAddressFlow() error {
+
+	err := cli.EnableTrustAddress()
+	if err != nil {
+		return err
+	}
+
+	cli.printTrustAddressStatus()
+
+	return nil
+}
+
+
+
+// DisableTrustAddressFlow
+func (cli *CLI) DisableTrustAddressFlow() error {
+
+	err := cli.DisableTrustAddress()
+	if err != nil {
+		return err
+	}
+
+	cli.printTrustAddressStatus()
+
+	return nil
 }

@@ -188,6 +188,42 @@ var (
 			Category:  "WALLET COMMANDS",
 			Flags:     []cli.Flag{},
 		},
+		{
+
+			Name:      "addtrustaddress",
+			Usage:     "add trust address",
+			ArgsUsage: "<symbol>",
+			Action:    addtrustaddress,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
+		{
+
+			Name:      "listtrustaddress",
+			Usage:     "show trust address list",
+			ArgsUsage: "<symbol>",
+			Action:    listtrustaddress,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
+		{
+
+			Name:      "enabletrustaddress",
+			Usage:     "enable trust address",
+			ArgsUsage: "<symbol>",
+			Action:    enabletrustaddress,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
+		{
+
+			Name:      "disabletrustaddress",
+			Usage:     "disable trust address",
+			ArgsUsage: "<symbol>",
+			Action:    disabletrustaddress,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
 	}
 )
 
@@ -481,6 +517,62 @@ func listtokenbalance(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
 		err := cli.ListTokenBalanceFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+// addtrustaddress
+func addtrustaddress(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.AddTrustAddressFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+// listtrustaddress
+func listtrustaddress(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.ListTrustAddressFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+// enabletrustaddress
+func enabletrustaddress(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.EnableTrustAddressFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+// disabletrustaddress
+func disabletrustaddress(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.DisableTrustAddressFlow()
 		if err != nil {
 			log.Error("unexpected error: ", err)
 			return err

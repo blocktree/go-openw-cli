@@ -298,3 +298,91 @@ func TestCLI_UpdateSymbols(t *testing.T) {
 	}
 	log.Infof("update info success")
 }
+
+func TestCLI_AddTrustAddress(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+	trustAddr := openwsdk.NewTrustAddress("WhWV4XcD7UJzt2bAcVe48PN1Cxwh8HAyoi", "WICC2", "testwicc")
+	err := cli.AddTrustAddress(trustAddr)
+	if err != nil {
+		t.Errorf("AddTrustAddress error: %v", err)
+		return
+	}
+	addrs, err := cli.ListTrustAddress("")
+	if err != nil {
+		t.Errorf("ListTrustAddress error: %v", err)
+		return
+	}
+	cli.printListTrustAddress(addrs)
+	cli.printTrustAddressStatus()
+}
+
+func TestCLI_ListTrustAddress(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+	addrs, err := cli.ListTrustAddress("")
+	if err != nil {
+		t.Errorf("ListTrustAddress error: %v", err)
+		return
+	}
+	cli.printListTrustAddress(addrs)
+	cli.printTrustAddressStatus()
+}
+
+func TestCLI_EnableTrustAddress(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+	cli.printTrustAddressStatus()
+	cli.EnableTrustAddress()
+	cli.printTrustAddressStatus()
+}
+
+
+func TestCLI_DisableTrustAddress(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+	cli.printTrustAddressStatus()
+	cli.DisableTrustAddress()
+	cli.printTrustAddressStatus()
+}
+
+func TestCLI_IsTrustAddress(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+	flag := cli.IsTrustAddress("WhWV4XcD7UJzt2bAcVe48PN1Cxwh8HAyoi22", "WICC")
+	log.Infof("WhWV4XcD7UJzt2bAcVe48PN1Cxwh8HAyoi22: %v", flag)
+
+	flag = cli.IsTrustAddress("WhWV4XcD7UJzt2bAcVe48PN1Cxwh8HAyoi", "WICC")
+	log.Infof("WhWV4XcD7UJzt2bAcVe48PN1Cxwh8HAyoi: %v", flag)
+}
+
+func TestCLI_SetSummaryInfo(t *testing.T) {
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+
+	obj := &openwsdk.SummarySetting{
+		WalletID:        "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx",
+		AccountID:       "AEeBZy321NzbLWPFkjyGfFyUn8hHX2g93f4wMBVumin4",
+		SumAddress:      "",
+		Threshold:       "1",
+		MinTransfer:     "0",
+		RetainedBalance: "0",
+		Confirms:        1,
+	}
+
+
+	cli.SetSummaryInfo(obj)
+
+}

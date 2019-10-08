@@ -63,6 +63,12 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	)
 
 
+	//:检查目标地址是否信任名单
+	if !cli.IsTrustAddress(to, account.Symbol) {
+		return nil, nil, openwallet.Errorf(openwallet.ErrUnknownException, "%s is not in trust address list", to)
+	}
+
+
 	if len(password) == 0 {
 		return nil, nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, "unlock wallet password is empty. ")
 	}
@@ -150,5 +156,4 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 
 	return retTx, retFailed, nil
 }
-
 

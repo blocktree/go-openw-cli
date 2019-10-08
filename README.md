@@ -126,6 +126,7 @@ enabletrustserverssl = false
 | -f, -file   | 指定加载的文件。                                       |
 | -debug      | 是否打印debug日志信息。                                |
 | -logdir     | 指定日志输出目录。                                     |
+| -w, wallet  | 指定钱包ID进行操作。                                     |
 
 ### 文件目录结构
 

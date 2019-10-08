@@ -8,6 +8,7 @@ import (
 	"github.com/blocktree/openwallet/common"
 	"github.com/blocktree/openwallet/hdkeystore"
 	"github.com/blocktree/openwallet/log"
+	"github.com/blocktree/openwallet/openwallet"
 	"github.com/blocktree/openwallet/owtp"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -22,6 +23,11 @@ func (cli *CLI) TransferAll(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 		tokenSymbol string
 		balance     string
 	)
+
+	//:检查目标地址是否信任名单
+	if !cli.IsTrustAddress(to, account.Symbol) {
+		return openwallet.Errorf(openwallet.ErrUnknownException, "%s is not in trust address list", to)
+	}
 
 	key, err := cli.getLocalKeyByWallet(wallet, password)
 	if err != nil {
