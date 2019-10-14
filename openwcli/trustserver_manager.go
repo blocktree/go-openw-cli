@@ -1,6 +1,8 @@
 package openwcli
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
@@ -43,6 +45,7 @@ func (cli *CLI) ServeTransmitNode(autoReconnect bool) error {
 	cli.transmitNode.HandleFunc("getSummaryTaskLogViaTrustNode", cli.getSummaryTaskLogViaTrustNode)
 	cli.transmitNode.HandleFunc("getLocalWalletListViaTrustNode", cli.getLocalWalletListViaTrustNode)
 	cli.transmitNode.HandleFunc("getTrustAddressListViaTrustNode", cli.getTrustAddressListViaTrustNode)
+	cli.transmitNode.HandleFunc("signTransactionViaTrustNode", cli.signTransactionViaTrustNode)
 
 	//自动连接
 	if autoReconnect {
@@ -197,7 +200,7 @@ func (cli *CLI) createWalletViaTrustNode(ctx *owtp.Context) {
 
 	wallet, err := cli.CreateWalletOnServer(alias, password)
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
 		return
 	}
 	ctx.Response(wallet, owtp.StatusSuccess, "success")
@@ -226,13 +229,13 @@ func (cli *CLI) createAccountViaTrustNode(ctx *owtp.Context) {
 
 	wallet, err := cli.GetWalletByWalletID(walletID)
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
 		return
 	}
 
 	account, addresses, err := cli.CreateAccountOnServer(alias, password, symbol, wallet)
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
 		return
 	}
 	ctx.Response(map[string]interface{}{
@@ -273,7 +276,7 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 
 	wallet, err := cli.GetWalletByWalletID(account.WalletID)
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
 		return
 	}
 
@@ -313,7 +316,7 @@ func (cli *CLI) setSummaryInfoViaTrustNode(ctx *owtp.Context) {
 	summarySetting := openwsdk.NewSummarySetting(ctx.Params().Get("summarySetting"))
 	err := cli.SetSummaryInfo(summarySetting)
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, "summary info save failed")
+		ctx.Response(nil, openwallet.ErrUnknownException, "summary info save failed")
 		return
 	}
 
@@ -339,7 +342,7 @@ func (cli *CLI) findSummaryInfoByWalletIDViaTrustNode(ctx *owtp.Context) {
 	//读取汇总配置
 	cli.db.Find("WalletID", walletID, &sumSets)
 	//if err != nil {
-	//	ctx.Response(nil, owtp.ErrCustomError, "can not find summary info")
+	//	ctx.Response(nil, openwallet.ErrUnknownException, "can not find summary info")
 	//	return
 	//}
 
@@ -377,7 +380,7 @@ func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 	//:先检查汇总任务是否有汇总配置
 	err := cli.checkSummaryTaskIsHaveSettings(summaryTask)
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
 		return
 	}
 
@@ -448,7 +451,7 @@ func (cli *CLI) updateInfoViaTrustNode(ctx *owtp.Context) {
 
 	err := cli.UpdateSymbols()
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
 		return
 	}
 
@@ -489,7 +492,7 @@ func (cli *CLI) appendSummaryTaskViaTrustNode(ctx *owtp.Context) {
 	//:先检查汇总任务是否有汇总配置
 	err := cli.checkSummaryTaskIsHaveSettings(summaryTask)
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
 		return
 	}
 
@@ -566,7 +569,7 @@ func (cli *CLI) getSummaryTaskLogViaTrustNode(ctx *owtp.Context) {
 
 	logs, err := cli.GetSummaryTaskLog(offset, limit)
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
 		return
 	}
 
@@ -584,7 +587,7 @@ func (cli *CLI) getLocalWalletListViaTrustNode(ctx *owtp.Context) {
 
 	wallets, err := cli.GetWalletsOnServer()
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
 		return
 	}
 
@@ -603,15 +606,103 @@ func (cli *CLI) getTrustAddressListViaTrustNode(ctx *owtp.Context) {
 
 	list, err := cli.ListTrustAddress(symbol)
 	if err != nil {
-		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
 		return
 	}
 
 	status := cli.TrustAddressStatus()
 
 	ctx.Response(map[string]interface{}{
-		"trustAddressList": list,
+		"trustAddressList":   list,
 		"enableTrustAddress": status,
 	}, owtp.StatusSuccess, "success")
 
+}
+
+func (cli *CLI) signTransactionViaTrustNode(ctx *owtp.Context) {
+
+	if !cli.config.enablerequesttransfer {
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [transfer] ability")
+		return
+	}
+
+	appID := ctx.Params().Get("appID").String()
+	walletID := ctx.Params().Get("walletID").String()
+	password := ctx.Params().Get("password").String()
+	jsonRawTx := ctx.Params().Get("rawTx")
+
+	if appID != cli.config.appid {
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
+		return
+	}
+
+	var rawTx openwsdk.RawTransaction
+	err := json.Unmarshal([]byte(jsonRawTx.Raw), &rawTx)
+	if err != nil {
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
+		return
+	}
+
+	destination := ""
+	amount := ""
+	for to, a := range rawTx.To {
+		//:检查目标地址是否信任名单
+		if !cli.IsTrustAddress(to, rawTx.Coin.Symbol) {
+			msg := fmt.Sprintf("%s is not in trust address list", to)
+			ctx.Response(nil, openwallet.ErrUnknownException, msg)
+			return
+		}
+		destination = to
+		amount = a
+	}
+
+	wallet, err := cli.GetWalletByWalletID(walletID)
+	if err != nil {
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
+		return
+	}
+
+	if len(password) == 0 {
+		//钱包是否已经解锁
+		if p, exist := cli.unlockWallets[wallet.WalletID]; exist {
+			password = p
+		}
+	}
+
+	//获取种子文件
+	key, err := cli.getLocalKeyByWallet(wallet, password)
+	if err != nil {
+		ctx.Response(nil, openwallet.ErrSignRawTransactionFailed, err.Error())
+		return
+	}
+
+	tokenSymbol := ""
+	if rawTx.Coin.IsContract {
+		tokenContract, _ := cli.GetTokenContractInfo(rawTx.Coin.ContractID)
+		if tokenContract != nil {
+			tokenSymbol = tokenContract.Token
+		}
+	}
+
+	//:打印交易单明细
+	log.Infof("-----------------------------------------------")
+	log.Infof("[%s %s Sign Transaction]", rawTx.Coin.Symbol, tokenSymbol)
+	log.Infof("SID: %s", rawTx.Sid)
+	log.Infof("From Account: %s", rawTx.AccountID)
+	log.Infof("To Address: %s", destination)
+	log.Infof("Send Amount: %s", amount)
+	log.Infof("Fees: %v", rawTx.Fees)
+	log.Infof("FeeRate: %v", rawTx.FeeRate)
+	log.Infof("-----------------------------------------------")
+
+	//签名交易
+	err = cli.txSigner(&rawTx, key)
+	if err != nil {
+		ctx.Response(nil, openwallet.ErrSignRawTransactionFailed, err.Error())
+		return
+	}
+
+	ctx.Response(map[string]interface{}{
+		"signedRawTx": rawTx,
+	}, owtp.StatusSuccess, "success")
 }
