@@ -1,6 +1,7 @@
 package openwcli
 
 import (
+	"encoding/json"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
@@ -151,7 +152,22 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 		log.Info("transaction id:", retTx[0].Txid)
 	} else if len(retFailed) > 0 {
 		//打印交易单
-		log.Error("send transaction failed. unexpected error:", retFailed[0].Reason)
+		log.Errorf("send transaction failed.")
+		for _, tx := range retFailed {
+			log.Warningf("[Failed] reason: %s", tx.Reason)
+			if tx.RawTx != nil {
+				log.Warningf("[Failed] rawHex: %s", tx.RawTx.RawHex)
+				for accountID, signatures := range tx.RawTx.Signatures {
+					log.Warningf("[Failed] signature accountID: %s", accountID)
+					for _, keySignature := range signatures {
+						signaturesJSON, jsonErr := json.Marshal(keySignature)
+						if jsonErr == nil {
+							log.Warningf("[Failed] keySignature: %s", string(signaturesJSON))
+						}
+					}
+				}
+			}
+		}
 	}
 
 	return retTx, retFailed, nil

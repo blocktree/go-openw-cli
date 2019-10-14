@@ -1,6 +1,7 @@
 package openwcli
 
 import (
+	"encoding/json"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
@@ -43,6 +44,7 @@ func (cli *CLI) ServeTransmitNode(autoReconnect bool) error {
 	cli.transmitNode.HandleFunc("getSummaryTaskLogViaTrustNode", cli.getSummaryTaskLogViaTrustNode)
 	cli.transmitNode.HandleFunc("getLocalWalletListViaTrustNode", cli.getLocalWalletListViaTrustNode)
 	cli.transmitNode.HandleFunc("getTrustAddressListViaTrustNode", cli.getTrustAddressListViaTrustNode)
+	cli.transmitNode.HandleFunc("signTransactionViaTrustNode", cli.signTransactionViaTrustNode)
 
 	//自动连接
 	if autoReconnect {
@@ -610,8 +612,64 @@ func (cli *CLI) getTrustAddressListViaTrustNode(ctx *owtp.Context) {
 	status := cli.TrustAddressStatus()
 
 	ctx.Response(map[string]interface{}{
-		"trustAddressList": list,
+		"trustAddressList":   list,
 		"enableTrustAddress": status,
 	}, owtp.StatusSuccess, "success")
 
+}
+
+func (cli *CLI) signTransactionViaTrustNode(ctx *owtp.Context) {
+
+	if !cli.config.enablerequesttransfer {
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [transfer] ability")
+		return
+	}
+
+	appID := ctx.Params().Get("appID").String()
+	walletID := ctx.Params().Get("walletID").String()
+	password := ctx.Params().Get("password").String()
+	jsonRawTx := ctx.Params().Get("rawTx")
+
+	if appID != cli.config.appid {
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
+		return
+	}
+
+	var rawTx openwsdk.RawTransaction
+	err := json.Unmarshal([]byte(jsonRawTx.Raw), &rawTx)
+	if err != nil {
+		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		return
+	}
+
+	wallet, err := cli.GetWalletByWalletID(walletID)
+	if err != nil {
+		ctx.Response(nil, owtp.ErrCustomError, err.Error())
+		return
+	}
+
+	if len(password) == 0 {
+		//钱包是否已经解锁
+		if p, exist := cli.unlockWallets[wallet.WalletID]; exist {
+			password = p
+		}
+	}
+
+	//获取种子文件
+	key, err := cli.getLocalKeyByWallet(wallet, password)
+	if err != nil {
+		ctx.Response(nil, openwallet.ErrSignRawTransactionFailed, "can not find wallet key")
+		return
+	}
+
+	//签名交易
+	err = cli.txSigner(&rawTx, key)
+	if err != nil {
+		ctx.Response(nil, openwallet.ErrSignRawTransactionFailed, err.Error())
+		return
+	}
+
+	ctx.Response(map[string]interface{}{
+		"signedRawTx": rawTx,
+	}, owtp.StatusSuccess, "success")
 }

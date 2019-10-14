@@ -14,7 +14,7 @@ require (
 	gopkg.in/urfave/cli.v1 v1.20.0
 )
 
-//replace github.com/blocktree/go-openw-sdk => ../go-openw-sdk
+replace github.com/blocktree/go-openw-sdk => ../go-openw-sdk
 
 //replace github.com/blocktree/openwallet => ../openwallet
 
