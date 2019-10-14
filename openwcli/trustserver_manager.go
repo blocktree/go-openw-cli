@@ -67,19 +67,20 @@ func (cli *CLI) connectTransmitNode() error {
 	connectCfg.ConnectType = owtp.Websocket
 	connectCfg.EnableSSL = cli.config.enabletrustserverssl
 	connectCfg.EnableSignature = false
+	connectCfg.EnableKeyAgreement = cli.config.enablekeyagreement
 
 	//建立连接
-	err := cli.transmitNode.Connect(trustHostID, connectCfg)
+	_, err := cli.transmitNode.Connect(trustHostID, connectCfg)
 	if err != nil {
 		return err
 	}
 
 	//开启协商密码
-	if cli.config.enablekeyagreement {
-		if err = cli.transmitNode.KeyAgreement(trustHostID, "aes"); err != nil {
-			return err
-		}
-	}
+	//if cli.config.enablekeyagreement {
+	//	if err = cli.transmitNode.KeyAgreement(trustHostID, "aes"); err != nil {
+	//		return err
+	//	}
+	//}
 
 	//向服务器发送连接成功
 	err = cli.nodeDidConnectedServer()
