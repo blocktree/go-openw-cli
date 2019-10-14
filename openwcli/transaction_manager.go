@@ -114,6 +114,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	//:打印交易单明细
 	log.Infof("-----------------------------------------------")
 	log.Infof("[%s %s Transfer]", account.Symbol, tokenSymbol)
+	log.Infof("SID: %s", retRawTx.Sid)
 	log.Infof("From Account: %s", account.AccountID)
 	log.Infof("To Address: %s", to)
 	log.Infof("Send Amount: %s", amount)

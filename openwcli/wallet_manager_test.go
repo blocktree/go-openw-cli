@@ -79,7 +79,7 @@ func TestCLI_GetAccountOnServer(t *testing.T) {
 		return
 	}
 
-	accountID := "PgHCcfMbcw1zXRNZo23NFjRdBmcN5tzrb1j5McRLJbG"
+	accountID := "65Y9FgipAS2M7ankrt4o3MR2Z1EEPNZKBqyQNsKt9wnj"
 	account, err := cli.GetAccountByAccountID(accountID)
 	if err != nil {
 		log.Error("GetAccountByAccountID error:", err)
@@ -112,7 +112,7 @@ func TestCLI_GetAddressesOnServer(t *testing.T) {
 	}
 
 	walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
-	accountID := "PgHCcfMbcw1zXRNZo23NFjRdBmcN5tzrb1j5McRLJbG"
+	accountID := "65Y9FgipAS2M7ankrt4o3MR2Z1EEPNZKBqyQNsKt9wnj"
 
 	addresses, err := cli.GetAddressesOnServer(walletID, accountID, 0, 50)
 	if err != nil {
