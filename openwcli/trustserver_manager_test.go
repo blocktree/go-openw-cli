@@ -2,11 +2,12 @@ package openwcli
 
 import (
 	"bytes"
-	"github.com/blocktree/openwallet/log"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"testing"
+
+	"github.com/blocktree/openwallet/log"
 )
 
 func TestCLI_ConnectTransmitNode(t *testing.T) {
@@ -29,7 +30,6 @@ func TestCLI_ConnectTransmitNode(t *testing.T) {
 	<-endRunning
 }
 
-
 func TestLocalIPAddress(t *testing.T) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
@@ -44,7 +44,6 @@ func TestLocalIPAddress(t *testing.T) {
 		}
 	}
 }
-
 
 func TestExternalIPAddress(t *testing.T) {
 	resp, err := http.Get("http://myexternalip.com/raw")

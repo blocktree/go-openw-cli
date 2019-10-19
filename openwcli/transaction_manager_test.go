@@ -39,7 +39,7 @@ func testCLITransfer(walletID, accountID, amount, to, password string) *openwall
 
 	if account != nil {
 		sid := uuid.New().String()
-		_, _, exErr := cli.Transfer(wallet, account, "", to, amount, sid, "", "", password)
+		_, exErr := cli.Transfer(wallet, account, "", to, amount, sid, "", "", password)
 		if exErr != nil {
 			//log.Error("Transfer error code: %d, msg: %s", exErr.Code(), exErr.Error())
 			return exErr
@@ -128,7 +128,7 @@ func TestCLI_Transfer_BTC(t *testing.T) {
 
 		if account != nil {
 			sid := uuid.New().String()
-			_, _, exErr := cli.Transfer(wallets[0], accounts[0], "", "mp1JDsi7Dr2PkcWu1j4SUSTXJqXjFMaeVx", "0.023", sid, "", "", "12345678")
+			_, exErr := cli.Transfer(wallets[0], accounts[0], "", "mp1JDsi7Dr2PkcWu1j4SUSTXJqXjFMaeVx", "0.023", sid, "", "", "12345678")
 			if err != nil {
 				log.Error("Transfer error code: %d, msg: %s", exErr.Code(), exErr.Error())
 				return
