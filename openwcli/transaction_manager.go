@@ -24,7 +24,7 @@ func (cli *CLI) GetTokenBalance(account *openwsdk.Account, contractID string) st
 func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, address string) (*openwsdk.TokenBalance, error) {
 	var (
 		getBalance *openwsdk.TokenBalance
-		callErr    error
+		callErr error
 	)
 
 	token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", address)
@@ -50,7 +50,7 @@ func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, addr
 }
 
 //Transfer 转账交易
-func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, password string) (*openwsdk.Transaction, *openwallet.Error) {
+func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, *openwallet.Error) {
 
 	var (
 		isContract  bool
@@ -63,26 +63,28 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 		tokenSymbol string
 	)
 
+
 	//:检查目标地址是否信任名单
 	if !cli.IsTrustAddress(to, account.Symbol) {
-		return nil, openwallet.Errorf(openwallet.ErrUnknownException, "%s is not in trust address list", to)
+		return nil, nil, openwallet.Errorf(openwallet.ErrUnknownException, "%s is not in trust address list", to)
 	}
 
+
 	if len(password) == 0 {
-		return nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, "unlock wallet password is empty. ")
+		return nil, nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, "unlock wallet password is empty. ")
 	}
 
 	//获取种子文件
 	key, err := cli.getLocalKeyByWallet(wallet, password)
 	if err != nil {
-		return nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, err.Error())
+		return nil, nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, err.Error())
 	}
 
 	if len(contractAddress) > 0 {
 		isContract = true
 		token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", contractAddress)
 		if findErr != nil {
-			return nil, openwallet.ConvertError(findErr)
+			return nil, nil, openwallet.ConvertError(findErr)
 		}
 		contractID = token[0].ContractID
 		tokenSymbol = token[0].Token
@@ -103,10 +105,10 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 			retRawTx = rawTx
 		})
 	if err != nil {
-		return nil, openwallet.ConvertError(err)
+		return nil, nil, openwallet.ConvertError(err)
 	}
 	if createErr != nil {
-		return nil, createErr
+		return nil, nil, createErr
 	}
 
 	//:打印交易单明细
@@ -124,7 +126,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	//签名交易单
 	err = cli.txSigner(retRawTx, key)
 	if err != nil {
-		return nil, openwallet.Errorf(openwallet.ErrSignRawTransactionFailed, err.Error())
+		return nil, nil, openwallet.Errorf(openwallet.ErrSignRawTransactionFailed, err.Error())
 	}
 
 	//广播交易单
@@ -139,39 +141,37 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 			retFailed = failedRawTxs
 		})
 	if err != nil {
-		return nil, openwallet.ConvertError(err)
+		return nil, nil, openwallet.ConvertError(err)
 	}
 	if createErr != nil {
-		return nil, createErr
+		return nil, nil, createErr
 	}
 
 	if len(retTx) > 0 {
 		//打印交易单
 		log.Info("send transaction successfully.")
 		log.Info("transaction id:", retTx[0].Txid)
-
-		return retTx[0], nil
 	} else if len(retFailed) > 0 {
 		//打印交易单
 		log.Errorf("send transaction failed.")
-		for _, tx := range retFailed {
-			log.Warningf("[Failed] reason: %s", tx.Reason)
-			if tx.RawTx != nil {
-				log.Warningf("[Failed] rawHex: %s", tx.RawTx.RawHex)
-				for accountID, signatures := range tx.RawTx.Signatures {
-					log.Warningf("[Failed] signature accountID: %s", accountID)
-					for _, keySignature := range signatures {
-						signaturesJSON, jsonErr := json.Marshal(keySignature)
-						if jsonErr == nil {
-							log.Warningf("[Failed] keySignature: %s", string(signaturesJSON))
-						}
+		tx := retFailed[0]
+		log.Warningf("[Failed] reason: %s", tx.Reason)
+		if tx.RawTx != nil {
+			log.Warningf("[Failed] rawHex: %s", tx.RawTx.RawHex)
+			for accountID, signatures := range tx.RawTx.Signatures {
+				log.Warningf("[Failed] signature accountID: %s", accountID)
+				for _, keySignature := range signatures {
+					signaturesJSON, jsonErr := json.Marshal(keySignature)
+					if jsonErr == nil {
+						log.Warningf("[Failed] keySignature: %s", string(signaturesJSON))
 					}
 				}
 			}
-
-			return nil, openwallet.Errorf(openwallet.ErrSubmitRawTransactionFailed, tx.Reason)
 		}
+
+		return retTx, retFailed, openwallet.Errorf(openwallet.ErrSubmitRawTransactionFailed, tx.Reason)
 	}
 
-	return nil, nil
+	return retTx, retFailed, nil
 }
+
