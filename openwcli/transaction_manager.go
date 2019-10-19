@@ -24,7 +24,7 @@ func (cli *CLI) GetTokenBalance(account *openwsdk.Account, contractID string) st
 func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, address string) (*openwsdk.TokenBalance, error) {
 	var (
 		getBalance *openwsdk.TokenBalance
-		callErr error
+		callErr    error
 	)
 
 	token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", address)
@@ -50,7 +50,7 @@ func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, addr
 }
 
 //Transfer 转账交易
-func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, *openwallet.Error) {
+func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, password string) (*openwsdk.Transaction, *openwallet.Error) {
 
 	var (
 		isContract  bool
@@ -63,28 +63,26 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 		tokenSymbol string
 	)
 
-
 	//:检查目标地址是否信任名单
 	if !cli.IsTrustAddress(to, account.Symbol) {
-		return nil, nil, openwallet.Errorf(openwallet.ErrUnknownException, "%s is not in trust address list", to)
+		return nil, openwallet.Errorf(openwallet.ErrUnknownException, "%s is not in trust address list", to)
 	}
 
-
 	if len(password) == 0 {
-		return nil, nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, "unlock wallet password is empty. ")
+		return nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, "unlock wallet password is empty. ")
 	}
 
 	//获取种子文件
 	key, err := cli.getLocalKeyByWallet(wallet, password)
 	if err != nil {
-		return nil, nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, err.Error())
+		return nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, err.Error())
 	}
 
 	if len(contractAddress) > 0 {
 		isContract = true
 		token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", contractAddress)
 		if findErr != nil {
-			return nil, nil, openwallet.ConvertError(findErr)
+			return nil, openwallet.ConvertError(findErr)
 		}
 		contractID = token[0].ContractID
 		tokenSymbol = token[0].Token
@@ -105,10 +103,10 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 			retRawTx = rawTx
 		})
 	if err != nil {
-		return nil, nil, openwallet.ConvertError(err)
+		return nil, openwallet.ConvertError(err)
 	}
 	if createErr != nil {
-		return nil, nil, createErr
+		return nil, createErr
 	}
 
 	//:打印交易单明细
@@ -126,7 +124,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	//签名交易单
 	err = cli.txSigner(retRawTx, key)
 	if err != nil {
-		return nil, nil, openwallet.Errorf(openwallet.ErrSignRawTransactionFailed, err.Error())
+		return nil, openwallet.Errorf(openwallet.ErrSignRawTransactionFailed, err.Error())
 	}
 
 	//广播交易单
@@ -141,16 +139,18 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 			retFailed = failedRawTxs
 		})
 	if err != nil {
-		return nil, nil, openwallet.ConvertError(err)
+		return nil, openwallet.ConvertError(err)
 	}
 	if createErr != nil {
-		return nil, nil, createErr
+		return nil, createErr
 	}
 
 	if len(retTx) > 0 {
 		//打印交易单
 		log.Info("send transaction successfully.")
 		log.Info("transaction id:", retTx[0].Txid)
+
+		return retTx[0], nil
 	} else if len(retFailed) > 0 {
 		//打印交易单
 		log.Errorf("send transaction failed.")
@@ -168,9 +168,10 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 					}
 				}
 			}
+
+			return nil, openwallet.Errorf(openwallet.ErrSubmitRawTransactionFailed, tx.Reason)
 		}
 	}
 
-	return retTx, retFailed, nil
+	return nil, nil
 }
-
