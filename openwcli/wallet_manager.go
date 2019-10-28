@@ -572,7 +572,7 @@ func (cli *CLI) UpdateSymbols() error {
 	)
 
 	var getSymbols []*openwsdk.Symbol
-	err := cli.api.GetSymbolList(0, limit, 0, true,
+	err := cli.api.GetSymbolList("", 0, limit, 0, true,
 		func(status uint64, msg string, total int, symbols []*openwsdk.Symbol) {
 			getSymbols = symbols
 		})
@@ -592,7 +592,7 @@ func (cli *CLI) UpdateSymbols() error {
 		for {
 
 			var getTokenContract []*openwsdk.TokenContract
-			err = cli.api.GetContracts(s.Coin, i, limit, true,
+			err = cli.api.GetContracts(s.Coin, "", i, limit, true,
 				func(status uint64, msg string, tokenContract []*openwsdk.TokenContract) {
 					getTokenContract = tokenContract
 				})
@@ -627,7 +627,7 @@ func (cli *CLI) UpdateSymbols() error {
 //UpdateSymbols 更新主链
 func (cli *CLI) UpdateTokenContracts(symbol string) error {
 	var getTokenContract []*openwsdk.TokenContract
-	err := cli.api.GetContracts(symbol, 0, 5000, true,
+	err := cli.api.GetContracts(symbol, "",  0, 5000, true,
 		func(status uint64, msg string, tokenContract []*openwsdk.TokenContract) {
 			getTokenContract = tokenContract
 		})
