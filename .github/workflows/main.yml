@@ -15,14 +15,32 @@ jobs:
     - name: Build with xgo
       uses: crazy-max/ghaction-xgo@v1.0.0
       with:
-        go_version: 1.13.3
-        dest: build
-        prefix: openw-cli
-        targets: darwin/amd64
-        v: true
-        x: true
-        ldflags: -s -w
+        run: 
+          make clean build
     - uses: actions/upload-artifact@v1.0.0
       with:
         name: openw-cli-artifacts
         path: build
+    - name: Compress artifacts
+        run:
+          zip --junk-paths openw-cli-artifacts.zip build/
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./openw-cli-artifacts.zip
+        asset_name: openw-cli-artifacts.zip
+        asset_content_type: application/zip
