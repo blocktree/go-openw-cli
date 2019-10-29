@@ -18,7 +18,11 @@ jobs:
         go_version: 1.13.3
         dest: build
         prefix: openw-cli
-        targets: windows/386,windows/amd64,linux/386,linux/amd64,darwin/386,darwin/amd64
+        targets: darwin/amd64
         v: true
         x: true
         ldflags: -s -w
+    - uses: actions/upload-artifact@v1.0.0
+      with:
+        name: openw-cli-artifacts
+        path: build
