@@ -14,14 +14,27 @@ jobs:
         uses: actions/checkout@master
       - name: Build with xgo
         uses: crazy-max/ghaction-xgo@v1.0.0
+        env:
+          OPENWCLIVERSION: $(shell git describe --tags `git rev-list --tags --max-count=1`)
+          OPENWCLIBINARY: openw-cli
+          OPENWCLIMAIN: main.go
+          BUILDDIR: build
+          GITREV: $(shell git rev-parse --short HEAD)
+          BUILDTIME: $(shell date +'%Y-%m-%d_%T')
+          TARGETS: "darwin-10.10/amd64,linux/amd64,windows-6.0/*"
         with:
-          run: make clean build
+          go_version: 1.13.3
+          dest: $(BUILDDIR)
+          prefix: $(OPENWCLIBINARY)-$(OPENWCLIVERSION)-$(GITREV)
+          targets: darwin/amd64
+          v: true
+          x: true
       - uses: actions/upload-artifact@v1.0.0
         with:
           name: openw-cli-artifacts
           path: build
       - name: Compress artifacts
-        run: zip --junk-paths openw-cli-artifacts.zip build/
+        run: zip --junk-paths openw-cli-artifacts.zip build
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
