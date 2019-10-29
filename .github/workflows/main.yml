@@ -14,15 +14,13 @@ jobs:
         uses: actions/checkout@master
       - name: Build with xgo
         uses: crazy-max/ghaction-xgo@v1.0.0
-        with:
-          run: make clean build
+        run: make clean build
       - uses: actions/upload-artifact@v1.0.0
         with:
           name: openw-cli-artifacts
           path: build
       - name: Compress artifacts
-        with:
-          run: zip --junk-paths openw-cli-artifacts.zip build/
+        run: zip --junk-paths openw-cli-artifacts.zip build/
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
