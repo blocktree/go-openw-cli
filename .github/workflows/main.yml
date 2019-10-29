@@ -14,7 +14,8 @@ jobs:
         uses: actions/checkout@master
       - name: Build with xgo
         uses: crazy-max/ghaction-xgo@v1.0.0
-        run: make clean build
+        with:
+          run: make clean build
       - uses: actions/upload-artifact@v1.0.0
         with:
           name: openw-cli-artifacts
