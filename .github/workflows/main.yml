@@ -15,7 +15,7 @@ jobs:
     - name: Build with xgo
       uses: crazy-max/ghaction-xgo@v1.0.0
       with:
-        go_version: 1.13
+        go_version: 1.13.3
         dest: build
         prefix: openw-cli
         targets: windows/386,windows/amd64,linux/386,linux/amd64,darwin/386,darwin/amd64
