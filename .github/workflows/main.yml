@@ -1,6 +1,9 @@
 name: CI
 
-on: [push]
+on: 
+  push:
+    branches:    
+      - fanyinghao/develop
 
 jobs:
   build:
@@ -10,16 +13,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@master
     - name: Build with xgo
-      uses: crazy-max/ghaction-xgo@v0.3.0
+      uses: crazy-max/ghaction-xgo@v1.0.0
       with:
-        go_version: 1.12.4
+        go_version: 1.13
         dest: build
         prefix: openw-cli
         targets: windows/386,windows/amd64,linux/386,linux/amd64,darwin/386,darwin/amd64
         v: true
         x: true
         ldflags: -s -w
-    - name: Release
-      uses: softprops/action-gh-release@v0.1.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
