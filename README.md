@@ -100,7 +100,7 @@ enableeditsummarysettings = false
 enablekeyagreement = true
 
 # Enable https or wss
-enablessl = false
+enablessl = true
 
 # Network request timeout, unit: second
 requesttimeout = 60
@@ -119,14 +119,10 @@ enabletrustserverssl = false
 
 | 参数变量    | 描述                                                  |
 |-------------|-----------------------------------------------------|
-| -s, -symbol | 币种标识符，其后带值[symbol]，如btc，ltc，eth，ada，btm，sc  |
 | -c, -conf   | 工具配置文件路径。                                     |
-| -i, -init   | 是否初始化，应用于配置功能时候，是否需要执行初始化流程。 |
-| -p, -path   | 指定文件目录。                                         |
 | -f, -file   | 指定加载的文件。                                       |
 | -debug      | 是否打印debug日志信息。                                |
 | -logdir     | 指定日志输出目录。                                     |
-| -w, wallet  | 指定钱包ID进行操作。                                     |
 
 ### 文件目录结构
 
@@ -135,8 +131,7 @@ enabletrustserverssl = false
 | 参数变量                  | 描述                                                                         |
 |---------------------------|----------------------------------------------------------------------------|
 | {datadir}/key/               | 钱包keystore文件目录，文件命名 [alias]-[WalletID].key                         |
-| {datadir}/db/                | 钱包数据库缓存目录，文件命名 [alias]-[WalletID].db                              |
-| {datadir}/backup/            | 钱包备份文件导出目录，以文件夹归档备份，文件夹命名 [alias]-[WalletID]-yyyyMMddHHmmss |
+| {datadir}/db/                | 钱包数据库缓存目录，文件命名 [appid].db                              |
 
 > 命令输入结构: openw-cli [配置文件] [子命令] [可选参数...]
 > 如：openw-cli -c ./node.ini newwallet -s btc
@@ -148,12 +143,9 @@ enabletrustserverssl = false
 # 临时生成随机的OWTP通信证书，不保存到本地缓存
 $ ./openw-cli genkeychain
 
-# 通过-c或-conf设置工具的配置文件路径
-$ ./openw-cli -c=./node.ini
-
 #### 节点相关 ####
 
-# 登记到openw-server，成为应用的授权节点。
+# 登记到openw-server，成为应用的授权节点。-c=./node.ini加载配置文件
 $ ./openw-cli -c=./node.ini noderegister
 
 # 查看节点的信息
@@ -350,6 +342,18 @@ $ ./openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
 
 ```shell
 
+# 添加信任地址到白名单
+$ ./openw-cli -c=./node.ini addtrustaddress
+
+# 查看信任地址列表，填入symbol查询
+$ ./openw-cli -c=./node.ini listtrustaddress
+
+# 开启信任地址白名单，转账的目标地址，只允许包含在白名单中
+$ ./openw-cli -c=./node.ini enabletrustaddress
+
+# 停用信任地址白名单
+$ ./openw-cli -c=./node.ini disabletrustaddress
+
 # 查询主链列表
 $ ./openw-cli -c=./node.ini listsymbol
 
@@ -361,5 +365,7 @@ $ ./openw-cli -c=./node.ini listtokenbalance
 
 # 启动后台托管钱包服务，执行时会要求是否解锁钱包
 $ ./openw-cli -c=./node.ini trustserver
+
+
 
 ```
