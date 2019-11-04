@@ -331,6 +331,13 @@ func (cli *CLI) findSummaryInfoByWalletIDViaTrustNode(ctx *owtp.Context) {
 		sumSets []*openwsdk.SummarySetting
 	)
 
+	_, err := cli.getDB()
+	if err != nil {
+		ctx.Response(nil, openwallet.ErrUnknownException, "cli database open failed")
+		return
+	}
+	defer cli.closeDB()
+
 	appID := ctx.Params().Get("appID").String()
 
 	if appID != cli.config.appid {

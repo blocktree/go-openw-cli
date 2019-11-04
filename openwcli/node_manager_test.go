@@ -22,9 +22,9 @@ func TestCLI_GenKeychain(t *testing.T) {
 
 func TestCLI_RegisterOnServer(t *testing.T) {
 	cli := getTestOpenwCLI()
-	if cli == nil {
-		return
-	}
+	//if cli == nil {
+	//	return
+	//}
 
 	//生成keychain
 	keychain, err := GenKeychain()
