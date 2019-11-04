@@ -136,12 +136,13 @@ func (cli *CLI) SummaryAccountMainCoin(accountTask *openwsdk.SummaryAccountTask,
 
 	var (
 		err     error
-		sumSets openwsdk.SummarySetting
+		sumSets *openwsdk.SummarySetting
 		symbol  string
 	)
 
 	//读取汇总信息
-	err = cli.db.One("AccountID", account.AccountID, &sumSets)
+	sumSets, err = cli.getSummarySettingByAccount(account.AccountID)
+	//err = cli.db.One("AccountID", account.AccountID, &sumSets)
 	if err != nil {
 		return fmt.Errorf("Summary account[%s] can not find account summary setting ", account.AccountID)
 	}
@@ -185,7 +186,7 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 
 	var (
 		err     error
-		sumSets openwsdk.SummarySetting
+		sumSets *openwsdk.SummarySetting
 		symbol  string
 	)
 
@@ -221,7 +222,8 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 	}
 
 	//读取汇总信息
-	err = cli.db.One("AccountID", account.AccountID, &sumSets)
+	sumSets, err = cli.getSummarySettingByAccount(account.AccountID)
+	//err = cli.db.One("AccountID", account.AccountID, &sumSets)
 	if err != nil {
 		return err
 	}
@@ -240,7 +242,7 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 		}
 
 		if contrackTask.SummarySetting == nil {
-			contrackTask.SummarySetting = &sumSets
+			contrackTask.SummarySetting = sumSets
 		} else {
 			contrackTask.SummarySetting.SumAddress = sumSets.SumAddress
 		}
@@ -343,6 +345,12 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 		retRawFeesSupportTxs []*openwsdk.RawTransaction
 		addressLimit         = 0
 	)
+
+	_, err = cli.getDB()
+	if err != nil {
+		return err
+	}
+	defer cli.closeDB()
 
 	log.Infof("Summary account[%s] Current Balance = %v ", account.AccountID, balance)
 	log.Infof("Summary account[%s] Summary Address = %v ", account.AccountID, sumSets.SumAddress)
@@ -651,9 +659,10 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 				return fmt.Errorf("summary task account: %s can not find", account.AccountID)
 			}
 
-			var sumSets openwsdk.SummarySetting
+			var sumSets *openwsdk.SummarySetting
 			//读取汇总信息
-			err = cli.db.One("AccountID", account.AccountID, &sumSets)
+			sumSets, err = cli.getSummarySettingByAccount(account.AccountID)
+			//err = cli.db.One("AccountID", account.AccountID, &sumSets)
 			if err != nil {
 				return fmt.Errorf("Summary account[%s] can not find account summary setting ", account.AccountID)
 			}
@@ -664,7 +673,7 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 			}
 
 			if account.SummarySetting == nil {
-				account.SummarySetting = &sumSets
+				account.SummarySetting = sumSets
 			} else {
 				account.SummarySetting.SumAddress = sumSets.SumAddress
 			}
@@ -767,12 +776,41 @@ func (cli *CLI) removeSummaryWalletTasks(walletID string, accountID string) {
 }
 
 func (cli *CLI) GetSummaryTaskLog(offset, limit int64) ([]*openwsdk.SummaryTaskLog, error) {
+
+	_, err := cli.getDB()
+	if err != nil {
+		return nil, err
+	}
+	defer cli.closeDB()
+
 	var summaryTaskLog []*openwsdk.SummaryTaskLog
 	//err := cli.db.All(&summaryTaskLog)
-	err := cli.db.AllByIndex("CreateTime", &summaryTaskLog,
+	err = cli.db.AllByIndex("CreateTime", &summaryTaskLog,
 		storm.Limit(int(limit)), storm.Skip(int(offset)), storm.Reverse())
 	if err != nil {
 		return nil, err
 	}
 	return summaryTaskLog, nil
+}
+
+// getSummaryInfoByAccount 根据accountID获取汇总默认配置
+func (cli *CLI) getSummarySettingByAccount(accountID string) (*openwsdk.SummarySetting, error) {
+	var (
+		err     error
+		sumSets openwsdk.SummarySetting
+	)
+
+	_, err = cli.getDB()
+	if err != nil {
+		return nil, err
+	}
+	defer cli.closeDB()
+
+	//读取汇总信息
+	err = cli.db.One("AccountID", accountID, &sumSets)
+	if err != nil {
+		return nil, err
+	}
+
+	return &sumSets, nil
 }

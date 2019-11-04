@@ -304,7 +304,7 @@ func TestCLI_AddTrustAddress(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	trustAddr := openwsdk.NewTrustAddress("WhWV4XcD7UJzt2bAcVe48PN1Cxwh8HAyoi", "WICC2", "testwicc")
+	trustAddr := openwsdk.NewTrustAddress("WhWV4XcD7UJzt2bAcVe48PN1Cxwh8HAyoi", "WICC", "testwicc")
 	err := cli.AddTrustAddress(trustAddr)
 	if err != nil {
 		t.Errorf("AddTrustAddress error: %v", err)
@@ -383,6 +383,10 @@ func TestCLI_SetSummaryInfo(t *testing.T) {
 	}
 
 
-	cli.SetSummaryInfo(obj)
+	err := cli.SetSummaryInfo(obj)
+	if err != nil {
+		t.Errorf("SetSummaryInfo failed, err: %v", err)
+		return
+	}
 
 }
