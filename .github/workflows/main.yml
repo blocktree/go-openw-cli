@@ -14,9 +14,23 @@ jobs:
         uses: actions/checkout@master
       - name: Build with xgo
         uses: crazy-max/ghaction-xgo@v1.0.0
+        env:
+          OPENWCLIVERSION: $(shell git describe --tags `git rev-list --tags --max-count=1`)
+          OPENWCLIBINARY: openw-cli
+          OPENWCLIMAIN: main.go
+          GITREV: $(shell git rev-parse --short HEAD)
+          BUILDTIME: $(shell date +'%Y-%m-%d_%T')
+          OPENWCLILDFLAGS: -X github.com/blocktree/go-openw-cli/commands.Version=${OPENWCLIVERSION} -X github.com/blocktree/go-openw-cli/commands.GitRev=${GITREV} -X github.com/blocktree/go-openw-cli/commands.BuildTime=${BUILDTIME}
         with:
-          run: make clean openw-cli
-      - uses: actions/upload-artifact@v1.0.0
+          go_version: 1.13.3
+          prefix: $(OPENWCLIBINARY)-$(OPENWCLIVERSION)-$(GITREV)
+          pkg: $(OPENWCLIMAIN)
+          targets: darwin-10.10/amd64
+          v: true
+          x: true
+          ldflags: $(OPENWCLILDFLAGS)
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1.0.0
         with:
           name: openw-cli-artifacts
           path: build/
