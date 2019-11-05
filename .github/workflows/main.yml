@@ -24,7 +24,6 @@ jobs:
         with:
           go_version: 1.13.3
           prefix: $(OPENWCLIBINARY)-$(OPENWCLIVERSION)-$(GITREV)
-          pkg: $(OPENWCLIMAIN)
           targets: darwin-10.10/amd64
           v: true
           x: true
