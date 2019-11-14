@@ -34,6 +34,7 @@ jobs:
           path: build/
       - name: Compress artifacts
         run: |
+          mkdir release
           zip --junk-paths release/openw-cli-${{ env.VERSION }}-darwin-10.10-amd64.zip build/openw-cli-${{ env.VERSION }}-darwin-10.10-amd64
           zip --junk-paths release/openw-cli-${{ env.VERSION }}-linux-amd64.zip build/openw-cli-${{ env.VERSION }}-linux-amd64
           zip --junk-paths release/openw-cli-${{ env.VERSION }}-windows-6.0-386.exe.zip build/openw-cli-${{ env.VERSION }}-windows-6.0-386.exe
