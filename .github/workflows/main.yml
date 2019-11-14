@@ -17,15 +17,14 @@ jobs:
         env:
           OPENWCLIVERSION: $(git describe --tags `git rev-list --tags --max-count=1`)
           OPENWCLIBINARY: openw-cli
-          GITREV: $(git rev-parse --short HEAD)
           BUILDTIME: $(date +'%Y-%m-%d_%T')
-          OPENWCLILDFLAGS: -X github.com/blocktree/go-openw-cli/commands.Version=${OPENWCLIVERSION} -X github.com/blocktree/go-openw-cli/commands.GitRev=${GITREV} -X github.com/blocktree/go-openw-cli/commands.BuildTime=${BUILDTIME}
+          OPENWCLILDFLAGS: -X github.com/blocktree/go-openw-cli/commands.GitRev=${GITHUB_SHA}
         with:
           go_version: 1.13.3
           dest: build/
-          # prefix: $(OPENWCLIBINARY)-$(OPENWCLIVERSION)
+          prefix: openw-cli
           targets: darwin-10.10/amd64
-          # ldflags: $(OPENWCLILDFLAGS)
+          ldflags: -X github.com/blocktree/go-openw-cli/commands.GitRev=${GITHUB_SHA}
       - name: Upload artifacts
         uses: actions/upload-artifact@v1.0.0
         with:
