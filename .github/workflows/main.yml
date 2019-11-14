@@ -19,7 +19,7 @@ jobs:
           OPENWCLIBINARY: openw-cli
           GITREV: $(git rev-parse --short HEAD)
           BUILDTIME: $(date +'%Y-%m-%d_%T')
-          OPENWCLILDFLAGS: -X github.com/blocktree/go-openw-cli/commands.Version=${{ OPENWCLIVERSION }} -X github.com/blocktree/go-openw-cli/commands.GitRev=${{ GITREV }} -X github.com/blocktree/go-openw-cli/commands.BuildTime=${{ BUILDTIME }}
+          OPENWCLILDFLAGS: -X github.com/blocktree/go-openw-cli/commands.Version=$(OPENWCLIVERSION) -X github.com/blocktree/go-openw-cli/commands.GitRev=$(GITREV) -X github.com/blocktree/go-openw-cli/commands.BuildTime=$(BUILDTIME)
         with:
           go_version: 1.13.3
           dest: build/
