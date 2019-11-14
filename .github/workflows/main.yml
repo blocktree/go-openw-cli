@@ -16,11 +16,8 @@ jobs:
         uses: actions/checkout@master
       - name: Set env
         run: |
-          echo ::set-env name=RELEAOPENWCLIVERSIONSE_VERSION::$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo ::set-env name=GITREV::$(git rev-parse --short HEAD)
-          echo ::set-env name=BUILDTIME::$(date +'%Y-%m-%d_%T')
-          echo ::set-env name=OPENWCLIBINARY::openw-cli-$(RELEAOPENWCLIVERSIONSE_VERSION)
-          echo ::set-env name=OPENWCLILDFLAGS::-X github.com/blocktree/go-openw-cli/commands.Version=$(OPENWCLIVERSION) -X github.com/blocktree/go-openw-cli/commands.GitRev=$(GITREV) -X github.com/blocktree/go-openw-cli/commands.BuildTime=$(BUILDTIME)
+          echo ::set-env name=OPENWCLIBINARY::openw-cli-$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo ::set-env name=OPENWCLILDFLAGS::-X github.com/blocktree/go-openw-cli/commands.Version=$(git describe --tags `git rev-list --tags --max-count=1`) -X github.com/blocktree/go-openw-cli/commands.GitRev=$(git rev-parse --short HEAD) -X github.com/blocktree/go-openw-cli/commands.BuildTime=$(date +'%Y-%m-%d_%T')
       - name: Build with xgo
         uses: crazy-max/ghaction-xgo@v1.0.0
         with:
