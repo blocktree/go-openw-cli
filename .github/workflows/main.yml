@@ -15,7 +15,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
       - name: Set env
-        run: |
+        run:
+          echo ::set-env name=VERSION::$(git describe --tags `git rev-list --tags --max-count=1`)
           echo ::set-env name=OPENWCLIBINARY::openw-cli-$(git describe --tags `git rev-list --tags --max-count=1`)
           echo ::set-env name=OPENWCLILDFLAGS::-X github.com/blocktree/go-openw-cli/commands.Version=$(git describe --tags `git rev-list --tags --max-count=1`) -X github.com/blocktree/go-openw-cli/commands.GitRev=$(git rev-parse --short HEAD) -X github.com/blocktree/go-openw-cli/commands.BuildTime=$(date +'%Y-%m-%d_%T')
       - name: Build with xgo
@@ -32,15 +33,15 @@ jobs:
           name: openw-cli-artifacts
           path: build/
       - name: Compress artifacts
-        run: zip --junk-paths openw-cli-artifacts.zip build/
+        run: zip --junk-paths openw-cli-${{ env.VERSION }}-darwin-10.10-amd64.zip build/openw-cli-${{ env.VERSION }}-darwin-10.10-amd64
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ env.VERSION }}
+          release_name: Release ${{ env.VERSION }}
           draft: false
           prerelease: false
       - name: Upload Release Asset
