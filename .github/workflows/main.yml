@@ -25,7 +25,7 @@ jobs:
           go_version: 1.13.3
           dest: build/
           prefix: ${{ env.OPENWCLIBINARY }}
-          targets: darwin-10.10/amd64
+          targets: darwin-10.10/amd64,linux/amd64,windows-6.0/*
           ldflags: ${{ env.OPENWCLILDFLAGS }}
       - name: Upload artifacts
         uses: actions/upload-artifact@v1.0.0
@@ -34,10 +34,10 @@ jobs:
           path: build/
       - name: Compress artifacts
         run: |
-          zip --junk-paths openw-cli-${{ env.VERSION }}-darwin-10.10-amd64.zip build/openw-cli-${{ env.VERSION }}-darwin-10.10-amd64
-          zip --junk-paths openw-cli-${{ env.VERSION }}-linux-amd64.zip build/openw-cli-${{ env.VERSION }}-linux-amd64
-          zip --junk-paths openw-cli-${{ env.VERSION }}-windows-6.0-386.exe.zip build/openw-cli-${{ env.VERSION }}-windows-6.0-386.exe
-          zip --junk-paths openw-cli-${{ env.VERSION }}-windows-6.0-amd64.exe.zip build/openw-cli-${{ env.VERSION }}-windows-6.0-amd64.exe
+          zip --junk-paths release/openw-cli-${{ env.VERSION }}-darwin-10.10-amd64.zip build/openw-cli-${{ env.VERSION }}-darwin-10.10-amd64
+          zip --junk-paths release/openw-cli-${{ env.VERSION }}-linux-amd64.zip build/openw-cli-${{ env.VERSION }}-linux-amd64
+          zip --junk-paths release/openw-cli-${{ env.VERSION }}-windows-6.0-386.exe.zip build/openw-cli-${{ env.VERSION }}-windows-6.0-386.exe
+          zip --junk-paths release/openw-cli-${{ env.VERSION }}-windows-6.0-amd64.exe.zip build/openw-cli-${{ env.VERSION }}-windows-6.0-amd64.exe
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
@@ -48,13 +48,43 @@ jobs:
           release_name: Release ${{ env.VERSION }}
           draft: false
           prerelease: false
-      - name: Upload Release Asset
+      - name: Upload Release Asset (1/4)
         id: upload-release-asset
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./openw-cli-artifacts.zip
-          asset_name: openw-cli-artifacts.zip
+          asset_path: ./release/openw-cli-${{ env.VERSION }}-darwin-10.10-amd64.zip
+          asset_name: openw-cli-${{ env.VERSION }}-darwin-10.10-amd64.zip
+          asset_content_type: application/zip
+      - name: Upload Release Asset (2/4)
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/openw-cli-${{ env.VERSION }}-linux-amd64.zip
+          asset_name: openw-cli-${{ env.VERSION }}-linux-amd64.zip
+          asset_content_type: application/zip
+      - name: Upload Release Asset (3/4)
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/openw-cli-${{ env.VERSION }}-windows-6.0-386.exe.zip
+          asset_name: openw-cli-${{ env.VERSION }}-windows-6.0-386.exe.zip
+          asset_content_type: application/zip
+      - name: Upload Release Asset (4/4)
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/openw-cli-${{ env.VERSION }}-windows-6.0-amd64.exe.zip
+          asset_name: openw-cli-${{ env.VERSION }}-windows-6.0-amd64.exe.zip
           asset_content_type: application/zip
