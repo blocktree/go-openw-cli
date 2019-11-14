@@ -36,6 +36,7 @@ type CLI struct {
 	transmitNode     *owtp.OWTPNode         //转发节点，被托管钱包种子的节点
 	unlockWallets    map[string]string      //已解锁的钱包
 	txSigner         SignRawTransactionFunc //自定义签名函数
+	keepOpen         bool                   //数据库文件保持打开状态
 }
 
 // 初始化工具
@@ -53,33 +54,16 @@ func NewCLI(c *Config) (*CLI, error) {
 		return nil, fmt.Errorf("remoteserver is empty. ")
 	}
 
-	dbfile := filepath.Join(c.dbdir, c.appid+".db")
-
-	//加载数据
-	db, err := OpenStormDB(
-		dbfile,
-		storm.BoltOptions(
-			0600,
-			&bolt.Options{
-				Timeout: 5 * time.Second,
-				//ReadOnly: true,
-			}),
-	)
-	if err != nil {
-		return nil, err
-	}
-
 	cli := &CLI{
 		config:        c,
-		db:            db,
 		unlockWallets: make(map[string]string),
-		txSigner:      openwsdk.SignRawTransaction,	//默认签名方法为openwsdk提供的
+		txSigner:      openwsdk.SignRawTransaction, //默认签名方法为openwsdk提供的
 	}
 
 	//配置日志
 	SetupLog(c.logdir, "openwcli.log", c.logdebug)
 
-	keychain, err := cli.GetKeychain()
+	keychain, _ := cli.GetKeychain()
 	if keychain != nil {
 		cli.setupAPISDK(keychain)
 	}
@@ -118,10 +102,44 @@ func (cli *CLI) checkConfig() error {
 		return fmt.Errorf("config is not loaded. ")
 	}
 
-	if cli.db == nil {
-		return fmt.Errorf("database is not loaded. ")
-	}
+	//if cli.db == nil {
+	//	return fmt.Errorf("database is not loaded. ")
+	//}
 	return nil
+}
+
+// getDB 获取数据库
+func (cli *CLI) getDB() (*StormDB, error) {
+	if !cli.keepOpen {
+
+		//加载数据
+		dbfile := filepath.Join(cli.config.dbdir, cli.config.appid+".db")
+		db, err := OpenStormDB(
+			dbfile,
+			storm.BoltOptions(
+				0600,
+				&bolt.Options{
+					Timeout: 5 * time.Second,
+					//ReadOnly: true,
+				}),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		cli.db = db
+	}
+
+	return cli.db, nil
+}
+
+// closeDB 关闭数据库
+func (cli *CLI) closeDB() {
+	//区块链数据文件
+	if !cli.keepOpen && cli.db != nil {
+		cli.db.Close()
+		cli.db = nil
+	}
 }
 
 //GenKeychainFlow 生成新的keychain流程
@@ -973,7 +991,6 @@ func (cli *CLI) AddTrustAddressFlow() error {
 	return nil
 }
 
-
 // ListTrustAddressFlow
 func (cli *CLI) ListTrustAddressFlow() error {
 
@@ -992,7 +1009,6 @@ func (cli *CLI) ListTrustAddressFlow() error {
 	return nil
 }
 
-
 // EnableTrustAddressFlow
 func (cli *CLI) EnableTrustAddressFlow() error {
 
@@ -1005,8 +1021,6 @@ func (cli *CLI) EnableTrustAddressFlow() error {
 
 	return nil
 }
-
-
 
 // DisableTrustAddressFlow
 func (cli *CLI) DisableTrustAddressFlow() error {

@@ -303,6 +303,12 @@ func (cli *CLI) GetAccountsOnServer(walletID string) ([]*openwsdk.Account, error
 //printAccountList 打印账户列表
 func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 
+	_, err := cli.getDB()
+	if err != nil {
+		return
+	}
+	defer cli.closeDB()
+
 	if list != nil && len(list) > 0 {
 		tableInfo := make([][]interface{}, 0)
 
@@ -338,9 +344,15 @@ func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 //printAccountList 打印账户列表
 func (cli *CLI) printAccountSummaryInfo() {
 
+	_, err := cli.getDB()
+	if err != nil {
+		return
+	}
+	defer cli.closeDB()
+
 	//读取汇总信息
 	var sum []*openwsdk.SummarySetting
-	err := cli.db.All(&sum)
+	err = cli.db.All(&sum)
 	if err != nil || len(sum) == 0 {
 		fmt.Println("No account setup summary info. ")
 		return
@@ -571,8 +583,14 @@ func (cli *CLI) UpdateSymbols() error {
 		limit = 500
 	)
 
+	_, err := cli.getDB()
+	if err != nil {
+		return err
+	}
+	defer cli.closeDB()
+
 	var getSymbols []*openwsdk.Symbol
-	err := cli.api.GetSymbolList("", 0, limit, 0, true,
+	err = cli.api.GetSymbolList("", 0, limit, 0, true,
 		func(status uint64, msg string, total int, symbols []*openwsdk.Symbol) {
 			getSymbols = symbols
 		})
@@ -635,6 +653,12 @@ func (cli *CLI) UpdateTokenContracts(symbol string) error {
 		return err
 	}
 
+	_, err = cli.getDB()
+	if err != nil {
+		return err
+	}
+	defer cli.closeDB()
+
 	tx, err := cli.db.Begin(true)
 	if err != nil {
 		return err
@@ -656,8 +680,15 @@ func (cli *CLI) UpdateTokenContracts(symbol string) error {
 
 //GetLocalSymbolList 查询本地保存主链
 func (cli *CLI) GetSymbolList() ([]*openwsdk.Symbol, error) {
+
+	_, err := cli.getDB()
+	if err != nil {
+		return nil, err
+	}
+	defer cli.closeDB()
+
 	var getSymbols []*openwsdk.Symbol
-	err := cli.db.All(&getSymbols)
+	err = cli.db.All(&getSymbols)
 
 	//没有数据，更新数据
 	if getSymbols == nil || len(getSymbols) == 0 {
@@ -717,8 +748,12 @@ func (cli *CLI) GetSymbolInfo(symbol string) (*openwsdk.Symbol, error) {
 
 //GetContractList 查询本地保存代币合约信息
 func (cli *CLI) GetTokenContractList(cols ...interface{}) ([]*openwsdk.TokenContract, error) {
-	query := make([]q.Matcher, 0)
-	var getTokenContracts []*openwsdk.TokenContract
+
+	var (
+		query = make([]q.Matcher, 0)
+		getTokenContracts []*openwsdk.TokenContract
+		err error
+	)
 
 	if len(cols)%2 != 0 {
 		return nil, fmt.Errorf("condition param is not pair")
@@ -730,7 +765,19 @@ func (cli *CLI) GetTokenContractList(cols ...interface{}) ([]*openwsdk.TokenCont
 		query = append(query, q.Eq(field.String(), val))
 	}
 
-	err := cli.db.Select(q.And(query...)).Find(&getTokenContracts)
+	getTokenContractListFunc := func(queryMatcher []q.Matcher) []*openwsdk.TokenContract {
+		var tokenContracts []*openwsdk.TokenContract
+		_, err := cli.getDB()
+		if err != nil {
+			return nil
+		}
+		defer cli.closeDB()
+
+		err = cli.db.Select(q.And(queryMatcher...)).Find(&tokenContracts)
+		return tokenContracts
+	}
+
+	getTokenContracts = getTokenContractListFunc(query)
 
 	//没有数据，更新数据
 	if getTokenContracts == nil || len(getTokenContracts) == 0 {
@@ -739,10 +786,7 @@ func (cli *CLI) GetTokenContractList(cols ...interface{}) ([]*openwsdk.TokenCont
 			return nil, err
 		}
 
-		err = cli.db.Select(q.And(query...)).Find(&getTokenContracts)
-		if err != nil {
-			return nil, err
-		}
+		getTokenContracts = getTokenContractListFunc(query)
 
 	}
 	return getTokenContracts, nil
@@ -806,6 +850,12 @@ func (cli *CLI) SetSummaryInfo(obj *openwsdk.SummarySetting) error {
 	if err != nil {
 		return err
 	}
+
+	_, err = cli.getDB()
+	if err != nil {
+		return err
+	}
+	defer cli.closeDB()
 
 	return cli.db.Save(obj)
 }
@@ -943,6 +993,12 @@ func (cli *CLI) AddTrustAddress(trustAddress *openwsdk.TrustAddress) error {
 
 	trustAddress.Symbol = s.Coin
 
+	_, err = cli.getDB()
+	if err != nil {
+		return err
+	}
+	defer cli.closeDB()
+
 	err = cli.db.Save(trustAddress)
 	if err != nil {
 		return err
@@ -957,6 +1013,13 @@ func (cli *CLI) ListTrustAddress(symbol string) ([]*openwsdk.TrustAddress, error
 		list []*openwsdk.TrustAddress
 		err  error
 	)
+
+	_, err = cli.getDB()
+	if err != nil {
+		return nil, err
+	}
+	defer cli.closeDB()
+
 	if symbol == "" {
 		err = cli.db.All(&list)
 	} else {
@@ -999,6 +1062,12 @@ func (cli *CLI) printListTrustAddress(addrs []*openwsdk.TrustAddress) {
 // importSummaryAddressToTrustAddress 导入汇总地址到信任地址列表
 func (cli *CLI) importSummaryAddressToTrustAddress() error {
 
+	_, err := cli.getDB()
+	if err != nil {
+		return err
+	}
+	defer cli.closeDB()
+
 	//读取汇总信息
 	var sum []*openwsdk.SummarySetting
 	cli.db.All(&sum)
@@ -1029,6 +1098,12 @@ func (cli *CLI) importSummaryAddressToTrustAddress() error {
 // EnableTrustAddress
 func (cli *CLI) EnableTrustAddress() error {
 
+	_, err := cli.getDB()
+	if err != nil {
+		return err
+	}
+	defer cli.closeDB()
+
 	var inited bool
 	cli.db.Get(CLIBucket, InitTrustAddress, &inited)
 
@@ -1046,7 +1121,7 @@ func (cli *CLI) EnableTrustAddress() error {
 		}
 	}
 
-	err := cli.db.Set(CLIBucket, EnableTrustAddress, true)
+	err = cli.db.Set(CLIBucket, EnableTrustAddress, true)
 	if err != nil {
 		return fmt.Errorf("Enable Trust Address, unexpected error: %v ", err)
 	}
@@ -1056,7 +1131,13 @@ func (cli *CLI) EnableTrustAddress() error {
 // DisableTrustAddress
 func (cli *CLI) DisableTrustAddress() error {
 
-	err := cli.db.Set(CLIBucket, EnableTrustAddress, false)
+	_, err := cli.getDB()
+	if err != nil {
+		return err
+	}
+	defer cli.closeDB()
+
+	err = cli.db.Set(CLIBucket, EnableTrustAddress, false)
 	if err != nil {
 		return fmt.Errorf("Enable Trust Address, unexpected error: %v ", err)
 	}
@@ -1065,6 +1146,14 @@ func (cli *CLI) DisableTrustAddress() error {
 
 // TrustAddressStatus
 func (cli *CLI) TrustAddressStatus() bool {
+
+	_, err := cli.getDB()
+	if err != nil {
+		log.Errorf("cli database open failed")
+		return false
+	}
+	defer cli.closeDB()
+
 	var status bool
 	cli.db.Get(CLIBucket, EnableTrustAddress, &status)
 	return status
@@ -1088,6 +1177,14 @@ func (cli *CLI) IsTrustAddress(address, symbol string) bool {
 	)
 
 	if cli.TrustAddressStatus() {
+
+		_, err = cli.getDB()
+		if err != nil {
+			fmt.Errorf("cli database open failed")
+			return false
+		}
+		defer cli.closeDB()
+
 		err = cli.db.Select(
 			q.And(
 				q.Eq("Address", address),

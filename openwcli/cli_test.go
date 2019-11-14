@@ -26,7 +26,7 @@ func getTestOpenwCLI() *CLI {
 	cli, err := NewCLI(conf)
 	if err != nil {
 		log.Error("getTestOpenwCLI error:", err)
-		return nil
+		//return nil
 	}
 	return cli
 

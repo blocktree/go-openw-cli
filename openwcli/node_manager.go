@@ -43,8 +43,14 @@ func (cli *CLI) SaveCurrentKeychain(keychain *Keychain) error {
 		return check
 	}
 
+	_, err := cli.getDB()
+	if err != nil {
+		return err
+	}
+	defer cli.closeDB()
+
 	//保存到数据库
-	err := cli.db.Save(keychain)
+	err = cli.db.Save(keychain)
 	if err != nil {
 		return fmt.Errorf("save new keychain failed. unexpected error: %v", err)
 	}
@@ -59,8 +65,15 @@ func (cli *CLI) SaveCurrentKeychain(keychain *Keychain) error {
 
 //GetKeychain
 func (cli *CLI) GetKeychain() (*Keychain, error) {
+
+	_, err := cli.getDB()
+	if err != nil {
+		return nil, err
+	}
+	defer cli.closeDB()
+
 	var current string
-	err := cli.db.Get(CLIBucket, CurrentKeychainKey, &current)
+	err = cli.db.Get(CLIBucket, CurrentKeychainKey, &current)
 	if err != nil {
 		return nil, fmt.Errorf("The keychain not exist, please register node first. ")
 	}
