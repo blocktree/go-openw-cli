@@ -4,14 +4,14 @@ go 1.12
 
 require (
 	github.com/asdine/storm v2.1.2+incompatible
-	github.com/astaxie/beego v1.11.1
-	github.com/blocktree/go-openw-sdk v1.4.8
-	github.com/blocktree/go-owcdrivers v1.1.29
-	github.com/blocktree/openwallet v1.5.4
+	github.com/astaxie/beego v1.12.0
+	github.com/blocktree/go-openw-sdk v1.5.0
+	github.com/blocktree/go-owcdrivers v1.2.0
+	github.com/blocktree/openwallet v1.7.0
 	github.com/bndr/gotabulate v1.1.2
 	github.com/google/uuid v1.1.1
-	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24
-	go.etcd.io/bbolt v1.3.2
+	github.com/shopspring/decimal v0.0.0-20200105231215-408a2507e114
+	go.etcd.io/bbolt v1.3.3
 	gopkg.in/urfave/cli.v1 v1.20.0
 )
 
