@@ -1,6 +1,7 @@
 package openwcli
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -389,4 +390,72 @@ func TestCLI_SetSummaryInfo(t *testing.T) {
 		return
 	}
 
+}
+
+func TestJSONUnmarshal(t *testing.T) {
+	jsonRawTx := `
+{
+        "coin" : {
+            "symbol" : "ACC",
+            "isContract" : true,
+            "contractID" : "txyV4/DJJ236r0+A8bp/de1ZCGyHE+oReNdS/Cz/PIQ=",
+            "contract" : {
+                "address" : "acc.token:ACC",
+                "token" : "ACC",
+                "protocol" : "",
+                "name" : "ACC",
+                "decimals" : 4.0,
+                "contractID" : "txyV4/DJJ236r0+A8bp/de1ZCGyHE+oReNdS/Cz/PIQ=",
+                "symbol" : "ACC"
+            }
+        },
+        "sid" : "1224324832045301760",
+        "sigCount" : 0.0,
+        "fees" : "0",
+        "sigParts" : {
+            "F13g6wP52QBeLT52dbcpUzVK5PJnSkk9BQTm4p8dvNe4" : [ 
+                {
+                    "address" : "ACC5u4W1N59cxWFnw72jV1muK418tK9URL6n9phgTBrMEhrcvXe6g",
+                    "nonce" : "",
+                    "signed" : "",
+                    "walletID" : "W9PXkEjbJrRfH75a6VWvs8kCef3Yusf2AN",
+                    "derivedPath" : "m/44'/88'/19'/0/0",
+                    "eccType" : 3972005888.0,
+                    "inputIndex" : 0.0,
+                    "msg" : "dbab2c8f8fe19be68994a164f1e9bf326cc9a20f9c6ddf748177b49fc7e9a0d1",
+                    "isImport" : 0.0,
+                    "publickey" : "",
+                    "rsv" : true
+                }
+            ]
+        },
+        "feeRate" : "0",
+        "errorMsg" : null,
+        "accountID" : "F13g6wP52QBeLT52dbcpUzVK5PJnSkk9BQTm4p8dvNe4",
+        "rawHex" : "1821385e672743f3dca100000000010000980ad20c1032000000572d3ccdcd01809001993688683c00000000a8ed323229809001993688683cf0064c826af4b0df2a9d1900000000000441434300000000084e3343435855445100",
+        "rawHexSig" : "c0f17722023cf9f17c7cc4f2e0263119",
+        "reqSigs" : 1.0,
+        "extParam" : "{\"memo\":\"N3CCXUDQ\"}",
+        "to" : {
+            "vysjcuo2dk3j" : "167.8634"
+        }
+    }
+`
+
+	var rawTx openwsdk.RawTransaction
+	err := json.Unmarshal([]byte(jsonRawTx), &rawTx)
+	if err != nil {
+		t.Errorf("SetSummaryInfo failed, err: %v", err)
+		return
+	}
+
+	for accountID, signatures := range rawTx.Signatures {
+		log.Warningf("[Failed] signature accountID: %s", accountID)
+		for _, keySignature := range signatures {
+			signaturesJSON, jsonErr := json.Marshal(keySignature)
+			if jsonErr == nil {
+				log.Warningf("[Failed] keySignature: %s", string(signaturesJSON))
+			}
+		}
+	}
 }

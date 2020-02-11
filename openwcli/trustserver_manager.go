@@ -182,6 +182,9 @@ func (cli *CLI) getTrustNodeInfo(ctx *owtp.Context) {
 		NodeID:      cli.transmitNode.NodeID(),
 		NodeName:    cli.config.localname,
 		ConnectType: owtp.Websocket,
+		Version:     Version,
+		GitRev:      GitRev,
+		BuildTime:   BuildTime,
 	}
 
 	ctx.Response(info, owtp.StatusSuccess, "success")

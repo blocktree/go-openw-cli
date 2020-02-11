@@ -2,11 +2,12 @@ package openwcli
 
 import (
 	"encoding/json"
-	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
+	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
 	"github.com/google/uuid"
 	"testing"
+	"time"
 )
 
 func testFindAccountByID(accountID string, list []*openwsdk.Account) *openwsdk.Account {
@@ -18,8 +19,7 @@ func testFindAccountByID(accountID string, list []*openwsdk.Account) *openwsdk.A
 	return nil
 }
 
-
-func testCLITransfer(walletID, accountID, amount, to, password string) *openwallet.Error {
+func testCLITransfer(walletID, accountID, contractAddress, amount, to, memo, password string) *openwallet.Error {
 	cli := getTestOpenwCLI()
 	if cli == nil {
 		return openwallet.Errorf(openwallet.ErrUnknownException, "init cli error")
@@ -39,7 +39,7 @@ func testCLITransfer(walletID, accountID, amount, to, password string) *openwall
 
 	if account != nil {
 		sid := uuid.New().String()
-		_, _, exErr := cli.Transfer(wallet, account, "", to, amount, sid, "", "", password)
+		_, _, exErr := cli.Transfer(wallet, account, contractAddress, to, amount, sid, "", memo, password)
 		if exErr != nil {
 			//log.Error("Transfer error code: %d, msg: %s", exErr.Code(), exErr.Error())
 			return exErr
@@ -48,7 +48,6 @@ func testCLITransfer(walletID, accountID, amount, to, password string) *openwall
 
 	return nil
 }
-
 
 func testCLITransferAll(walletID, accountID, to, password string) *openwallet.Error {
 	cli := getTestOpenwCLI()
@@ -86,7 +85,7 @@ func TestCLI_Transfer_LTC(t *testing.T) {
 	amount := "0.001"
 	to := "LcaFc1pmJBsS7MQyMvZaboppuuvGFubD49"
 	password := "12345678"
-	err := testCLITransfer(walletID, accountID, amount, to, password)
+	err := testCLITransfer(walletID, accountID, "", amount, to, "", password)
 	if err != nil {
 		t.Errorf("Transfer error code: %d, msg: %s", err.Code(), err.Error())
 		return
@@ -240,4 +239,24 @@ func TestCLI_GetSummaryTaskLog(t *testing.T) {
 	for i, l := range logs {
 		log.Infof("log[%d]: %+v", i, l)
 	}
+}
+
+func TestCLI_Transfer_Token(t *testing.T) {
+	count := 1000
+	for i := 0; i < count; i++ {
+		walletID := "WCpVSv7AsTpLpkkc5tHApnqCKzdsoNKr8P"
+		accountID := "72xtVNtkkiJyEHoFCSL9XjnwRQNjVm1GBpLwLG6Rk98h"
+		amount := "0.0001"
+		contractAddress := "evsio.token:TGC"
+		to := "tgcopenwtest"
+		password := "12345678"
+		memo := "N3CCXUQL"
+		err := testCLITransfer(walletID, accountID, contractAddress, amount, to, memo, password)
+		if err != nil {
+			t.Errorf("Transfer error code: %d, msg: %s \n", err.Code(), err.Error())
+			return
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+
 }
