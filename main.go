@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	openw "github.com/blocktree/go-openw-cli/openwcli"
 )
 
 const (
@@ -27,7 +28,7 @@ SUBCOMMANDS:
 
 	// Git SHA1 commit hash of the release (set via linker flags)
 	// The app that holds all commands and flags.
-	app = NewApp(commands.GitRev, "the Wallet Manager Driver command line interface")
+	app = NewApp(openw.GitRev, "the Wallet Manager Driver command line interface")
 )
 
 func init() {
@@ -54,7 +55,7 @@ func NewApp(gitCommit, usage string) *cli.App {
 	app.Author = ""
 	//app.Authors = nil
 	app.Email = ""
-	app.Version = commands.Version
+	app.Version = openw.Version
 	if len(gitCommit) >= 0 {
 		app.Version += "-" + gitCommit
 	}
@@ -68,7 +69,7 @@ func init() {
 	app.Action = openwcli
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2018 The OpenWallet Authors"
-	app.Version = commands.Version
+	app.Version = openw.Version
 	app.Commands = commands.Commands
 	app.Flags = []cli.Flag{
 		commands.AppNameFlag,

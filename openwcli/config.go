@@ -73,6 +73,9 @@ var (
 	// 固定应用信息
 	FixAppID  = ""
 	FixAppKey = ""
+	Version   = ""
+	GitRev    = ""
+	BuildTime = ""
 )
 
 //配置

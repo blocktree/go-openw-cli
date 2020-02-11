@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/asdine/storm"
 	"github.com/blocktree/go-openw-sdk/openwsdk"
+	"github.com/blocktree/openwallet/common/file"
 	"github.com/blocktree/openwallet/console"
 	"github.com/blocktree/openwallet/hdkeystore"
 	"github.com/blocktree/openwallet/log"
@@ -14,9 +15,12 @@ import (
 	"github.com/shopspring/decimal"
 	bolt "go.etcd.io/bbolt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -609,6 +613,11 @@ func (cli *CLI) StartSumFlow(file string) error {
 		taskFile    string
 	)
 
+	err := CheckBackgroundProcess("startsum")
+	if err != nil {
+		return err
+	}
+
 	cycleTime := cli.config.summaryperiod
 	if len(cycleTime) == 0 {
 		cycleTime = "1m"
@@ -809,6 +818,11 @@ func (cli *CLI) StartTrustServerFlow() error {
 		endRunning = make(chan bool, 1)
 		err        error
 	)
+
+	err = CheckBackgroundProcess("trustserver")
+	if err != nil {
+		return err
+	}
 
 	confirm, _ := console.Stdin.PromptConfirm("Do you want to unlock local wallets?")
 
@@ -1031,6 +1045,55 @@ func (cli *CLI) DisableTrustAddressFlow() error {
 	}
 
 	cli.printTrustAddressStatus()
+
+	return nil
+}
+
+func CheckBackgroundProcess(processName string) error {
+	iManPid := fmt.Sprint(os.Getpid())
+	tmpDir := filepath.Join(".", "pid")
+	file.MkdirAll(tmpDir)
+	filePath := filepath.Join(tmpDir, processName + ".pid")
+	if err := ProcExsit(filePath, processName); err == nil {
+		pidFile, _ := os.Create(filePath)
+		defer pidFile.Close()
+
+		pidFile.WriteString(iManPid)
+		return nil
+	} else {
+		return err
+	}
+}
+
+// 判断进程是否启动
+func ProcExsit(filePath string, processName string) error {
+	var (
+		iManPidFile *os.File
+		filePid []byte
+		process *os.Process
+		err error
+	)
+	iManPidFile, err = os.Open(filePath)
+	defer iManPidFile.Close()
+
+	if err == nil {
+		filePid, err = ioutil.ReadAll(iManPidFile)
+		if err == nil {
+			pidStr := fmt.Sprintf("%s", filePid)
+			pid, _ := strconv.Atoi(pidStr)
+			process, err = os.FindProcess(pid)
+			if err == nil {
+				err = process.Signal(syscall.Signal(0))
+				//fmt.Printf("process.Signal on pid %d returned: %v\n", pid, err)
+				if err == nil {
+					//进程还能接受消息，仍存在
+					return fmt.Errorf("openw-cli pid: %s %s is running", pidStr, processName)
+				}
+				//进程不存在
+			}
+			//进程不存在
+		}
+	}
 
 	return nil
 }
