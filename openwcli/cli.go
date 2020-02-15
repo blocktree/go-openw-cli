@@ -720,14 +720,14 @@ func (cli *CLI) StartSumFlow(file string) error {
 
 	log.Infof("The timer for summary task start now. Execute by every %v seconds.", cycleSec.Seconds())
 
+	//马上执行一次汇总
+	cli.SummaryTask()
+
 	//启动钱包汇总程序
 	sumTimer := timer.NewTask(cycleSec, cli.SummaryTask)
 	sumTimer.Start()
 
 	cli.summaryTaskTimer = sumTimer
-
-	//马上执行一次汇总
-	cli.SummaryTask()
 
 	<-endRunning
 
