@@ -2,8 +2,8 @@ package openwcli
 
 import (
 	"encoding/json"
-	"github.com/blocktree/go-openw-sdk/openwsdk"
-	"github.com/blocktree/openwallet/log"
+	"github.com/blocktree/go-openw-sdk/v2/openwsdk"
+	"github.com/blocktree/openwallet/v2/log"
 	"testing"
 )
 
@@ -77,7 +77,7 @@ func TestCLI_appendSummaryTasks(t *testing.T) {
 
 	log.Infof("--------------- before append task ---------------")
 
-	for _, w := range cli.summaryTask.Wallets  {
+	for _, w := range cli.summaryTask.Wallets {
 		log.Infof("walletID: %s", w.WalletID)
 		for _, a := range w.Accounts {
 			log.Infof("accountID: %s", a.AccountID)
@@ -145,7 +145,7 @@ func TestCLI_appendSummaryTasks(t *testing.T) {
 
 	log.Infof("--------------- after append task ---------------")
 
-	for _, w := range cli.summaryTask.Wallets  {
+	for _, w := range cli.summaryTask.Wallets {
 		log.Infof("walletID: %s", w.WalletID)
 		for _, a := range w.Accounts {
 			log.Infof("accountID: %s", a.AccountID)

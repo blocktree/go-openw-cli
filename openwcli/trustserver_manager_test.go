@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/blocktree/openwallet/log"
+	"github.com/blocktree/openwallet/v2/log"
 )
 
 func TestCLI_ConnectTransmitNode(t *testing.T) {

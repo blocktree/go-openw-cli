@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/asdine/storm"
-	"github.com/blocktree/go-openw-sdk/openwsdk"
-	"github.com/blocktree/openwallet/common/file"
-	"github.com/blocktree/openwallet/console"
-	"github.com/blocktree/openwallet/hdkeystore"
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/owtp"
-	"github.com/blocktree/openwallet/timer"
+	"github.com/blocktree/go-openw-sdk/v2/openwsdk"
+	"github.com/blocktree/openwallet/v2/common/file"
+	"github.com/blocktree/openwallet/v2/console"
+	"github.com/blocktree/openwallet/v2/hdkeystore"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/owtp"
+	"github.com/blocktree/openwallet/v2/timer"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	bolt "go.etcd.io/bbolt"
@@ -28,19 +28,20 @@ const (
 	maxAddresNum = 2000
 )
 
-type SignRawTransactionFunc func(rawTx *openwsdk.RawTransaction, key *hdkeystore.HDKey) error
+//type SignRawTransactionFunc func(rawTx *openwsdk.RawTransaction, key *hdkeystore.HDKey) error
+type SignTxHashFunc func(signatures map[string][]*openwsdk.KeySignature, key *hdkeystore.HDKey) (map[string][]*openwsdk.KeySignature, error)
 
 type CLI struct {
 	mu               sync.RWMutex
-	config           *Config                //工具配置
-	db               *StormDB               //本地数据库
-	api              *openwsdk.APINode      //api
-	summaryTask      *openwsdk.SummaryTask  //汇总任务
-	summaryTaskTimer *timer.TaskTimer       //汇总任务定时器
-	transmitNode     *owtp.OWTPNode         //转发节点，被托管钱包种子的节点
-	unlockWallets    map[string]string      //已解锁的钱包
-	txSigner         SignRawTransactionFunc //自定义签名函数
-	keepOpen         bool                   //数据库文件保持打开状态
+	config           *Config               //工具配置
+	db               *StormDB              //本地数据库
+	api              *openwsdk.APINode     //api
+	summaryTask      *openwsdk.SummaryTask //汇总任务
+	summaryTaskTimer *timer.TaskTimer      //汇总任务定时器
+	transmitNode     *owtp.OWTPNode        //转发节点，被托管钱包种子的节点
+	unlockWallets    map[string]string     //已解锁的钱包
+	txSigner         SignTxHashFunc        //自定义签名函数
+	keepOpen         bool                  //数据库文件保持打开状态
 }
 
 // 初始化工具
@@ -61,7 +62,7 @@ func NewCLI(c *Config) (*CLI, error) {
 	cli := &CLI{
 		config:        c,
 		unlockWallets: make(map[string]string),
-		txSigner:      openwsdk.SignRawTransaction, //默认签名方法为openwsdk提供的
+		txSigner:      openwsdk.SignTxHash, //默认签名方法为openwsdk提供的
 	}
 
 	//配置日志
@@ -957,8 +958,8 @@ func (cli *CLI) unlockLocalWalletsByInputPassword() error {
 	return nil
 }
 
-// SetSignRawTransactionFunc 设置签名方法
-func (cli *CLI) SetSignRawTransactionFunc(txSigner SignRawTransactionFunc) error {
+// SetSignTxHashFunc 设置签名方法
+func (cli *CLI) SetSignTxHashFunc(txSigner SignTxHashFunc) error {
 	if txSigner == nil {
 		return fmt.Errorf("SignRawTransactionFunc is nil")
 	}
@@ -1053,7 +1054,7 @@ func CheckBackgroundProcess(processName string) error {
 	iManPid := fmt.Sprint(os.Getpid())
 	tmpDir := filepath.Join(".", "pid")
 	file.MkdirAll(tmpDir)
-	filePath := filepath.Join(tmpDir, processName + ".pid")
+	filePath := filepath.Join(tmpDir, processName+".pid")
 	if err := ProcExsit(filePath, processName); err == nil {
 		pidFile, _ := os.Create(filePath)
 		defer pidFile.Close()
@@ -1069,9 +1070,9 @@ func CheckBackgroundProcess(processName string) error {
 func ProcExsit(filePath string, processName string) error {
 	var (
 		iManPidFile *os.File
-		filePid []byte
-		process *os.Process
-		err error
+		filePid     []byte
+		process     *os.Process
+		err         error
 	)
 	iManPidFile, err = os.Open(filePath)
 	defer iManPidFile.Close()

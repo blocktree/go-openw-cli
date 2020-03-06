@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/asdine/storm"
-	"github.com/blocktree/go-openw-sdk/openwsdk"
-	"github.com/blocktree/openwallet/common"
-	"github.com/blocktree/openwallet/hdkeystore"
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openwallet"
-	"github.com/blocktree/openwallet/owtp"
+	"github.com/blocktree/go-openw-sdk/v2/openwsdk"
+	"github.com/blocktree/openwallet/v2/common"
+	"github.com/blocktree/openwallet/v2/hdkeystore"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openwallet"
+	"github.com/blocktree/openwallet/v2/owtp"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	"time"
@@ -426,11 +426,12 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 			for _, rawTx := range retRawTxs {
 
 				//签名交易
-				err = cli.txSigner(rawTx, key)
-				if err != nil {
-					log.Warn("SignRawTransaction unexpected error: %v", err)
+				signatures, sigErr := cli.txSigner(rawTx.Signatures, key)
+				if sigErr != nil {
+					log.Warn("SignRawTransaction unexpected error: %v", sigErr)
 					continue
 				}
+				rawTx.Signatures = signatures
 
 				signedRawTxs = append(signedRawTxs, rawTx)
 
@@ -545,12 +546,12 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 			signedRawTxs := make([]*openwsdk.RawTransaction, 0)
 			for _, rawTx := range retRawFeesSupportTxs {
 				//签名交易
-				err = cli.txSigner(rawTx, key)
-				if err != nil {
-					log.Warn("SignRawTransaction unexpected error: %v", err)
+				signatures, sigErr := cli.txSigner(rawTx.Signatures, key)
+				if sigErr != nil {
+					log.Warn("SignRawTransaction unexpected error: %v", sigErr)
 					continue
 				}
-
+				rawTx.Signatures = signatures
 				signedRawTxs = append(signedRawTxs, rawTx)
 			}
 
@@ -603,11 +604,12 @@ func (cli *CLI) signSummaryRawTransaction(retRawTxs []*openwsdk.RawTransaction, 
 	signedRawTxs := make([]*openwsdk.RawTransaction, 0)
 	for _, rawTx := range retRawTxs {
 		//签名交易
-		err := cli.txSigner(rawTx, key)
-		if err != nil {
-			log.Warn("SignRawTransaction unexpected error: %v", err)
-			return nil, err
+		signatures, sigErr := cli.txSigner(rawTx.Signatures, key)
+		if sigErr != nil {
+			log.Warn("SignRawTransaction unexpected error: %v", sigErr)
+			return nil, sigErr
 		}
+		rawTx.Signatures = signatures
 
 		signedRawTxs = append(signedRawTxs, rawTx)
 	}

@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/asdine/storm/q"
-	"github.com/blocktree/go-openw-sdk/openwsdk"
-	"github.com/blocktree/openwallet/common"
-	"github.com/blocktree/openwallet/common/file"
-	"github.com/blocktree/openwallet/hdkeystore"
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openwallet"
-	"github.com/blocktree/openwallet/owtp"
+	"github.com/blocktree/go-openw-sdk/v2/openwsdk"
+	"github.com/blocktree/openwallet/v2/common"
+	"github.com/blocktree/openwallet/v2/common/file"
+	"github.com/blocktree/openwallet/v2/hdkeystore"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openwallet"
+	"github.com/blocktree/openwallet/v2/owtp"
 	"github.com/bndr/gotabulate"
 )
 
@@ -645,7 +645,7 @@ func (cli *CLI) UpdateSymbols() error {
 //UpdateSymbols 更新主链
 func (cli *CLI) UpdateTokenContracts(symbol string) error {
 	var getTokenContract []*openwsdk.TokenContract
-	err := cli.api.GetContracts(symbol, "",  0, 5000, true,
+	err := cli.api.GetContracts(symbol, "", 0, 5000, true,
 		func(status uint64, msg string, tokenContract []*openwsdk.TokenContract) {
 			getTokenContract = tokenContract
 		})
@@ -750,9 +750,9 @@ func (cli *CLI) GetSymbolInfo(symbol string) (*openwsdk.Symbol, error) {
 func (cli *CLI) GetTokenContractList(cols ...interface{}) ([]*openwsdk.TokenContract, error) {
 
 	var (
-		query = make([]q.Matcher, 0)
+		query             = make([]q.Matcher, 0)
 		getTokenContracts []*openwsdk.TokenContract
-		err error
+		err               error
 	)
 
 	if len(cols)%2 != 0 {
@@ -1057,7 +1057,6 @@ func (cli *CLI) printListTrustAddress(addrs []*openwsdk.TrustAddress) {
 	//打印信息
 	fmt.Println(t.Render("simple"))
 }
-
 
 // importSummaryAddressToTrustAddress 导入汇总地址到信任地址列表
 func (cli *CLI) importSummaryAddressToTrustAddress() error {

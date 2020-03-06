@@ -3,11 +3,11 @@ package openwcli
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/blocktree/go-openw-sdk/openwsdk"
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openwallet"
-	"github.com/blocktree/openwallet/owtp"
-	"github.com/blocktree/openwallet/timer"
+	"github.com/blocktree/go-openw-sdk/v2/openwsdk"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openwallet"
+	"github.com/blocktree/openwallet/v2/owtp"
+	"github.com/blocktree/openwallet/v2/timer"
 	"time"
 )
 
@@ -706,11 +706,13 @@ func (cli *CLI) signTransactionViaTrustNode(ctx *owtp.Context) {
 	log.Infof("-----------------------------------------------")
 
 	//签名交易
-	err = cli.txSigner(&rawTx, key)
-	if err != nil {
-		ctx.Response(nil, openwallet.ErrSignRawTransactionFailed, err.Error())
+	signature, sigErr := cli.txSigner(rawTx.Signatures, key)
+	if sigErr != nil {
+		ctx.Response(nil, openwallet.ErrSignRawTransactionFailed, sigErr.Error())
 		return
 	}
+
+	rawTx.Signatures = signature
 
 	ctx.Response(map[string]interface{}{
 		"signedRawTx": rawTx,

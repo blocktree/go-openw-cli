@@ -2,7 +2,7 @@ package openwcli
 
 import (
 	"fmt"
-	"github.com/blocktree/openwallet/owtp"
+	"github.com/blocktree/openwallet/v2/owtp"
 )
 
 //GenKeychain 生成新密钥对

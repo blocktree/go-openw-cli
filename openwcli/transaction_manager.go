@@ -2,10 +2,10 @@ package openwcli
 
 import (
 	"encoding/json"
-	"github.com/blocktree/go-openw-sdk/openwsdk"
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openwallet"
-	"github.com/blocktree/openwallet/owtp"
+	"github.com/blocktree/go-openw-sdk/v2/openwsdk"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openwallet"
+	"github.com/blocktree/openwallet/v2/owtp"
 )
 
 //GetTokenBalance 获取代币余额
@@ -24,7 +24,7 @@ func (cli *CLI) GetTokenBalance(account *openwsdk.Account, contractID string) st
 func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, address string) (*openwsdk.TokenBalance, error) {
 	var (
 		getBalance *openwsdk.TokenBalance
-		callErr error
+		callErr    error
 	)
 
 	token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", address)
@@ -63,12 +63,10 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 		tokenSymbol string
 	)
 
-
 	//:检查目标地址是否信任名单
 	if !cli.IsTrustAddress(to, account.Symbol) {
 		return nil, nil, openwallet.Errorf(openwallet.ErrUnknownException, "%s is not in trust address list", to)
 	}
-
 
 	if len(password) == 0 {
 		return nil, nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, "unlock wallet password is empty. ")
@@ -124,10 +122,11 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	log.Infof("-----------------------------------------------")
 
 	//签名交易单
-	err = cli.txSigner(retRawTx, key)
-	if err != nil {
-		return nil, nil, openwallet.Errorf(openwallet.ErrSignRawTransactionFailed, err.Error())
+	signatures, sigErr := cli.txSigner(retRawTx.Signatures, key)
+	if sigErr != nil {
+		return nil, nil, openwallet.Errorf(openwallet.ErrSignRawTransactionFailed, sigErr.Error())
 	}
+	retRawTx.Signatures = signatures
 
 	//广播交易单
 	err = api.SubmitTrade([]*openwsdk.RawTransaction{retRawTx}, true,
@@ -174,4 +173,3 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 
 	return retTx, retFailed, nil
 }
-
