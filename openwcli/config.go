@@ -2,7 +2,7 @@ package openwcli
 
 import (
 	"github.com/astaxie/beego/config"
-	"github.com/blocktree/openwallet/common/file"
+	"github.com/blocktree/openwallet/v2/common/file"
 	"path/filepath"
 )
 
@@ -63,10 +63,10 @@ enabletrustserverssl = false
 
 `
 
-	keyDirName = "key"
-	dbDirName  = "db"
+	keyDirName     = "key"
+	dbDirName      = "db"
 	exportDirName  = "export"
-	addressDirName  = "address"
+	addressDirName = "address"
 )
 
 var (
@@ -166,7 +166,6 @@ func NewConfig(c config.Configer) *Config {
 	if len(appid) > 0 {
 		conf.appid = appid
 	}
-
 
 	//建立文件夹
 	file.MkdirAll(conf.datadir)

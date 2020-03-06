@@ -2,7 +2,7 @@ package commands
 
 import (
 	"github.com/blocktree/go-openw-cli/openwcli"
-	"github.com/blocktree/openwallet/log"
+	"github.com/blocktree/openwallet/v2/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

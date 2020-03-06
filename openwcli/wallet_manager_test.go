@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/blocktree/go-openw-sdk/openwsdk"
-	"github.com/blocktree/openwallet/log"
+	"github.com/blocktree/go-openw-sdk/v2/openwsdk"
+	"github.com/blocktree/openwallet/v2/log"
 )
 
 func TestCLI_CreateWalletOnServer(t *testing.T) {
@@ -344,7 +344,6 @@ func TestCLI_EnableTrustAddress(t *testing.T) {
 	cli.printTrustAddressStatus()
 }
 
-
 func TestCLI_DisableTrustAddress(t *testing.T) {
 	cli := getTestOpenwCLI()
 	if cli == nil {
@@ -382,7 +381,6 @@ func TestCLI_SetSummaryInfo(t *testing.T) {
 		RetainedBalance: "0",
 		Confirms:        1,
 	}
-
 
 	err := cli.SetSummaryInfo(obj)
 	if err != nil {
