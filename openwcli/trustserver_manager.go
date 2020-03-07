@@ -46,6 +46,7 @@ func (cli *CLI) ServeTransmitNode(autoReconnect bool) error {
 	cli.transmitNode.HandleFunc("getLocalWalletListViaTrustNode", cli.getLocalWalletListViaTrustNode)
 	cli.transmitNode.HandleFunc("getTrustAddressListViaTrustNode", cli.getTrustAddressListViaTrustNode)
 	cli.transmitNode.HandleFunc("signTransactionViaTrustNode", cli.signTransactionViaTrustNode)
+	cli.transmitNode.HandleFunc("triggerABIViaTrustNode", cli.triggerABIViaTrustNode)
 
 	//自动连接
 	if autoReconnect {
@@ -717,4 +718,59 @@ func (cli *CLI) signTransactionViaTrustNode(ctx *owtp.Context) {
 	ctx.Response(map[string]interface{}{
 		"signedRawTx": rawTx,
 	}, owtp.StatusSuccess, "success")
+}
+
+func (cli *CLI) triggerABIViaTrustNode(ctx *owtp.Context) {
+
+	if !cli.config.enablerequesttransfer {
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [transfer] ability")
+		return
+	}
+
+	appID := ctx.Params().Get("appID").String()
+
+	if appID != cli.config.appid {
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
+		return
+	}
+
+	accountID := ctx.Params().Get("accountID").String()
+	sid := ctx.Params().Get("sid").String()
+	contractAddress := ctx.Params().Get("contractAddress").String()
+	password := ctx.Params().Get("password").String()
+	abiArr := ctx.Params().Get("abiParam")
+	amount := ctx.Params().Get("amount").String()
+	feeRate := ctx.Params().Get("feeRate").String()
+
+	abiParam := make([]string, 0)
+	for _, s := range abiArr.Array() {
+		abiParam = append(abiParam, s.String())
+	}
+
+	account, err := cli.GetAccountByAccountID(accountID)
+	if err != nil {
+		ctx.Response(nil, openwallet.ErrAccountNotFound, err.Error())
+		return
+	}
+
+	wallet, err := cli.GetWalletByWalletID(account.WalletID)
+	if err != nil {
+		ctx.Response(nil, openwallet.ErrUnknownException, err.Error())
+		return
+	}
+
+	if len(password) == 0 {
+		//钱包是否已经解锁
+		if p, exist := cli.unlockWallets[wallet.WalletID]; exist {
+			password = p
+		}
+	}
+
+	retTx, exErr := cli.TriggerABI(wallet, account, contractAddress, amount, sid, feeRate, password, abiParam)
+	if exErr != nil {
+		ctx.Response(nil, exErr.Code(), exErr.Error())
+		return
+	}
+
+	ctx.Response(retTx, owtp.StatusSuccess, "success")
 }

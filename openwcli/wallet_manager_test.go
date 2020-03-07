@@ -49,7 +49,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	}
 
 	if wallet != nil {
-		_, _, err = cli.CreateAccountOnServer("mainnetLTC", "12345678", "LTC", wallet)
+		_, _, err = cli.CreateAccountOnServer("mainnetQUORUM", "12345678", "QUORUM", wallet)
 		if err != nil {
 			log.Error("CreateAccountOnServer error:", err)
 			return
@@ -113,7 +113,7 @@ func TestCLI_GetAddressesOnServer(t *testing.T) {
 	}
 
 	walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
-	accountID := "65Y9FgipAS2M7ankrt4o3MR2Z1EEPNZKBqyQNsKt9wnj"
+	accountID := "7KgNQFx35ijMA43NgY89uaiwi9Tm4MH1PH68Kpnaqstu"
 
 	addresses, err := cli.GetAddressesOnServer(walletID, accountID, 0, 50)
 	if err != nil {

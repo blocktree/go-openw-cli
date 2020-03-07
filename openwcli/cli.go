@@ -1098,3 +1098,97 @@ func ProcExsit(filePath string, processName string) error {
 
 	return nil
 }
+
+
+//TriggerABIFlow
+func (cli *CLI) TriggerABIFlow() error {
+	//:选择钱包
+	wallet, err := cli.SelectWalletStep()
+	if err != nil {
+		return err
+	}
+
+	//:选择账户
+	account, err := cli.selectAccountStep(wallet.WalletID)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入合约地址
+	contractAddress, err := console.InputText("Enter contract address: ", false)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入ABI参数
+	abiInput, err := console.InputText("Enter ABI parameters: ", false)
+	if err != nil {
+		return err
+	}
+
+	abiParam := strings.Split(abiInput, ",")
+
+	// 等待用户费率
+	feeRate, err := console.InputRealNumber("Enter fee rate: ", false)
+	if err != nil {
+		return err
+	}
+
+	feeRateDec, _ := decimal.NewFromString(feeRate)
+	if feeRateDec.LessThan(decimal.Zero) {
+		return fmt.Errorf("fee rate can not be negative")
+	}
+
+	// 等待用户输入密码
+	password, err := console.InputPassword(false, 3)
+	if err != nil {
+		return err
+	}
+
+	//创建新交易单
+	sid := uuid.New().String()
+
+	_, exErr := cli.TriggerABI(wallet, account, contractAddress, "0", sid, feeRate, password, abiParam)
+	if exErr != nil {
+		return exErr
+	}
+
+	return nil
+}
+
+
+//CallABIFlow
+func (cli *CLI) CallABIFlow() error {
+	//:选择钱包
+	wallet, err := cli.SelectWalletStep()
+	if err != nil {
+		return err
+	}
+
+	//:选择账户
+	account, err := cli.selectAccountStep(wallet.WalletID)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入合约地址
+	contractAddress, err := console.InputText("Enter contract address: ", false)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入ABI参数
+	abiInput, err := console.InputText("Enter ABI parameters: ", false)
+	if err != nil {
+		return err
+	}
+
+	abiParam := strings.Split(abiInput, ",")
+
+	_, exErr := cli.CallABI(account, contractAddress, abiParam)
+	if exErr != nil {
+		return exErr
+	}
+
+	return nil
+}
