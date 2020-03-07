@@ -224,6 +224,24 @@ var (
 			Category:  "WALLET COMMANDS",
 			Flags:     []cli.Flag{},
 		},
+		{
+
+			Name:      "callabi",
+			Usage:     "executes a new message call immediately without creating a transaction on the block chain.",
+			ArgsUsage: "<symbol>",
+			Action:    callabi,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
+		{
+
+			Name:      "triggerabi",
+			Usage:     "creates new transaction trigger smart contract on the block chain.",
+			ArgsUsage: "<symbol>",
+			Action:    triggerabi,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
 	}
 )
 
@@ -573,6 +591,36 @@ func disabletrustaddress(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
 		err := cli.DisableTrustAddressFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+//callabi 直接调用ABI
+func callabi(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.CallABIFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+//triggerabi 触发ABI上链交易
+func triggerabi(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.TriggerABIFlow()
 		if err != nil {
 			log.Error("unexpected error: ", err)
 			return err

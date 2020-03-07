@@ -14,3 +14,233 @@
  */
 
 package openwcli
+
+import (
+	"encoding/json"
+	"github.com/blocktree/go-openw-sdk/v2/openwsdk"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openwallet"
+	"github.com/blocktree/openwallet/v2/owtp"
+	"strings"
+	"time"
+)
+
+//CallABI 直接调用ABI方法
+func (cli *CLI) CallABI(account *openwsdk.Account, contractAddress string, abiParam []string) (*openwsdk.SmartContractCallResult, *openwallet.Error) {
+
+	var (
+		isContract    bool
+		retCallResult *openwsdk.SmartContractCallResult
+		err           error
+		createErr     *openwallet.Error
+		contractID    string
+		tokenSymbol   string
+	)
+
+	if len(contractAddress) > 0 {
+		isContract = true
+		token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", contractAddress)
+		if findErr != nil {
+			return nil, openwallet.ConvertError(findErr)
+		}
+		contractID = token[0].ContractID
+		tokenSymbol = token[0].Token
+	}
+	coin := openwsdk.Coin{
+		Symbol:     account.Symbol,
+		IsContract: isContract,
+		ContractID: contractID,
+	}
+
+	api := cli.api
+	err = api.CallSmartContractABI(account.AccountID, coin, abiParam, "", 0,
+		true, func(status uint64, msg string, callResult *openwsdk.SmartContractCallResult) {
+			if status != owtp.StatusSuccess {
+				createErr = openwallet.Errorf(status, msg)
+				return
+			}
+			retCallResult = callResult
+		})
+	if err != nil {
+		return nil, openwallet.ConvertError(err)
+	}
+	if createErr != nil {
+		return nil, createErr
+	}
+
+	//:打印交易单明细
+	log.Infof("-----------------------------------------------")
+	log.Infof("[%s %s TriggerABI]", account.Symbol, tokenSymbol)
+	log.Infof("From Account: %s", account.AccountID)
+	log.Infof("Contract Address: %s", contractAddress)
+	log.Infof("ABI Param: %s", strings.Join(abiParam, ","))
+	if retCallResult.Status == openwallet.SmartContractCallResultStatusSuccess {
+		log.Infof("ABI Status: success")
+		log.Infof("ABI Result: %v", retCallResult.Value)
+	} else {
+		log.Infof("ABI Status: fail")
+		log.Infof("ABI Exception: %v", retCallResult.Exception)
+	}
+	log.Infof("-----------------------------------------------")
+
+	return retCallResult, nil
+}
+
+//TriggerABI 触发合约ABI接口
+func (cli *CLI) TriggerABI(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, amount, sid, feeRate, password string, abiParam []string) (*openwsdk.SmartContractReceipt, *openwallet.Error) {
+
+	var (
+		isContract  bool
+		retReceipt  *openwsdk.SmartContractReceipt
+		retTx       []*openwsdk.SmartContractReceipt
+		retFailed   []*openwsdk.FailureSmartContractLog
+		retRawTx    *openwsdk.SmartContractRawTransaction
+		err         error
+		createErr   *openwallet.Error
+		contractID  string
+		tokenSymbol string
+		txid        string
+	)
+
+	if len(password) == 0 {
+		return nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, "unlock wallet password is empty. ")
+	}
+
+	//获取种子文件
+	key, err := cli.getLocalKeyByWallet(wallet, password)
+	if err != nil {
+		return nil, openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, err.Error())
+	}
+
+	if len(contractAddress) > 0 {
+		isContract = true
+		token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", contractAddress)
+		if findErr != nil {
+			return nil, openwallet.ConvertError(findErr)
+		}
+		contractID = token[0].ContractID
+		tokenSymbol = token[0].Token
+	}
+	coin := openwsdk.Coin{
+		Symbol:     account.Symbol,
+		IsContract: isContract,
+		ContractID: contractID,
+	}
+
+	api := cli.api
+	err = api.CreateSmartContractTrade(sid, account.AccountID, coin, abiParam, "", 0, feeRate, amount,
+		true, func(status uint64, msg string, rawTx *openwsdk.SmartContractRawTransaction) {
+			if status != owtp.StatusSuccess {
+				createErr = openwallet.Errorf(status, msg)
+				return
+			}
+			retRawTx = rawTx
+		})
+	if err != nil {
+		return nil, openwallet.ConvertError(err)
+	}
+	if createErr != nil {
+		return nil, createErr
+	}
+
+	//:打印交易单明细
+	log.Infof("-----------------------------------------------")
+	log.Infof("[%s %s TriggerABI]", account.Symbol, tokenSymbol)
+	log.Infof("SID: %s", retRawTx.Sid)
+	log.Infof("From Account: %s", account.AccountID)
+	log.Infof("Contract Address: %s", contractAddress)
+	log.Infof("ABI Param: %s", strings.Join(abiParam, ","))
+	log.Infof("Fees: %v", retRawTx.Fees)
+	log.Infof("-----------------------------------------------")
+
+	//签名交易单
+	signatures, sigErr := cli.txSigner(retRawTx.Signatures, key)
+	if sigErr != nil {
+		return nil, openwallet.Errorf(openwallet.ErrSignRawTransactionFailed, sigErr.Error())
+	}
+	retRawTx.Signatures = signatures
+
+	//广播交易单
+	err = api.SubmitSmartContractTrade([]*openwsdk.SmartContractRawTransaction{retRawTx}, true,
+		func(status uint64, msg string, successTx []*openwsdk.SmartContractReceipt, failedRawTxs []*openwsdk.FailureSmartContractLog) {
+			if status != owtp.StatusSuccess {
+				createErr = openwallet.Errorf(status, msg)
+				return
+			}
+
+			retTx = successTx
+			retFailed = failedRawTxs
+		})
+	if err != nil {
+		return nil, openwallet.ConvertError(err)
+	}
+	if createErr != nil {
+		return nil, createErr
+	}
+
+	if len(retTx) > 0 {
+		//打印交易单
+		log.Info("send transaction successfully.")
+		log.Info("transaction id:", retTx[0].TxID)
+		txid = retTx[0].TxID
+	} else if len(retFailed) > 0 {
+		//打印交易单
+		log.Errorf("send transaction failed.")
+		tx := retFailed[0]
+		log.Warningf("[Failed] reason: %s", tx.Reason)
+		if tx.RawTx != nil {
+			log.Warningf("[Failed] rawHex: %s", tx.RawTx.Raw)
+			for accountID, signatures := range tx.RawTx.Signatures {
+				log.Warningf("[Failed] signature accountID: %s", accountID)
+				for _, keySignature := range signatures {
+					signaturesJSON, jsonErr := json.Marshal(keySignature)
+					if jsonErr == nil {
+						log.Warningf("[Failed] keySignature: %s", string(signaturesJSON))
+					}
+				}
+			}
+		}
+
+		return nil, openwallet.Errorf(openwallet.ErrSubmitRawSmartContractTransactionFailed, tx.Reason)
+	}
+
+	//监听receipt结果
+	log.Info("waiting for transaction receipt returns ...")
+	for {
+		err = api.FindSmartContractReceiptByParams(map[string]interface{}{"txid": txid}, true,
+			func(status uint64, msg string, receipts []*openwsdk.SmartContractReceipt) {
+				if status != owtp.StatusSuccess {
+					createErr = openwallet.Errorf(status, msg)
+					return
+				}
+				if len(receipts) > 0 {
+					retReceipt = receipts[0]
+				}
+			})
+		if err != nil {
+			return nil, openwallet.ConvertError(err)
+		}
+		if createErr != nil {
+			return nil, createErr
+		}
+
+		if retReceipt != nil && retReceipt.BlockHeight > 0 {
+
+			if retReceipt.Success == openwallet.TxStatusSuccess {
+				log.Infof("get receipt status: success")
+				log.Info("show receipt events:")
+				for _, event := range retReceipt.Events {
+					log.Infof("contract address: %s, contract name: %s", event.ContractAddr, event.ContractName)
+					log.Infof("[%s]%s", event.Event, event.Value)
+				}
+			} else {
+				log.Infof("get receipt status: fail")
+			}
+			break
+		}
+
+		time.Sleep(3 * time.Second)
+	}
+
+	return retReceipt, nil
+}
