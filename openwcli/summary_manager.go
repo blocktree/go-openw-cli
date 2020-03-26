@@ -209,15 +209,16 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 	//查询已选token过程，查地址
 	findSelectedTokensFunc := func(t string) (bool, *openwsdk.SummaryContractTask) {
 
-		if setting, ok := accountTask.Contracts["all"]; ok {
-			return true, setting
-		}
-
 		for c, s := range accountTask.Contracts {
 			if c == t {
 				return true, s
 			}
 		}
+
+		if setting, ok := accountTask.Contracts["all"]; ok {
+			return true, setting
+		}
+
 		return false, nil
 	}
 
