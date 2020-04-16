@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"github.com/blocktree/go-openw-sdk/v2/openwsdk"
 	"github.com/blocktree/openwallet/v2/log"
+	"strings"
 	"testing"
+
+	"github.com/DisposaBoy/JsonConfigReader"
 )
 
 func TestCLI_appendSummaryTasks(t *testing.T) {
@@ -23,11 +26,11 @@ func TestCLI_appendSummaryTasks(t *testing.T) {
             "password": "",
             "accounts": [
                 {
-                    "accountID": "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF",
+                    "accountID": "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF",  //注释
                     "onlyContracts": true,
                     "threshold": "5",
                     "minTransfer": "2",
-                    "retainedBalance": "0",
+                    "retainedBalance": "0", //注释
 					"addressLimit": 20,
                     "contracts": {
                         "1002000": {
@@ -67,7 +70,15 @@ func TestCLI_appendSummaryTasks(t *testing.T) {
 
 `
 	var summaryTask openwsdk.SummaryTask
-	err := json.Unmarshal([]byte(plain), &summaryTask)
+	//err := json.Unmarshal([]byte(plain), &summaryTask)
+	//if err != nil {
+	//	t.Errorf("json.Unmarshal error: %v", err)
+	//	return
+	//}
+
+	str := strings.NewReader(plain)
+	r := JsonConfigReader.New(str)
+	err := json.NewDecoder(r).Decode(&summaryTask)
 	if err != nil {
 		t.Errorf("json.Unmarshal error: %v", err)
 		return
@@ -102,7 +113,7 @@ func TestCLI_appendSummaryTasks(t *testing.T) {
                     "threshold": "5",
                     "minTransfer": "2",
                     "retainedBalance": "0",
-                    "contracts": {
+                    "contracts": {  //注释
                         "1002000": {
                             "threshold": "30",
                             "minTransfer": "20",
@@ -135,7 +146,13 @@ func TestCLI_appendSummaryTasks(t *testing.T) {
 `
 
 	var apppendTask openwsdk.SummaryTask
-	err = json.Unmarshal([]byte(append), &apppendTask)
+	//err = json.Unmarshal([]byte(append), &apppendTask)
+	//if err != nil {
+	//	t.Errorf("json.Unmarshal error: %v", err)
+	//	return
+	//}
+
+	err = json.NewDecoder(JsonConfigReader.New(strings.NewReader(append))).Decode(&apppendTask)
 	if err != nil {
 		t.Errorf("json.Unmarshal error: %v", err)
 		return

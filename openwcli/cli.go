@@ -3,6 +3,7 @@ package openwcli
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/DisposaBoy/JsonConfigReader"
 	"github.com/asdine/storm"
 	"github.com/blocktree/go-openw-sdk/v2/openwsdk"
 	"github.com/blocktree/openwallet/v2/common/file"
@@ -641,10 +642,15 @@ func (cli *CLI) StartSumFlow(file string) error {
 	taskJSON, err := ioutil.ReadFile(taskFile)
 	if err == nil {
 
-		err = json.Unmarshal(taskJSON, &summaryTask)
-		if err != nil {
-			return err
-		}
+		//err = json.Unmarshal(taskJSON, &summaryTask)
+		//if err != nil {
+		//	return err
+		//}
+
+		str := strings.NewReader(string(taskJSON))
+		r := JsonConfigReader.New(str)
+		err = json.NewDecoder(r).Decode(&summaryTask)
+
 		manual = false
 	}
 
