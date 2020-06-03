@@ -49,7 +49,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	}
 
 	if wallet != nil {
-		_, _, err = cli.CreateAccountOnServer("mainnetQUORUM", "12345678", "QUORUM", wallet)
+		_, _, err = cli.CreateAccountOnServer("mainnetQUORUM2", "12345678", "QUORUM", wallet)
 		if err != nil {
 			log.Error("CreateAccountOnServer error:", err)
 			return

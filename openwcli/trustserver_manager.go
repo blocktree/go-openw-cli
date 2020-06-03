@@ -318,9 +318,17 @@ func (cli *CLI) setSummaryInfoViaTrustNode(ctx *owtp.Context) {
 	}
 
 	summarySetting := openwsdk.NewSummarySetting(ctx.Params().Get("summarySetting"))
-	err := cli.SetSummaryInfo(summarySetting)
+
+	//汇总配置是否已初始化，若初始化后不能再有信任节点设置
+	setup, err := cli.getSummarySettingByAccount(summarySetting.AccountID)
+	if setup != nil {
+		ctx.Response(nil, ErrorSummarySettingFailed, "summary setting has been initialized")
+		return
+	}
+
+	err = cli.SetSummaryInfo(summarySetting)
 	if err != nil {
-		ctx.Response(nil, openwallet.ErrUnknownException, "summary info save failed")
+		ctx.Response(nil, ErrorSummarySettingFailed, "summary info save failed")
 		return
 	}
 
