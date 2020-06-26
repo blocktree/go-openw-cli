@@ -685,22 +685,26 @@ func (cli *CLI) GetSymbolList() ([]*openwsdk.Symbol, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer cli.closeDB()
 
 	var getSymbols []*openwsdk.Symbol
 	err = cli.db.All(&getSymbols)
+	cli.closeDB()
 
 	//没有数据，更新数据
 	if getSymbols == nil || len(getSymbols) == 0 {
+
 		err = cli.UpdateSymbols()
 		if err != nil {
 			return nil, err
 		}
 
-		err = cli.db.All(&getSymbols)
+		_, err = cli.getDB()
 		if err != nil {
 			return nil, err
 		}
+
+		err = cli.db.All(&getSymbols)
+		cli.closeDB()
 
 	}
 	return getSymbols, nil
