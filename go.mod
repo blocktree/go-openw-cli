@@ -1,4 +1,4 @@
-module github.com/blocktree/go-openw-cli
+module github.com/blocktree/go-openw-cli/v2
 
 go 1.12
 

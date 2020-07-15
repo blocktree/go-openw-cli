@@ -48,9 +48,9 @@ type CLI struct {
 // 初始化工具
 func NewCLI(c *Config) (*CLI, error) {
 
-	if len(c.appkey) == 0 {
-		return nil, fmt.Errorf("appkey is empty. ")
-	}
+	//if len(c.appkey) == 0 {
+	//	return nil, fmt.Errorf("appkey is empty. ")
+	//}
 
 	if len(c.appid) == 0 {
 		return nil, fmt.Errorf("appid is empty. ")

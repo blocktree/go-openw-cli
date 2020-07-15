@@ -18,11 +18,11 @@ BUILDDIR = build
 GITREV = $(shell git rev-parse --short HEAD)
 BUILDTIME = $(shell date +'%Y-%m-%d_%T')
 
-OPENWCLILDFLAGS="-X github.com/blocktree/go-openw-cli/openwcli.Version=${OPENWCLIVERSION} \
-	-X github.com/blocktree/go-openw-cli/openwcli.GitRev=${GITREV} \
-	-X github.com/blocktree/go-openw-cli/openwcli.BuildTime=${BUILDTIME} \
-	-X github.com/blocktree/go-openw-cli/openwcli.FixAppID=${APPID} \
-	-X github.com/blocktree/go-openw-cli/openwcli.FixAppKey=${APPKEY}"
+OPENWCLILDFLAGS="-X github.com/blocktree/go-openw-cli/v2/openwcli.Version=${OPENWCLIVERSION} \
+	-X github.com/blocktree/go-openw-cli/v2/openwcli.GitRev=${GITREV} \
+	-X github.com/blocktree/go-openw-cli/v2/openwcli.BuildTime=${BUILDTIME} \
+	-X github.com/blocktree/go-openw-cli/v2/openwcli.FixAppID=${APPID} \
+	-X github.com/blocktree/go-openw-cli/v2/openwcli.FixAppKey=${APPKEY}"
 
 # OS platfom
 # options: windows-6.0/*,darwin-10.10/amd64,linux/amd64,linux/386,linux/arm64,linux/mips64, linux/mips64le
