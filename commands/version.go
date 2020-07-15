@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/blocktree/go-openw-cli/openwcli"
+	"github.com/blocktree/go-openw-cli/v2/openwcli"
 	"gopkg.in/urfave/cli.v1"
 )
 

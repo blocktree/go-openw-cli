@@ -2,16 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/blocktree/go-openw-cli/commands"
+	"github.com/blocktree/go-openw-cli/v2/commands"
+	openw "github.com/blocktree/go-openw-cli/v2/openwcli"
 	"gopkg.in/urfave/cli.v1"
 	"os"
 	"path/filepath"
 	"sort"
-	openw "github.com/blocktree/go-openw-cli/openwcli"
 )
 
 const (
-	Identifier   = "openw-cli" // Client identifier to advertise over the network
+	Identifier = "openw-cli" // Client identifier to advertise over the network
 )
 
 var (

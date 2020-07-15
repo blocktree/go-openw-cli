@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/blocktree/go-openw-cli/openwcli"
+	"github.com/blocktree/go-openw-cli/v2/openwcli"
 	"github.com/blocktree/openwallet/v2/log"
 	"gopkg.in/urfave/cli.v1"
 )
@@ -600,7 +600,6 @@ func disabletrustaddress(c *cli.Context) error {
 	return nil
 }
 
-
 //callabi 直接调用ABI
 func callabi(c *cli.Context) error {
 
@@ -614,7 +613,6 @@ func callabi(c *cli.Context) error {
 
 	return nil
 }
-
 
 //triggerabi 触发ABI上链交易
 func triggerabi(c *cli.Context) error {
