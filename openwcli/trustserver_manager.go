@@ -271,6 +271,7 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 	address := ctx.Params().Get("address").String()
 	feeRate := ctx.Params().Get("feeRate").String()
 	memo := ctx.Params().Get("memo").String()
+	extParam := ctx.Params().Get("extParam").String()
 
 	account, err := cli.GetAccountByAccountID(accountID)
 	if err != nil {
@@ -291,7 +292,7 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 		}
 	}
 
-	retTx, retFailed, exErr := cli.Transfer(wallet, account, contractAddress, address, amount, sid, feeRate, memo, password)
+	retTx, retFailed, exErr := cli.TransferExt(wallet, account, contractAddress, address, amount, sid, feeRate, memo, extParam, password)
 	if exErr != nil {
 		ctx.Response(nil, exErr.Code(), exErr.Error())
 		return

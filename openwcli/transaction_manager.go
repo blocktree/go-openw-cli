@@ -51,6 +51,11 @@ func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, addr
 
 //Transfer 转账交易
 func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, *openwallet.Error) {
+	return cli.TransferExt(wallet, account, contractAddress, to, amount, sid, feeRate, memo, "", password)
+}
+
+//TransferExt 转账交易 + 扩展参数
+func (cli *CLI) TransferExt(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, extParam, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, *openwallet.Error) {
 
 	var (
 		isContract  bool
@@ -94,7 +99,7 @@ func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, con
 	}
 
 	api := cli.api
-	err = api.CreateTrade(account.AccountID, sid, coin, amount, to, feeRate, memo, true,
+	err = api.CreateTrade(account.AccountID, sid, coin, amount, to, feeRate, memo, extParam, true,
 		func(status uint64, msg string, rawTx *openwsdk.RawTransaction) {
 			if status != owtp.StatusSuccess {
 				createErr = openwallet.Errorf(status, msg)
