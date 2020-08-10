@@ -387,6 +387,11 @@ func (cli *CLI) startSummaryTaskViaTrustNode(ctx *owtp.Context) {
 	summaryTask := openwsdk.NewSummaryTask(ctx.Params().Get("summaryTask"))
 	cycleSec := ctx.Params().Get("cycleSec").Int()
 
+	if cycleSec <= 0 {
+		ctx.Response(nil, openwallet.ErrUnknownException, "cycleSec must be greater than 0")
+		return
+	}
+
 	//检查汇总任务的参数是否传入密码
 	for _, summaryWalletTask := range summaryTask.Wallets {
 		if len(summaryWalletTask.Password) == 0 {
