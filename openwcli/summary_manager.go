@@ -646,7 +646,7 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 
 		wallet, err := cli.GetWalletByWalletIDOnLocal(w.WalletID)
 		if err != nil {
-			return fmt.Errorf("can not find local wallet: %s-%s", wallet.Alias, wallet.WalletID)
+			return fmt.Errorf("can not find local wallet wtih ID: %s", w.WalletID)
 		}
 
 		//解锁密码是否正确
