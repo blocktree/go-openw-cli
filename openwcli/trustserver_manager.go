@@ -568,7 +568,15 @@ func (cli *CLI) getCurrentSummaryTaskViaTrustNode(ctx *owtp.Context) {
 		return
 	}
 
-	ctx.Response(cli.summaryTask, owtp.StatusSuccess, "success")
+	retTask := openwsdk.SummaryTask{Wallets: make([]*openwsdk.SummaryWalletTask, 0)}
+	for _, wt := range cli.summaryTask.Wallets {
+		newWt := *wt
+		newWt.Password = ""
+		newWt.Wallet = nil
+		retTask.Wallets = append(retTask.Wallets, &newWt)
+	}
+
+	ctx.Response(retTask, owtp.StatusSuccess, "success")
 }
 
 func (cli *CLI) getSummaryTaskLogViaTrustNode(ctx *owtp.Context) {

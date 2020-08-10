@@ -620,6 +620,11 @@ func (cli *CLI) StartSumFlow(file string) error {
 		return err
 	}
 
+	err = CheckBackgroundProcess("trustserver")
+	if err != nil {
+		return err
+	}
+
 	cycleTime := cli.config.summaryperiod
 	if len(cycleTime) == 0 {
 		cycleTime = "1m"
@@ -827,6 +832,11 @@ func (cli *CLI) StartTrustServerFlow() error {
 	)
 
 	err = CheckBackgroundProcess("trustserver")
+	if err != nil {
+		return err
+	}
+
+	err = CheckBackgroundProcess("startsum")
 	if err != nil {
 		return err
 	}
@@ -1094,7 +1104,7 @@ func ProcExsit(filePath string, processName string) error {
 				//fmt.Printf("process.Signal on pid %d returned: %v\n", pid, err)
 				if err == nil {
 					//进程还能接受消息，仍存在
-					return fmt.Errorf("openw-cli pid: %s %s is running", pidStr, processName)
+					return fmt.Errorf("openw-cli background process with pid: %s is running", pidStr)
 				}
 				//进程不存在
 			}
