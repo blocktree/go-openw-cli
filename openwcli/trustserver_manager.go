@@ -759,10 +759,13 @@ func (cli *CLI) triggerABIViaTrustNode(ctx *owtp.Context) {
 	accountID := ctx.Params().Get("accountID").String()
 	sid := ctx.Params().Get("sid").String()
 	contractAddress := ctx.Params().Get("contractAddress").String()
+	contractABI := ctx.Params().Get("contractABI").String()
 	password := ctx.Params().Get("password").String()
 	abiArr := ctx.Params().Get("abiParam")
 	amount := ctx.Params().Get("amount").String()
 	feeRate := ctx.Params().Get("feeRate").String()
+	raw := ctx.Params().Get("raw").String()
+	rawType := ctx.Params().Get("rawType").Uint()
 
 	abiParam := make([]string, 0)
 	for _, s := range abiArr.Array() {
@@ -788,7 +791,7 @@ func (cli *CLI) triggerABIViaTrustNode(ctx *owtp.Context) {
 		}
 	}
 
-	retTx, exErr := cli.TriggerABI(wallet, account, contractAddress, amount, sid, feeRate, password, abiParam)
+	retTx, exErr := cli.TriggerABI(wallet, account, contractAddress, contractABI, amount, sid, feeRate, password, abiParam, raw, rawType)
 	if exErr != nil {
 		ctx.Response(nil, exErr.Code(), exErr.Error())
 		return
