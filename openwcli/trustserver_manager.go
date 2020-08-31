@@ -742,6 +742,17 @@ func (cli *CLI) signTransactionViaTrustNode(ctx *owtp.Context) {
 	}, owtp.StatusSuccess, "success")
 }
 
+// TriggerABIViaTrustNode 触发ABI上链调用
+// @param nodeID 必填 节点ID
+// @param accountID 必填 账户ID
+// @param password 可选 钱包解锁密码
+// @param contractAddress 必填 合约地址
+// @param contractABI 可选 ABI定义
+// @param amount 可选 主币数量
+// @param feeRate 可选 自定义手续费率
+// @param abiParam 可选 ABI参数组
+// @param raw 可选 原始交易单
+// @param rawType 可选 原始交易单编码类型，0：hex字符串，1：json字符串，2：base64字符串
 func (cli *CLI) triggerABIViaTrustNode(ctx *owtp.Context) {
 
 	if !cli.config.enablerequesttransfer {
@@ -766,6 +777,7 @@ func (cli *CLI) triggerABIViaTrustNode(ctx *owtp.Context) {
 	feeRate := ctx.Params().Get("feeRate").String()
 	raw := ctx.Params().Get("raw").String()
 	rawType := ctx.Params().Get("rawType").Uint()
+	awaitResult := ctx.Params().Get("awaitResult").Bool()
 
 	abiParam := make([]string, 0)
 	for _, s := range abiArr.Array() {
@@ -791,7 +803,7 @@ func (cli *CLI) triggerABIViaTrustNode(ctx *owtp.Context) {
 		}
 	}
 
-	retTx, exErr := cli.TriggerABI(wallet, account, contractAddress, contractABI, amount, sid, feeRate, password, abiParam, raw, rawType)
+	retTx, exErr := cli.TriggerABI(wallet, account, contractAddress, contractABI, amount, sid, feeRate, password, abiParam, raw, rawType, awaitResult)
 	if exErr != nil {
 		ctx.Response(nil, exErr.Code(), exErr.Error())
 		return
