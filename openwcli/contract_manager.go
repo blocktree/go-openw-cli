@@ -87,7 +87,7 @@ func (cli *CLI) CallABI(account *openwsdk.Account, contractAddress string, abiPa
 }
 
 //TriggerABI 触发合约ABI接口
-func (cli *CLI) TriggerABI(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, amount, sid, feeRate, password string, abiParam []string) (*openwsdk.SmartContractReceipt, *openwallet.Error) {
+func (cli *CLI) TriggerABI(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, contractABI, amount, sid, feeRate, password string, abiParam []string, raw string, rawType uint64) (*openwsdk.SmartContractReceipt, *openwallet.Error) {
 
 	var (
 		isContract  bool
@@ -115,20 +115,21 @@ func (cli *CLI) TriggerABI(wallet *openwsdk.Wallet, account *openwsdk.Account, c
 	if len(contractAddress) > 0 {
 		isContract = true
 		token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", contractAddress)
-		if findErr != nil {
-			return nil, openwallet.ConvertError(findErr)
+		if findErr == nil {
+			contractID = token[0].ContractID
+			tokenSymbol = token[0].Token
 		}
-		contractID = token[0].ContractID
-		tokenSymbol = token[0].Token
 	}
 	coin := openwsdk.Coin{
-		Symbol:     account.Symbol,
-		IsContract: isContract,
-		ContractID: contractID,
+		Symbol:          account.Symbol,
+		IsContract:      isContract,
+		ContractID:      contractID,
+		ContractAddress: contractAddress,
+		ContractABI:     contractABI,
 	}
 
 	api := cli.api
-	err = api.CreateSmartContractTrade(sid, account.AccountID, coin, abiParam, "", 0, feeRate, amount,
+	err = api.CreateSmartContractTrade(sid, account.AccountID, coin, abiParam, raw, rawType, feeRate, amount,
 		true, func(status uint64, msg string, rawTx *openwsdk.SmartContractRawTransaction) {
 			if status != owtp.StatusSuccess {
 				createErr = openwallet.Errorf(status, msg)

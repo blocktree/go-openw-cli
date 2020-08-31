@@ -1164,7 +1164,7 @@ func (cli *CLI) TriggerABIFlow() error {
 	//创建新交易单
 	sid := uuid.New().String()
 
-	_, exErr := cli.TriggerABI(wallet, account, contractAddress, "0", sid, feeRate, password, abiParam)
+	_, exErr := cli.TriggerABI(wallet, account, contractAddress, "", "0", sid, feeRate, password, abiParam, "", 0)
 	if exErr != nil {
 		return exErr
 	}
