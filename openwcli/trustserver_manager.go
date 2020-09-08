@@ -47,6 +47,7 @@ func (cli *CLI) ServeTransmitNode(autoReconnect bool) error {
 	cli.transmitNode.HandleFunc("getTrustAddressListViaTrustNode", cli.getTrustAddressListViaTrustNode)
 	cli.transmitNode.HandleFunc("signTransactionViaTrustNode", cli.signTransactionViaTrustNode)
 	cli.transmitNode.HandleFunc("triggerABIViaTrustNode", cli.triggerABIViaTrustNode)
+	cli.transmitNode.HandleFunc("signHashViaTrustNode", cli.signHashViaTrustNode)
 
 	//自动连接
 	if autoReconnect {
@@ -810,4 +811,54 @@ func (cli *CLI) triggerABIViaTrustNode(ctx *owtp.Context) {
 	}
 
 	ctx.Response(retTx, owtp.StatusSuccess, "success")
+}
+
+// signHashViaTrustNode 通过节点签名哈希消息
+func (cli *CLI) signHashViaTrustNode(ctx *owtp.Context) {
+
+	if !cli.config.enablerequesttransfer {
+		ctx.Response(nil, ErrorNodeAbilityDisabled, "the node has disabled [transfer] ability")
+		return
+	}
+
+	appID := ctx.Params().Get("appID").String()
+
+	if appID != cli.config.appid {
+		ctx.Response(nil, ErrorAppIDIncorrect, "appID is incorrect")
+		return
+	}
+
+	walletID := ctx.Params().Get("walletID").String()
+	accountID := ctx.Params().Get("accountID").String()
+	message := ctx.Params().Get("message").String()
+	password := ctx.Params().Get("password").String()
+	address := ctx.Params().Get("address").String()
+	symbol := ctx.Params().Get("symbol").String()
+	hdPath := ctx.Params().Get("hdPath").String()
+
+	if len(password) == 0 {
+		//钱包是否已经解锁
+		if p, exist := cli.unlockWallets[walletID]; exist {
+			password = p
+		}
+	}
+
+	addr := &openwsdk.Address{
+		AppID:            appID,
+		WalletID:         walletID,
+		AccountID:        accountID,
+		Symbol:           symbol,
+		Address:          address,
+		HdPath:           hdPath,
+	}
+
+	signature, err := cli.SignHash(addr, message, password)
+	if err != nil {
+		ctx.Response(nil, openwallet.ErrSystemException, err.Error())
+		return
+	}
+
+	ctx.Response(map[string]interface{}{
+		"signature": signature,
+	}, owtp.StatusSuccess, "success")
 }
