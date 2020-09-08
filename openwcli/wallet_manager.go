@@ -3,6 +3,7 @@ package openwcli
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/blocktree/go-owcrypt"
 	"path/filepath"
 	"strings"
 	"time"
@@ -1198,4 +1199,48 @@ func (cli *CLI) IsTrustAddress(address, symbol string) bool {
 		}
 	}
 	return true
+}
+
+// SignHash 哈希消息签名
+func (cli *CLI) SignHash(address *openwsdk.Address, message, password string) (string, error) {
+
+	wallet, err := cli.GetWalletByWalletID(address.WalletID)
+	if err != nil {
+		return "", err
+	}
+
+	//获取种子文件
+	key, err := cli.getLocalKeyByWallet(wallet, password)
+	if err != nil {
+		return "", err
+	}
+
+	symbolInfo, err := cli.GetSymbolInfo(address.Symbol)
+	if err != nil {
+		return "", err
+	}
+
+	childKey, err := key.DerivedKeyWithPath(address.HdPath, uint32(symbolInfo.Curve))
+	if err != nil {
+		return "", err
+	}
+
+	keyBytes, err := childKey.GetPrivateKeyBytes()
+	if err != nil {
+		return "", err
+	}
+
+	hash, err := hex.DecodeString(strings.TrimPrefix(message, "0x"))
+	if err != nil {
+		return "", err
+	}
+
+	signature, v, sigErr := owcrypt.Signature(keyBytes, nil, hash, uint32(symbolInfo.Curve))
+	if sigErr != owcrypt.SUCCESS {
+		return "", fmt.Errorf("sign hash message failed")
+	}
+
+	signature = append(signature, v)
+
+	return hex.EncodeToString(signature), nil
 }
