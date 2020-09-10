@@ -113,7 +113,7 @@ func (cli *CLI) TriggerABI(wallet *openwsdk.Wallet, account *openwsdk.Account, c
 	if len(contractAddress) > 0 {
 		isContract = true
 		token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", contractAddress)
-		if findErr == nil {
+		if findErr == nil && len(token) > 0 {
 			contractID = token[0].ContractID
 			tokenSymbol = token[0].Token
 		}
