@@ -9,7 +9,7 @@ require (
 	github.com/blocktree/go-openw-sdk/v2 v2.1.6
 	github.com/blocktree/go-owcdrivers v1.2.22 // indirect
 	github.com/blocktree/go-owcrypt v1.1.7
-	github.com/blocktree/openwallet/v2 v2.1.0
+	github.com/blocktree/openwallet/v2 v2.3.0
 	github.com/bndr/gotabulate v1.1.2
 	github.com/google/uuid v1.1.1
 	github.com/shopspring/decimal v0.0.0-20200105231215-408a2507e114
