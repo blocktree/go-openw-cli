@@ -429,6 +429,22 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 				//签名交易
 				signatures, sigErr := cli.txSigner(rawTx.Signatures, key)
 				if sigErr != nil {
+					for accountID, signatures := range rawTx.Signatures {
+						log.Error("[Sign Failed] sign accountID: %s", accountID)
+						for _, keySignature := range signatures {
+							signaturesJSON, jsonErr := json.Marshal(keySignature)
+							if jsonErr == nil {
+								log.Warningf("[Failed] keySignature: %s", string(signaturesJSON))
+							}
+							//childKey, _ := key.DerivedKeyWithPath(keySignature.DerivedPath, keySignature.EccType)
+							//keyBytes, _ := childKey.GetPrivateKeyBytes()
+							//hexKey := hex.EncodeToString(keyBytes)
+							//public_key, _ := owcrypt.GenPubkey(keyBytes, keySignature.EccType)
+							//public := hex.EncodeToString(public_key)
+							//log.Warningf("[Failed] Pub: %s", string(public))
+							//log.Warningf("[Failed] Key: %s", string(hexKey))
+						}
+					}
 					log.Warn("SignRawTransaction unexpected error: %v", sigErr)
 					continue
 				}
@@ -508,6 +524,13 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 							if jsonErr == nil {
 								log.Warningf("[Failed] keySignature: %s", string(signaturesJSON))
 							}
+							//childKey, _ := key.DerivedKeyWithPath(keySignature.DerivedPath, keySignature.EccType)
+							//keyBytes, _ := childKey.GetPrivateKeyBytes()
+							//hexKey := hex.EncodeToString(keyBytes)
+							//public_key, _ := owcrypt.GenPubkey(keyBytes, keySignature.EccType)
+							//public := hex.EncodeToString(public_key)
+							//log.Warningf("[Failed] Pub: %s", string(public))
+							//log.Warningf("[Failed] Key: %s", string(hexKey))
 						}
 					}
 				}
