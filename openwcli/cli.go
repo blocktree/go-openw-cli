@@ -1208,3 +1208,48 @@ func (cli *CLI) CallABIFlow() error {
 
 	return nil
 }
+
+
+
+// SignHashFlow 消息签名
+func (cli *CLI) SignHashFlow() error {
+
+
+	// 等待用户输入代签消息
+	message, err := console.InputText("Enter message: ", false)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入地址
+	addr, err := console.InputText("Enter address: ", true)
+	if err != nil {
+		return err
+	}
+
+	address, err := cli.SearchAddressOnServer(addr)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("[The found address belongs to WalletID: %s] \n", address.WalletID)
+
+	// 等待用户输入密码
+	password, err := console.InputPassword(false, 3)
+	if err != nil {
+		return err
+	}
+
+	signature, exErr := cli.SignHash(address, message, password, false)
+	if exErr != nil {
+		return exErr
+	}
+
+	//打印公钥和消息
+	fmt.Printf("--------------- PUBLIC KEY --------------- \n")
+	fmt.Printf("%s\n", address.PublicKey)
+	fmt.Printf("--------------- SIGNATURE ---------------  \n")
+	fmt.Printf("%s\n", signature)
+
+	return nil
+}

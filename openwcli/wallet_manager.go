@@ -1202,7 +1202,7 @@ func (cli *CLI) IsTrustAddress(address, symbol string) bool {
 }
 
 // SignHash 哈希消息签名
-func (cli *CLI) SignHash(address *openwsdk.Address, message, password string) (string, error) {
+func (cli *CLI) SignHash(address *openwsdk.Address, message, password string, appendV bool) (string, error) {
 
 	wallet, err := cli.GetWalletByWalletID(address.WalletID)
 	if err != nil {
@@ -1240,7 +1240,9 @@ func (cli *CLI) SignHash(address *openwsdk.Address, message, password string) (s
 		return "", fmt.Errorf("sign hash message failed")
 	}
 
-	signature = append(signature, v)
+	if appendV {
+		signature = append(signature, v)
+	}
 
 	return hex.EncodeToString(signature), nil
 }
