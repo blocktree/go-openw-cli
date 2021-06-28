@@ -1,5 +1,5 @@
 # openw-cli
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![CI](https://github.com/blocktree/go-openw-cli/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/blocktree/go-openw-cli/actions/workflows/main.yml)
 
 ## 概述
 
