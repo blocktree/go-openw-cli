@@ -242,6 +242,15 @@ var (
 			Category:  "WALLET COMMANDS",
 			Flags:     []cli.Flag{},
 		},
+		{
+
+			Name:      "signhash",
+			Usage:     "Select the private key of a specific address to sign the hash.",
+			ArgsUsage: "<symbol>",
+			Action:    signhash,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
 	}
 )
 
@@ -619,6 +628,20 @@ func triggerabi(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
 		err := cli.TriggerABIFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+//signhash 消息签名
+func signhash(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.SignHashFlow()
 		if err != nil {
 			log.Error("unexpected error: ", err)
 			return err

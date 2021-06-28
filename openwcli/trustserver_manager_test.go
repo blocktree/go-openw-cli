@@ -2,12 +2,12 @@ package openwcli
 
 import (
 	"bytes"
+	"github.com/blocktree/openwallet/v2/log"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"testing"
-
-	"github.com/blocktree/openwallet/v2/log"
+	"time"
 )
 
 func TestCLI_ConnectTransmitNode(t *testing.T) {
@@ -57,3 +57,33 @@ func TestExternalIPAddress(t *testing.T) {
 	buf.ReadFrom(resp.Body)
 	log.Infof("addr: %s", string(content))
 }
+
+func TestCLI_TestRunTimeTask(t *testing.T) {
+
+	testRunTimeTask := func (cli *CLI) {
+		for {
+			walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
+			accounts, cErr := cli.GetAccountsOnServer(walletID)
+			if cErr != nil {
+				log.Errorf("GetAccountsOnServer failed, err: %v", cErr)
+			}
+			log.Infof("accounts length: %d", len(accounts))
+			time.Sleep(1 * time.Second)
+		}
+	}
+
+	cli := getTestOpenwCLI()
+	if cli == nil {
+		return
+	}
+
+	err := cli.ServeTransmitNode(true)
+	if err != nil {
+		t.Logf("ConnectTransmitNode error: %v\n", err)
+		return
+	}
+
+	testRunTimeTask(cli)
+
+}
+

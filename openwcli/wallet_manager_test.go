@@ -180,7 +180,7 @@ func TestCLI_GetTokenContractList(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	tokens, err := cli.GetTokenContractList()
+	tokens, err := cli.GetTokenContractList("Symbol", "ETP", "Address", "dna")
 	if err != nil {
 		log.Error("GetTokenContractList error:", err)
 		return

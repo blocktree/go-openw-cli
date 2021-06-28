@@ -366,6 +366,7 @@ $ ./openw-cli -c=./node.ini listtokenbalance
 # 启动后台托管钱包服务，执行时会要求是否解锁钱包
 $ ./openw-cli -c=./node.ini trustserver
 
-
+# 输入消息哈希和地址，并解锁改地址所属钱包，利用该地址的私钥对消息哈希进行签名
+$ ./openw-cli -c=node.ini signhash
 
 ```

@@ -835,6 +835,7 @@ func (cli *CLI) signHashViaTrustNode(ctx *owtp.Context) {
 	address := ctx.Params().Get("address").String()
 	symbol := ctx.Params().Get("symbol").String()
 	hdPath := ctx.Params().Get("hdPath").String()
+	rsv := ctx.Params().Get("rsv").Bool()
 
 	if len(password) == 0 {
 		//钱包是否已经解锁
@@ -852,7 +853,7 @@ func (cli *CLI) signHashViaTrustNode(ctx *owtp.Context) {
 		HdPath:           hdPath,
 	}
 
-	signature, err := cli.SignHash(addr, message, password)
+	signature, err := cli.SignHash(addr, message, password, rsv)
 	if err != nil {
 		ctx.Response(nil, openwallet.ErrSystemException, err.Error())
 		return
