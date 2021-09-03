@@ -339,7 +339,7 @@ func (cli *CLI) NewAddressFlow() error {
 	}
 
 	//:选择账户
-	account, err := cli.selectAccountStep(wallet.WalletID)
+	account, err := cli.SelectAccountStep(wallet.WalletID)
 	if err != nil {
 		return err
 	}
@@ -413,7 +413,7 @@ func (cli *CLI) TransferFlow() error {
 	}
 
 	//:选择账户
-	account, err := cli.selectAccountStep(wallet.WalletID)
+	account, err := cli.SelectAccountStep(wallet.WalletID)
 	if err != nil {
 		return err
 	}
@@ -478,7 +478,7 @@ func (cli *CLI) TransferAllFlow() error {
 	}
 
 	//:选择账户
-	account, err := cli.selectAccountStep(wallet.WalletID)
+	account, err := cli.SelectAccountStep(wallet.WalletID)
 	if err != nil {
 		return err
 	}
@@ -556,7 +556,7 @@ func (cli *CLI) SetSumFlow() error {
 	//}
 
 	//:选择账户
-	account, err := cli.selectAccountStep(wallet.WalletID)
+	account, err := cli.SelectAccountStep(wallet.WalletID)
 	if err != nil {
 		return err
 	}
@@ -668,7 +668,7 @@ func (cli *CLI) StartSumFlow(file string) error {
 		}
 
 		//:选择账户
-		account, selectErr := cli.selectAccountStep(wallet.WalletID)
+		account, selectErr := cli.SelectAccountStep(wallet.WalletID)
 		if selectErr != nil {
 			return selectErr
 		}
@@ -795,7 +795,7 @@ func (cli *CLI) ListAddressFlow() error {
 	}
 
 	//:选择账户
-	account, err := cli.selectAccountStep(wallet.WalletID)
+	account, err := cli.SelectAccountStep(wallet.WalletID)
 	if err != nil {
 		return err
 	}
@@ -893,8 +893,8 @@ func (cli *CLI) SelectWalletStep() (*openwsdk.Wallet, error) {
 	return wallet, nil
 }
 
-//selectAccountStep 选择资产账户操作
-func (cli *CLI) selectAccountStep(walletID string) (*openwsdk.Account, error) {
+//SelectAccountStep 选择资产账户操作
+func (cli *CLI) SelectAccountStep(walletID string) (*openwsdk.Account, error) {
 
 	accounts, _ := cli.GetAccountsOnServer(walletID)
 	cli.printAccountList(accounts)
@@ -929,7 +929,7 @@ func (cli *CLI) ListTokenBalanceFlow() error {
 	}
 
 	//:选择账户
-	account, selectErr := cli.selectAccountStep(wallet.WalletID)
+	account, selectErr := cli.SelectAccountStep(wallet.WalletID)
 	if selectErr != nil {
 		return selectErr
 	}
@@ -1125,7 +1125,7 @@ func (cli *CLI) TriggerABIFlow() error {
 	}
 
 	//:选择账户
-	account, err := cli.selectAccountStep(wallet.WalletID)
+	account, err := cli.SelectAccountStep(wallet.WalletID)
 	if err != nil {
 		return err
 	}
@@ -1182,7 +1182,7 @@ func (cli *CLI) CallABIFlow() error {
 	}
 
 	//:选择账户
-	account, err := cli.selectAccountStep(wallet.WalletID)
+	account, err := cli.SelectAccountStep(wallet.WalletID)
 	if err != nil {
 		return err
 	}
