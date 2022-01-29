@@ -365,6 +365,7 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 
 	//分页汇总交易
 	for i := 0; i < int(account.AddressIndex)+1; i = i + addressLimit {
+		createErr = nil
 		err = nil
 		retRawTxs = make([]*openwsdk.RawTransaction, 0)
 		retRawFeesSupportTxs = make([]*openwsdk.RawTransaction, 0)
