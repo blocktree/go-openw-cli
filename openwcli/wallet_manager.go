@@ -388,7 +388,7 @@ func (cli *CLI) printAccountSummaryInfo() {
 }
 
 // CreateAddressOnServer
-func (cli *CLI) CreateAddressOnServer(walletID, accountID string, count uint64) error {
+func (cli *CLI) CreateAddressOnServer(walletID, accountID, symbol string, count uint64) error {
 
 	var (
 		retErr error
@@ -406,8 +406,8 @@ func (cli *CLI) CreateAddressOnServer(walletID, accountID string, count uint64) 
 		return fmt.Errorf("create address count can not 0. ")
 	}
 
-	err := cli.api.CreateBatchAddress(walletID, accountID, count, true,
-		func(status uint64, msg string, addresses []string) {
+	err := cli.api.CreateAddress(symbol, walletID, accountID, count, true,
+		func(status uint64, msg string, addresses []*openwsdk.Address) {
 			if status == owtp.StatusSuccess {
 				log.Infof("create [%d] addresses successfully", len(addresses))
 				//:保存到本地数据库，导出到文件夹
@@ -433,14 +433,14 @@ func (cli *CLI) CreateAddressOnServer(walletID, accountID string, count uint64) 
 }
 
 // exportAddressToFile 导出地址到文件中
-func (cli *CLI) exportAddressToFile(addresses []string, filePath string) bool {
+func (cli *CLI) exportAddressToFile(addresses []*openwsdk.Address, filePath string) bool {
 
 	var (
 		content string
 	)
 
 	for _, a := range addresses {
-		content = content + a + "\n"
+		content = content + a.Address + "\n"
 	}
 
 	return file.WriteFile(filePath, []byte(content), true)

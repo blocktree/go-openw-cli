@@ -344,6 +344,12 @@ func (cli *CLI) NewAddressFlow() error {
 		return err
 	}
 
+	// 输入symbol
+	symbol, err := console.InputText("Enter symbol: ", false)
+	if err != nil {
+		return err
+	}
+
 	// 输入地址数量
 	count, err := console.InputNumber("Enter the number of addresses you want: ", false)
 	if err != nil {
@@ -354,7 +360,7 @@ func (cli *CLI) NewAddressFlow() error {
 		return fmt.Errorf("The number of addresses can not exceed %d ", maxAddresNum)
 	}
 
-	err = cli.CreateAddressOnServer(account.WalletID, account.AccountID, count)
+	err = cli.CreateAddressOnServer(account.WalletID, account.AccountID, symbol, count)
 	if err != nil {
 		return err
 	}

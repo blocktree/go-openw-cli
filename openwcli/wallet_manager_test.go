@@ -14,7 +14,7 @@ func TestCLI_CreateWalletOnServer(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	_, err := cli.CreateWalletOnServer("testwallet", "12345678")
+	_, err := cli.CreateWalletOnServer("newwallet", "12345678")
 	if err != nil {
 		log.Error("CreateWalletOnServer error:", err)
 		return
@@ -41,7 +41,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
+	walletID := "WJ728uvSxc73m6BvfRsjM1v3jGfdimVEAr"
 	wallet, err := cli.GetWalletByWalletID(walletID)
 	if err != nil {
 		log.Error("GetWalletByWalletID error:", err)
@@ -49,7 +49,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	}
 
 	if wallet != nil {
-		_, _, err = cli.CreateAccountOnServer("mainnetQUORUM2", "12345678", "QUORUM", wallet)
+		_, _, err = cli.CreateAccountOnServer("testETH", "12345678", "ETH", wallet)
 		if err != nil {
 			log.Error("CreateAccountOnServer error:", err)
 			return
@@ -80,7 +80,7 @@ func TestCLI_GetAccountOnServer(t *testing.T) {
 		return
 	}
 
-	accountID := "65Y9FgipAS2M7ankrt4o3MR2Z1EEPNZKBqyQNsKt9wnj"
+	accountID := "A9PfM5Dr62WAtDEC3Pio6G1g27288gSUAJaLom68rSCZ"
 	account, err := cli.GetAccountByAccountID("ETH", accountID)
 	if err != nil {
 		log.Error("GetAccountByAccountID error:", err)
@@ -95,9 +95,9 @@ func TestCLI_CreateAddressOnServer(t *testing.T) {
 		return
 	}
 
-	walletID := "WN84dVZXpgVixsvXnU8jkFWD1qWHp15LpA"
-	accountID := "7ww2Gpfy8pN6HTngbMFBTEMAaVRGEpkmsiNkgAgqGQGf"
-	err := cli.CreateAddressOnServer(walletID, accountID, 1000)
+	walletID := "WJ728uvSxc73m6BvfRsjM1v3jGfdimVEAr"
+	accountID := "A9PfM5Dr62WAtDEC3Pio6G1g27288gSUAJaLom68rSCZ"
+	err := cli.CreateAddressOnServer(walletID, accountID, "ETH", 10)
 	if err != nil {
 		log.Error("CreateAddressOnServer error:", err)
 		return
@@ -112,8 +112,8 @@ func TestCLI_GetAddressesOnServer(t *testing.T) {
 		return
 	}
 
-	walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
-	accountID := "7KgNQFx35ijMA43NgY89uaiwi9Tm4MH1PH68Kpnaqstu"
+	walletID := "WJ728uvSxc73m6BvfRsjM1v3jGfdimVEAr"
+	accountID := "A9PfM5Dr62WAtDEC3Pio6G1g27288gSUAJaLom68rSCZ"
 
 	addresses, err := cli.GetAddressesOnServer(walletID, accountID, "ETH", 0, 50)
 	if err != nil {
@@ -134,7 +134,7 @@ func TestCLI_SearchAddressOnServer(t *testing.T) {
 		return
 	}
 
-	addr := "n4LX1HnPnM4Xwy61abUFFpzqoXctHsmmeJ"
+	addr := "0x03463372a699f99775000edf9e89104af31c297f"
 
 	address, err := cli.SearchAddressOnServer("ETH", addr)
 	if err != nil {
