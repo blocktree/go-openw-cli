@@ -29,7 +29,7 @@ const (
 	maxAddresNum = 2000
 )
 
-//type SignRawTransactionFunc func(rawTx *openwsdk.RawTransaction, key *hdkeystore.HDKey) error
+// type SignRawTransactionFunc func(rawTx *openwsdk.RawTransaction, key *hdkeystore.HDKey) error
 type SignTxHashFunc func(signatures map[string][]*openwsdk.KeySignature, key *hdkeystore.HDKey) (map[string][]*openwsdk.KeySignature, error)
 
 type CLI struct {
@@ -77,7 +77,7 @@ func NewCLI(c *Config) (*CLI, error) {
 	return cli, nil
 }
 
-//setupAPI 配置APISDK
+// setupAPI 配置APISDK
 func (cli *CLI) setupAPISDK(keychain *Keychain) error {
 
 	if keychain != nil {
@@ -101,7 +101,7 @@ func (cli *CLI) setupAPISDK(keychain *Keychain) error {
 	return nil
 }
 
-//checkConfig 检查配置加载完
+// checkConfig 检查配置加载完
 func (cli *CLI) checkConfig() error {
 
 	if cli.config == nil {
@@ -148,7 +148,7 @@ func (cli *CLI) closeDB() {
 	}
 }
 
-//GenKeychainFlow 生成新的keychain流程
+// GenKeychainFlow 生成新的keychain流程
 func GenKeychainFlow() error {
 
 	//生成keychain
@@ -163,7 +163,7 @@ func GenKeychainFlow() error {
 	return nil
 }
 
-//RegisterFlow 注册节点流程
+// RegisterFlow 注册节点流程
 func (cli *CLI) RegisterFlow() error {
 
 	var (
@@ -218,7 +218,7 @@ func (cli *CLI) RegisterFlow() error {
 	return nil
 }
 
-//GetNodeInfo 获取节点信息
+// GetNodeInfo 获取节点信息
 func (cli *CLI) GetNodeInfoFlow() error {
 
 	keychain, err := cli.GetKeychain()
@@ -231,7 +231,7 @@ func (cli *CLI) GetNodeInfoFlow() error {
 	return nil
 }
 
-//printKeychain 打印证书钥匙串
+// printKeychain 打印证书钥匙串
 func printKeychain(keychain *Keychain) {
 	//打印证书信息
 	log.Notice("--------------- PRIVATE KEY ---------------")
@@ -242,7 +242,7 @@ func printKeychain(keychain *Keychain) {
 	log.Notice(keychain.NodeID)
 }
 
-//NewWalletFlow 创建钱包流程
+// NewWalletFlow 创建钱包流程
 func (cli *CLI) NewWalletFlow() error {
 
 	var (
@@ -269,14 +269,14 @@ func (cli *CLI) NewWalletFlow() error {
 	return nil
 }
 
-//ListWalletFlow
+// ListWalletFlow
 func (cli *CLI) ListWalletFlow() error {
 	wallets, _ := cli.GetWalletsOnServer()
 	cli.printWalletList(wallets)
 	return nil
 }
 
-//NewAccountFlow
+// NewAccountFlow
 func (cli *CLI) NewAccountFlow() error {
 
 	//:选择钱包
@@ -315,7 +315,7 @@ func (cli *CLI) NewAccountFlow() error {
 	return nil
 }
 
-//ListAccountFlow
+// ListAccountFlow
 func (cli *CLI) ListAccountFlow() error {
 
 	//:选择钱包
@@ -329,7 +329,7 @@ func (cli *CLI) ListAccountFlow() error {
 	return nil
 }
 
-//NewAddressFlow
+// NewAddressFlow
 func (cli *CLI) NewAddressFlow() error {
 
 	//:选择钱包
@@ -361,12 +361,18 @@ func (cli *CLI) NewAddressFlow() error {
 	return nil
 }
 
-//SearchAddressFlow
+// SearchAddressFlow
 func (cli *CLI) SearchAddressFlow() error {
 
 	var (
 		password string
 	)
+
+	// 等待用户输入symbol
+	symbol, err := console.InputText("Enter symbol: ", true)
+	if err != nil {
+		return err
+	}
 
 	// 等待用户输入地址
 	addr, err := console.InputText("Enter address: ", true)
@@ -384,7 +390,7 @@ func (cli *CLI) SearchAddressFlow() error {
 		}
 	}
 
-	address, err := cli.SearchAddressOnServer(addr)
+	address, err := cli.SearchAddressOnServer(symbol, addr)
 	if err != nil {
 		return err
 	}
@@ -404,7 +410,7 @@ func (cli *CLI) SearchAddressFlow() error {
 	return nil
 }
 
-//TransferFlow
+// TransferFlow
 func (cli *CLI) TransferFlow() error {
 	//:选择钱包
 	wallet, err := cli.SelectWalletStep()
@@ -469,7 +475,7 @@ func (cli *CLI) TransferFlow() error {
 	return nil
 }
 
-//TransferAllFlow
+// TransferAllFlow
 func (cli *CLI) TransferAllFlow() error {
 	//:选择钱包
 	wallet, err := cli.SelectWalletStep()
@@ -528,13 +534,13 @@ func (cli *CLI) TransferAllFlow() error {
 	return nil
 }
 
-//ListSumInfoFlow
+// ListSumInfoFlow
 func (cli *CLI) ListSumInfoFlow() error {
 	cli.printAccountSummaryInfo()
 	return nil
 }
 
-//SetSumFlow
+// SetSumFlow
 func (cli *CLI) SetSumFlow() error {
 
 	//:选择钱包
@@ -589,6 +595,7 @@ func (cli *CLI) SetSumFlow() error {
 	obj := &openwsdk.SummarySetting{
 		WalletID:        account.WalletID,
 		AccountID:       account.AccountID,
+		Symbol:          account.Symbol,
 		SumAddress:      sumAddress,
 		Threshold:       threshold,
 		MinTransfer:     minTransfer,
@@ -605,7 +612,7 @@ func (cli *CLI) SetSumFlow() error {
 	return nil
 }
 
-//StartSumFlow
+// StartSumFlow
 func (cli *CLI) StartSumFlow(file string) error {
 
 	var (
@@ -746,7 +753,7 @@ func (cli *CLI) StartSumFlow(file string) error {
 	return nil
 }
 
-//UpdateInfoFlow
+// UpdateInfoFlow
 func (cli *CLI) UpdateInfoFlow() error {
 
 	err := cli.UpdateSymbols()
@@ -759,7 +766,7 @@ func (cli *CLI) UpdateInfoFlow() error {
 	return nil
 }
 
-//ListSymbolFlow
+// ListSymbolFlow
 func (cli *CLI) ListSymbolFlow() error {
 	list, err := cli.GetSymbolList()
 	if err != nil {
@@ -769,7 +776,7 @@ func (cli *CLI) ListSymbolFlow() error {
 	return nil
 }
 
-//ListTokenContractFlow
+// ListTokenContractFlow
 func (cli *CLI) ListTokenContractFlow() error {
 
 	symbol, err := console.InputText("Enter symbol: ", true)
@@ -785,7 +792,7 @@ func (cli *CLI) ListTokenContractFlow() error {
 	return nil
 }
 
-//ListAddressFlow
+// ListAddressFlow
 func (cli *CLI) ListAddressFlow() error {
 
 	//:选择钱包
@@ -800,7 +807,7 @@ func (cli *CLI) ListAddressFlow() error {
 		return err
 	}
 
-	offset, err := console.InputNumber("Enter offset: ", true)
+	lastId, err := console.InputNumber("Enter last ID: ", true)
 	if err != nil {
 		return err
 	}
@@ -810,7 +817,7 @@ func (cli *CLI) ListAddressFlow() error {
 		return err
 	}
 
-	addresses, err := cli.GetAddressesOnServer(account.WalletID, account.AccountID, int(offset), int(limit))
+	addresses, err := cli.GetAddressesOnServer(account.WalletID, account.AccountID, account.Symbol, int64(lastId), int64(limit))
 	if err != nil {
 		return err
 	}
@@ -823,7 +830,7 @@ func (cli *CLI) ListAddressFlow() error {
 	return nil
 }
 
-//StartTrustServerFlow
+// StartTrustServerFlow
 func (cli *CLI) StartTrustServerFlow() error {
 
 	var (
@@ -868,7 +875,7 @@ func (cli *CLI) StartTrustServerFlow() error {
 	return nil
 }
 
-//SelectWalletStep 选择钱包操作
+// SelectWalletStep 选择钱包操作
 func (cli *CLI) SelectWalletStep() (*openwsdk.Wallet, error) {
 
 	wallets, _ := cli.GetWalletsOnServer()
@@ -893,7 +900,7 @@ func (cli *CLI) SelectWalletStep() (*openwsdk.Wallet, error) {
 	return wallet, nil
 }
 
-//SelectAccountStep 选择资产账户操作
+// SelectAccountStep 选择资产账户操作
 func (cli *CLI) SelectAccountStep(walletID string) (*openwsdk.Account, error) {
 
 	accounts, _ := cli.GetAccountsOnServer(walletID)
@@ -919,7 +926,7 @@ func (cli *CLI) SelectAccountStep(walletID string) (*openwsdk.Account, error) {
 	return account, nil
 }
 
-//ListTokenBalanceFlow
+// ListTokenBalanceFlow
 func (cli *CLI) ListTokenBalanceFlow() error {
 
 	//:选择钱包
@@ -942,7 +949,7 @@ func (cli *CLI) ListTokenBalanceFlow() error {
 	return nil
 }
 
-//unlockLocalWalletsByInputPassword 输入密码解锁钱包
+// unlockLocalWalletsByInputPassword 输入密码解锁钱包
 func (cli *CLI) unlockLocalWalletsByInputPassword() error {
 
 	localWallets, err := cli.GetWalletsOnServer()
@@ -1115,8 +1122,7 @@ func ProcExsit(filePath string, processName string) error {
 	return nil
 }
 
-
-//TriggerABIFlow
+// TriggerABIFlow
 func (cli *CLI) TriggerABIFlow() error {
 	//:选择钱包
 	wallet, err := cli.SelectWalletStep()
@@ -1172,8 +1178,7 @@ func (cli *CLI) TriggerABIFlow() error {
 	return nil
 }
 
-
-//CallABIFlow
+// CallABIFlow
 func (cli *CLI) CallABIFlow() error {
 	//:选择钱包
 	wallet, err := cli.SelectWalletStep()
@@ -1209,14 +1214,17 @@ func (cli *CLI) CallABIFlow() error {
 	return nil
 }
 
-
-
 // SignHashFlow 消息签名
 func (cli *CLI) SignHashFlow() error {
 
-
 	// 等待用户输入代签消息
 	message, err := console.InputText("Enter message: ", false)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入symbol
+	symbol, err := console.InputText("Enter symbol: ", true)
 	if err != nil {
 		return err
 	}
@@ -1227,7 +1235,7 @@ func (cli *CLI) SignHashFlow() error {
 		return err
 	}
 
-	address, err := cli.SearchAddressOnServer(addr)
+	address, err := cli.SearchAddressOnServer(symbol, addr)
 	if err != nil {
 		return err
 	}

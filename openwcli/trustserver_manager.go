@@ -64,7 +64,7 @@ func (cli *CLI) ServeTransmitNode(autoReconnect bool) error {
 	return nil
 }
 
-//connectTransmitNode
+// connectTransmitNode
 func (cli *CLI) connectTransmitNode() error {
 
 	connectCfg := owtp.ConnectConfig{}
@@ -96,7 +96,7 @@ func (cli *CLI) connectTransmitNode() error {
 	return nil
 }
 
-//Run 运行商户节点管理
+// Run 运行商户节点管理
 func (cli *CLI) autoReconnectTransmitNode() error {
 
 	var (
@@ -273,8 +273,9 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 	feeRate := ctx.Params().Get("feeRate").String()
 	memo := ctx.Params().Get("memo").String()
 	extParam := ctx.Params().Get("extParam").String()
+	symbol := ctx.Params().Get("symbol").String()
 
-	account, err := cli.GetAccountByAccountID(accountID)
+	account, err := cli.GetAccountByAccountID(symbol, accountID)
 	if err != nil {
 		ctx.Response(nil, openwallet.ErrAccountNotFound, err.Error())
 		return
@@ -779,13 +780,14 @@ func (cli *CLI) triggerABIViaTrustNode(ctx *owtp.Context) {
 	raw := ctx.Params().Get("raw").String()
 	rawType := ctx.Params().Get("rawType").Uint()
 	awaitResult := ctx.Params().Get("awaitResult").Bool()
+	symbol := ctx.Params().Get("symbol").String()
 
 	abiParam := make([]string, 0)
 	for _, s := range abiArr.Array() {
 		abiParam = append(abiParam, s.String())
 	}
 
-	account, err := cli.GetAccountByAccountID(accountID)
+	account, err := cli.GetAccountByAccountID(symbol, accountID)
 	if err != nil {
 		ctx.Response(nil, openwallet.ErrAccountNotFound, err.Error())
 		return
@@ -845,12 +847,12 @@ func (cli *CLI) signHashViaTrustNode(ctx *owtp.Context) {
 	}
 
 	addr := &openwsdk.Address{
-		AppID:            appID,
-		WalletID:         walletID,
-		AccountID:        accountID,
-		Symbol:           symbol,
-		Address:          address,
-		HdPath:           hdPath,
+		AppID:     appID,
+		WalletID:  walletID,
+		AccountID: accountID,
+		Symbol:    symbol,
+		Address:   address,
+		HdPath:    hdPath,
 	}
 
 	signature, err := cli.SignHash(addr, message, password, rsv)

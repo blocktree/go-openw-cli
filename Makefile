@@ -29,7 +29,8 @@ OPENWCLILDFLAGS="-X github.com/blocktree/go-openw-cli/v2/openwcli.Version=${OPEN
 TARGETS="darwin-10.10/amd64,linux/amd64,windows-6.0/*"
 
 deps:
-	go get -u github.com/gythialy/xgo
+	#go get -u github.com/gythialy/xgo
+	go get -u src.techknowlogick.com/xgo
 
 build:
 	GO111MODULE=on go build -ldflags $(OPENWCLILDFLAGS) -i -o $(shell pwd)/$(BUILDDIR)/$(OPENWCLIBINARY) $(shell pwd)/$(OPENWCLIMAIN)
