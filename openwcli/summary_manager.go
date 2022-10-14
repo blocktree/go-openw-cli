@@ -53,10 +53,17 @@ func (cli *CLI) TransferAll(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 			return findErr
 		}
 		contractID = tokenBalance.ContractID
-		tokenSymbol = tokenBalance.Token
-		balance = tokenBalance.Balance.Balance
+		tokenSymbol = tokenBalance.ContractToken
+		balance = tokenBalance.Balance
 	} else {
-		balance = account.Balance
+		balance = "0"
+		cli.api.GetBalanceByAccount(account.Symbol, account.AccountID, "",
+			true, func(status uint64, msg string, accBalance *openwsdk.BalanceResult) {
+				if status == owtp.StatusSuccess {
+					balance = accBalance.Balance
+				}
+			})
+
 	}
 	coin := openwsdk.Coin{
 		Symbol:     account.Symbol,
@@ -75,7 +82,7 @@ func (cli *CLI) TransferAll(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 	return nil
 }
 
-//SummaryWallets 执行汇总流程
+// SummaryWallets 执行汇总流程
 func (cli *CLI) SummaryTask() {
 
 	log.Infof("[Summary Task Start]------%s", common.TimeFormat("2006-01-02 15:04:05"))
@@ -105,7 +112,7 @@ func (cli *CLI) SummaryTask() {
 
 		for _, accountTask := range task.Accounts {
 
-			account, err := cli.GetAccountByAccountID(accountTask.AccountID)
+			account, err := cli.GetAccountByAccountID(accountTask.Symbol, accountTask.AccountID)
 			if err != nil {
 				continue
 			}
@@ -131,14 +138,22 @@ func (cli *CLI) SummaryTask() {
 	log.Infof("[Summary Task End]------%s", common.TimeFormat("2006-01-02 15:04:05"))
 }
 
-//SummaryAccountMainCoin 汇总账户主币
+// SummaryAccountMainCoin 汇总账户主币
 func (cli *CLI) SummaryAccountMainCoin(accountTask *openwsdk.SummaryAccountTask, account *openwsdk.Account, key *hdkeystore.HDKey) error {
 
 	var (
 		err     error
 		sumSets *openwsdk.SummarySetting
 		symbol  string
+		balance = "0"
 	)
+
+	cli.api.GetBalanceByAccount(account.Symbol, account.AccountID, "",
+		true, func(status uint64, msg string, accBalance *openwsdk.BalanceResult) {
+			if status == owtp.StatusSuccess {
+				balance = accBalance.Balance
+			}
+		})
 
 	//读取汇总信息
 	sumSets, err = cli.getSummarySettingByAccount(account.AccountID)
@@ -169,7 +184,7 @@ func (cli *CLI) SummaryAccountMainCoin(accountTask *openwsdk.SummaryAccountTask,
 
 	log.Infof("Summary account[%s] Symbol: %s start", account.AccountID, symbol)
 
-	err = cli.summaryAccountProcess(account, accountTask, key, account.Balance, *accountTask.SummarySetting, coin)
+	err = cli.summaryAccountProcess(account, accountTask, key, balance, *accountTask.SummarySetting, coin)
 
 	log.Infof("Summary account[%s] Symbol: %s end", account.AccountID, symbol)
 	log.Infof("----------------------------------------------------------------------------------------")
@@ -181,7 +196,7 @@ func (cli *CLI) SummaryAccountMainCoin(accountTask *openwsdk.SummaryAccountTask,
 	return nil
 }
 
-//SummaryAccountTokenContracts 汇总账户代币合约
+// SummaryAccountTokenContracts 汇总账户代币合约
 func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccountTask, account *openwsdk.Account, key *hdkeystore.HDKey) error {
 
 	var (
@@ -271,7 +286,7 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 	return nil
 }
 
-//summaryAccountProcess 汇总账户过程
+// summaryAccountProcess 汇总账户过程
 func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.SummaryAccountTask, key *hdkeystore.HDKey, balance string, sumSets openwsdk.SummarySetting, coin openwsdk.Coin) error {
 
 	var (
@@ -288,7 +303,8 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 	if task.FeesSupportAccount != nil && coin.IsContract {
 		//代币汇总才需要手续费账户
 		feesSupportAccountID = task.FeesSupportAccount.AccountID
-		feesSupportAccounInfo, err := cli.GetAccountByAccountID(feesSupportAccountID)
+		feesSupportSymbol := task.FeesSupportAccount.Symbol
+		feesSupportAccounInfo, err := cli.GetAccountByAccountID(feesSupportSymbol, feesSupportAccountID)
 		if err != nil {
 			return fmt.Errorf("fees support account: %s can not find", feesSupportAccountID)
 		}
@@ -302,12 +318,19 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 			}
 			tokenBalance, err := cli.GetTokenBalanceByContractAddress(feesSupportAccounInfo, task.FeesSupportAccount.ContractAddress)
 			if err == nil {
-				feesSupportBalance, _ = decimal.NewFromString(tokenBalance.Balance.Balance)
+				feesSupportBalance, _ = decimal.NewFromString(tokenBalance.Balance)
 			}
 
 		} else {
 			//主币作为手续费
-			feesSupportBalance, _ = decimal.NewFromString(feesSupportAccounInfo.Balance)
+			feesSupportBalance = decimal.Zero
+			cli.api.GetBalanceByAccount(feesSupportAccounInfo.Symbol, feesSupportAccounInfo.AccountID, "",
+				true, func(status uint64, msg string, balance *openwsdk.BalanceResult) {
+					if status == owtp.StatusSuccess {
+						feesSupportBalance, _ = decimal.NewFromString(balance.Balance)
+					}
+				})
+
 		}
 
 		lowBalanceWarning, _ := decimal.NewFromString(task.FeesSupportAccount.LowBalanceWarning)
@@ -328,7 +351,7 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 	return nil
 }
 
-//summaryAccount 汇总单个账户
+// summaryAccount 汇总单个账户
 func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.SummaryAccountTask,
 	key *hdkeystore.HDKey, balance string, sumSets openwsdk.SummarySetting, coin openwsdk.Coin,
 	feesSupportAccountID string, feesSupportBalance decimal.Decimal) error {
@@ -498,12 +521,12 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 			for _, tx := range retTx {
 
 				//只计算汇总账户的 总的汇总数量，手续费
-				log.Infof("[Success] txid: %s", tx.Txid)
+				log.Infof("[Success] txid: %s", tx.TxID)
 
 				fees, _ := decimal.NewFromString(tx.Fees)
 
 				totalCostFees = totalCostFees.Add(fees)
-				txIDs = append(txIDs, tx.Txid)
+				txIDs = append(txIDs, tx.TxID)
 				sids = append(sids, tx.Sid)
 				//统计汇总总数
 				for i, a := range tx.ToAddress {
@@ -611,7 +634,7 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 				amount, _ := decimal.NewFromString(tx.Amount)
 				totalSupportCostFees = totalSupportCostFees.Add(amount)
 				//:手续费账户消息处理
-				log.Std.Notice(" [fees support account transfer Success] txid: %s", tx.Txid)
+				log.Std.Notice(" [fees support account transfer Success] txid: %s", tx.TxID)
 			}
 
 			for _, tx := range retFailed {
@@ -663,7 +686,7 @@ func FindExistedSummaryAccountTask(accountID string, tasks []*openwsdk.SummaryAc
 	return -1, nil
 }
 
-//checkSummaryTaskIsHaveSettings 检查汇总任务中的账户是否已配置
+// checkSummaryTaskIsHaveSettings 检查汇总任务中的账户是否已配置
 func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error {
 
 	for _, w := range task.Wallets {
@@ -681,7 +704,7 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 
 		for _, account := range w.Accounts {
 
-			accounInfo, err := cli.GetAccountByAccountID(account.AccountID)
+			accounInfo, err := cli.GetAccountByAccountID(account.Symbol, account.AccountID)
 			if err != nil {
 				return fmt.Errorf("summary task account: %s can not find", account.AccountID)
 			}
@@ -708,7 +731,7 @@ func (cli *CLI) checkSummaryTaskIsHaveSettings(task *openwsdk.SummaryTask) error
 			//:查询手续费账户是否存在，是否在当前钱包下，相同的symbol，并且检查手续费账户余额是否报警
 			if account.FeesSupportAccount != nil && account.FeesSupportAccount.AccountID != "" {
 
-				feesSupportAccountInfo, err := cli.GetAccountByAccountID(account.FeesSupportAccount.AccountID)
+				feesSupportAccountInfo, err := cli.GetAccountByAccountID(account.FeesSupportAccount.Symbol, account.FeesSupportAccount.AccountID)
 				if err != nil {
 					return fmt.Errorf("fees support account: %s can not find", account.FeesSupportAccount.AccountID)
 				}

@@ -81,7 +81,7 @@ func TestCLI_GetAccountOnServer(t *testing.T) {
 	}
 
 	accountID := "65Y9FgipAS2M7ankrt4o3MR2Z1EEPNZKBqyQNsKt9wnj"
-	account, err := cli.GetAccountByAccountID(accountID)
+	account, err := cli.GetAccountByAccountID("ETH", accountID)
 	if err != nil {
 		log.Error("GetAccountByAccountID error:", err)
 		return
@@ -115,7 +115,7 @@ func TestCLI_GetAddressesOnServer(t *testing.T) {
 	walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
 	accountID := "7KgNQFx35ijMA43NgY89uaiwi9Tm4MH1PH68Kpnaqstu"
 
-	addresses, err := cli.GetAddressesOnServer(walletID, accountID, 0, 50)
+	addresses, err := cli.GetAddressesOnServer(walletID, accountID, "ETH", 0, 50)
 	if err != nil {
 		log.Error("GetAddressesOnServer error:", err)
 		return
@@ -136,7 +136,7 @@ func TestCLI_SearchAddressOnServer(t *testing.T) {
 
 	addr := "n4LX1HnPnM4Xwy61abUFFpzqoXctHsmmeJ"
 
-	address, err := cli.SearchAddressOnServer(addr)
+	address, err := cli.SearchAddressOnServer("ETH", addr)
 	if err != nil {
 		log.Error("SearchAddressOnServer error:", err)
 		return

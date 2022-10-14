@@ -8,22 +8,22 @@ import (
 	"github.com/blocktree/openwallet/v2/owtp"
 )
 
-//GetTokenBalance 获取代币余额
+// GetTokenBalance 获取代币余额
 func (cli *CLI) GetTokenBalance(account *openwsdk.Account, contractID string) string {
 	getBalance := "0"
-	cli.api.GetTokenBalanceByAccount(account.AccountID, contractID, true,
-		func(status uint64, msg string, balance *openwsdk.TokenBalance) {
+	cli.api.GetBalanceByAccount(account.Symbol, account.AccountID, contractID, true,
+		func(status uint64, msg string, balance *openwsdk.BalanceResult) {
 			if status == owtp.StatusSuccess {
-				getBalance = balance.Balance.Balance
+				getBalance = balance.Balance
 			}
 		})
 	return getBalance
 }
 
-//GetTokenBalanceByContractAddress 通过代币合约的地址获取代币余额
-func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, address string) (*openwsdk.TokenBalance, error) {
+// GetTokenBalanceByContractAddress 通过代币合约的地址获取代币余额
+func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, address string) (*openwsdk.BalanceResult, error) {
 	var (
-		getBalance *openwsdk.TokenBalance
+		getBalance *openwsdk.BalanceResult
 		callErr    error
 	)
 
@@ -32,10 +32,11 @@ func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, addr
 		return nil, findErr
 	}
 	contractID := token[0].ContractID
-	err := cli.api.GetTokenBalanceByAccount(account.AccountID, contractID, true,
-		func(status uint64, msg string, balance *openwsdk.TokenBalance) {
+	err := cli.api.GetBalanceByAccount(account.Symbol, account.AccountID, contractID, true,
+		func(status uint64, msg string, balance *openwsdk.BalanceResult) {
 			if status == owtp.StatusSuccess {
 				getBalance = balance
+				getBalance.ContractToken = token[0].Token
 			} else {
 				callErr = openwallet.Errorf(status, msg)
 			}
@@ -49,12 +50,12 @@ func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, addr
 	return getBalance, nil
 }
 
-//Transfer 转账交易
+// Transfer 转账交易
 func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, *openwallet.Error) {
 	return cli.TransferExt(wallet, account, contractAddress, to, amount, sid, feeRate, memo, "", password)
 }
 
-//TransferExt 转账交易 + 扩展参数
+// TransferExt 转账交易 + 扩展参数
 func (cli *CLI) TransferExt(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, extParam, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, *openwallet.Error) {
 
 	var (
@@ -99,7 +100,7 @@ func (cli *CLI) TransferExt(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 	}
 
 	api := cli.api
-	err = api.CreateTrade(account.AccountID, sid, coin, amount, to, feeRate, memo, extParam, true,
+	err = api.CreateTrade(account.AccountID, sid, coin, map[string]string{"to": amount}, feeRate, memo, extParam, true,
 		func(status uint64, msg string, rawTx *openwsdk.RawTransaction) {
 			if status != owtp.StatusSuccess {
 				createErr = openwallet.Errorf(status, msg)
@@ -154,7 +155,7 @@ func (cli *CLI) TransferExt(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 	if len(retTx) > 0 {
 		//打印交易单
 		log.Info("send transaction successfully.")
-		log.Info("transaction id:", retTx[0].Txid)
+		log.Info("transaction id:", retTx[0].TxID)
 	} else if len(retFailed) > 0 {
 		//打印交易单
 		log.Errorf("send transaction failed.")

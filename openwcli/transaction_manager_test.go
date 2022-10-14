@@ -19,7 +19,7 @@ func testFindAccountByID(accountID string, list []*openwsdk.Account) *openwsdk.A
 	return nil
 }
 
-func testCLITransfer(walletID, accountID, contractAddress, amount, to, memo, password string) *openwallet.Error {
+func testCLITransfer(walletID, accountID, symbol, contractAddress, amount, to, memo, password string) *openwallet.Error {
 	cli := getTestOpenwCLI()
 	if cli == nil {
 		return openwallet.Errorf(openwallet.ErrUnknownException, "init cli error")
@@ -31,7 +31,7 @@ func testCLITransfer(walletID, accountID, contractAddress, amount, to, memo, pas
 		return openwallet.ConvertError(err)
 	}
 
-	account, err := cli.GetAccountByAccountID(accountID)
+	account, err := cli.GetAccountByAccountID(accountID, symbol)
 	if err != nil {
 		//log.Error("GetAccountByAccountID error:", err)
 		return openwallet.ConvertError(err)
@@ -49,7 +49,7 @@ func testCLITransfer(walletID, accountID, contractAddress, amount, to, memo, pas
 	return nil
 }
 
-func testCLITransferAll(walletID, accountID, to, password string) *openwallet.Error {
+func testCLITransferAll(walletID, accountID, symbol, to, password string) *openwallet.Error {
 	cli := getTestOpenwCLI()
 	if cli == nil {
 		return openwallet.Errorf(openwallet.ErrUnknownException, "init cli error")
@@ -61,7 +61,7 @@ func testCLITransferAll(walletID, accountID, to, password string) *openwallet.Er
 		return openwallet.ConvertError(err)
 	}
 
-	account, err := cli.GetAccountByAccountID(accountID)
+	account, err := cli.GetAccountByAccountID(accountID, symbol)
 	if err != nil {
 		//log.Error("GetAccountByAccountID error:", err)
 		return openwallet.ConvertError(err)
@@ -85,7 +85,7 @@ func TestCLI_Transfer_LTC(t *testing.T) {
 	amount := "0.001"
 	to := "LcaFc1pmJBsS7MQyMvZaboppuuvGFubD49"
 	password := "12345678"
-	err := testCLITransfer(walletID, accountID, "", amount, to, "", password)
+	err := testCLITransfer(walletID, accountID, "ETH", "", amount, to, "", password)
 	if err != nil {
 		t.Errorf("Transfer error code: %d, msg: %s", err.Code(), err.Error())
 		return
@@ -97,7 +97,7 @@ func TestCLI_TransferAll_LTC(t *testing.T) {
 	accountID := "PgHCcfMbcw1zXRNZo23NFjRdBmcN5tzrb1j5McRLJbG"
 	to := "LcaFc1pmJBsS7MQyMvZaboppuuvGFubD49"
 	password := "12345678"
-	err := testCLITransferAll(walletID, accountID, to, password)
+	err := testCLITransferAll(walletID, accountID, "ETH", to, password)
 	if err != nil {
 		t.Errorf("Transfer All error code: %d, msg: %s", err.Code(), err.Error())
 		return
@@ -251,7 +251,7 @@ func TestCLI_Transfer_Token(t *testing.T) {
 		to := "tgcopenwtest"
 		password := "12345678"
 		memo := "N3CCXUQL"
-		err := testCLITransfer(walletID, accountID, contractAddress, amount, to, memo, password)
+		err := testCLITransfer(walletID, accountID, "ETH", contractAddress, amount, to, memo, password)
 		if err != nil {
 			t.Errorf("Transfer error code: %d, msg: %s \n", err.Code(), err.Error())
 			return

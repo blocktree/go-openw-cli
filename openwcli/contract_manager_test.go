@@ -32,7 +32,7 @@ func TestCLI_CallABI(t *testing.T) {
 		return
 	}
 
-	account, err := cli.GetAccountByAccountID(accountID)
+	account, err := cli.GetAccountByAccountID("ETH", accountID)
 	if err != nil {
 		t.Errorf("GetAccountByAccountID failed, err: %v", err)
 		return
@@ -70,7 +70,7 @@ func TestCLI_TriggerABI(t *testing.T) {
 		return
 	}
 
-	account, err := cli.GetAccountByAccountID(accountID)
+	account, err := cli.GetAccountByAccountID("ETH", accountID)
 	if err != nil {
 		t.Errorf("GetAccountByAccountID failed, err: %v", err)
 		return

@@ -19,7 +19,7 @@ import (
 	"github.com/bndr/gotabulate"
 )
 
-//CreateWalletOnServer
+// CreateWalletOnServer
 func (cli *CLI) CreateWalletOnServer(name, password string) (*openwsdk.Wallet, error) {
 
 	var (
@@ -74,7 +74,7 @@ func (cli *CLI) CreateWalletOnServer(name, password string) (*openwsdk.Wallet, e
 	return retWallet, retErr
 }
 
-//GetWalletsByKeyDir 通过给定的文件路径加载keystore文件得到钱包列表
+// GetWalletsByKeyDir 通过给定的文件路径加载keystore文件得到钱包列表
 func (cli *CLI) GetWalletsOnServer() ([]*openwsdk.Wallet, error) {
 	localWallets, err := openwallet.GetWalletsByKeyDir(cli.config.keydir)
 	if err != nil {
@@ -97,7 +97,7 @@ func (cli *CLI) GetWalletsOnServer() ([]*openwsdk.Wallet, error) {
 	return serverWallets, nil
 }
 
-//GetWalletByWalletID 查找本地且线上有的钱包对象
+// GetWalletByWalletID 查找本地且线上有的钱包对象
 func (cli *CLI) GetWalletByWalletID(walletID string) (*openwsdk.Wallet, error) {
 
 	var (
@@ -128,7 +128,7 @@ func (cli *CLI) GetWalletByWalletID(walletID string) (*openwsdk.Wallet, error) {
 	return localWallet, nil
 }
 
-//GetWalletByWalletIDOnLocal 查找本地种子目录的钱包对象
+// GetWalletByWalletIDOnLocal 查找本地种子目录的钱包对象
 func (cli *CLI) GetWalletByWalletIDOnLocal(walletID string) (*openwsdk.Wallet, error) {
 	localWallets, err := openwallet.GetWalletsByKeyDir(cli.config.keydir)
 	if err != nil {
@@ -148,7 +148,7 @@ func (cli *CLI) GetWalletByWalletIDOnLocal(walletID string) (*openwsdk.Wallet, e
 	return nil, fmt.Errorf("can not find local wallet by walletID: %s", walletID)
 }
 
-//printWalletList 打印钱包列表
+// printWalletList 打印钱包列表
 func (cli *CLI) printWalletList(list []*openwsdk.Wallet) {
 
 	if list != nil && len(list) > 0 {
@@ -171,7 +171,7 @@ func (cli *CLI) printWalletList(list []*openwsdk.Wallet) {
 	}
 }
 
-//CreateAccountOnServer
+// CreateAccountOnServer
 func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *openwsdk.Wallet) (*openwsdk.Account, []*openwsdk.Address, error) {
 
 	var (
@@ -222,7 +222,7 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 	err = cli.api.CreateNormalAccount(newaccount, true,
 		func(status uint64, msg string, account *openwsdk.Account, addresses []*openwsdk.Address) {
 			if status == owtp.StatusSuccess {
-				log.Infof("create [%s] account successfully", selectedSymbol.Coin)
+				log.Infof("create [%s] account successfully", selectedSymbol.Symbol)
 				log.Infof("new accountID: %s", account.AccountID)
 				if len(addresses) > 0 {
 					log.Infof("new address: %s", addresses[0].Address)
@@ -246,8 +246,8 @@ func (cli *CLI) CreateAccountOnServer(name, password, symbol string, wallet *ope
 	return retAccount, retAddresses, nil
 }
 
-//GetAccountOnServerByAccountID 从服务器获取账户
-func (cli *CLI) GetAccountByAccountID(accountID string) (*openwsdk.Account, error) {
+// GetAccountOnServerByAccountID 从服务器获取账户
+func (cli *CLI) GetAccountByAccountID(symbol, accountID string) (*openwsdk.Account, error) {
 
 	var (
 		getAccount *openwsdk.Account
@@ -255,7 +255,7 @@ func (cli *CLI) GetAccountByAccountID(accountID string) (*openwsdk.Account, erro
 		retErr     error
 	)
 
-	err = cli.api.FindAccountByAccountID(accountID, 0, true,
+	err = cli.api.FindAccountByAccountID(symbol, accountID, 0, true,
 		func(status uint64, msg string, account *openwsdk.Account) {
 			if status == owtp.StatusSuccess {
 				getAccount = account
@@ -273,16 +273,18 @@ func (cli *CLI) GetAccountByAccountID(accountID string) (*openwsdk.Account, erro
 	return getAccount, nil
 }
 
-//GetAccountsOnServer 从服务器获取账户列表
+// GetAccountsOnServer 从服务器获取账户列表
 func (cli *CLI) GetAccountsOnServer(walletID string) ([]*openwsdk.Account, error) {
 
 	var (
 		list   = make([]*openwsdk.Account, 0)
 		err    error
 		retErr error
+		lastID = int64(0)
+		limit  = int64(200)
 	)
 
-	err = cli.api.FindAccountByWalletID(walletID, true,
+	err = cli.api.FindAccountByWalletID("", walletID, lastID, limit, true,
 		func(status uint64, msg string, accounts []*openwsdk.Account) {
 			if status == owtp.StatusSuccess && len(accounts) > 0 {
 				list = append(list, accounts...)
@@ -301,7 +303,7 @@ func (cli *CLI) GetAccountsOnServer(walletID string) ([]*openwsdk.Account, error
 	return list, nil
 }
 
-//printAccountList 打印账户列表
+// printAccountList 打印账户列表
 func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 
 	_, err := cli.getDB()
@@ -324,9 +326,19 @@ func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 			} else {
 				sumTips = "√"
 			}
+			balanceStr := "0"
+			//查询账户余额
+			cli.api.GetBalanceByAccount(w.Symbol, w.AccountID, "",
+				true, func(status uint64, msg string, balance *openwsdk.BalanceResult) {
+					if status == owtp.StatusSuccess {
+						balanceStr = balance.Balance
+					} else {
+						balanceStr = "N/A"
+					}
+				})
 
 			tableInfo = append(tableInfo, []interface{}{
-				i, w.Alias, w.AccountID, w.Symbol, w.Balance, w.AddressIndex + 1, sumTips,
+				i, w.Alias, w.AccountID, w.Symbol, balanceStr, w.AddressIndex + 1, sumTips,
 			})
 		}
 
@@ -342,7 +354,7 @@ func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 	}
 }
 
-//printAccountList 打印账户列表
+// printAccountList 打印账户列表
 func (cli *CLI) printAccountSummaryInfo() {
 
 	_, err := cli.getDB()
@@ -375,7 +387,7 @@ func (cli *CLI) printAccountSummaryInfo() {
 	fmt.Println(t.Render("simple"))
 }
 
-//CreateAddressOnServer
+// CreateAddressOnServer
 func (cli *CLI) CreateAddressOnServer(walletID, accountID string, count uint64) error {
 
 	var (
@@ -420,7 +432,7 @@ func (cli *CLI) CreateAddressOnServer(walletID, accountID string, count uint64) 
 	return retErr
 }
 
-//exportAddressToFile 导出地址到文件中
+// exportAddressToFile 导出地址到文件中
 func (cli *CLI) exportAddressToFile(addresses []string, filePath string) bool {
 
 	var (
@@ -434,8 +446,8 @@ func (cli *CLI) exportAddressToFile(addresses []string, filePath string) bool {
 	return file.WriteFile(filePath, []byte(content), true)
 }
 
-//SearchAddressOnServer
-func (cli *CLI) SearchAddressOnServer(address string) (*openwsdk.Address, error) {
+// SearchAddressOnServer
+func (cli *CLI) SearchAddressOnServer(symbol, address string) (*openwsdk.Address, error) {
 
 	var (
 		retErr error
@@ -447,7 +459,7 @@ func (cli *CLI) SearchAddressOnServer(address string) (*openwsdk.Address, error)
 
 	var addr *openwsdk.Address
 
-	err := cli.api.FindAddressByAddress(address, true,
+	err := cli.api.FindAddressByAddress(symbol, address, true,
 		func(status uint64, msg string, address *openwsdk.Address) {
 			if status == owtp.StatusSuccess {
 				addr = address
@@ -463,8 +475,8 @@ func (cli *CLI) SearchAddressOnServer(address string) (*openwsdk.Address, error)
 	return addr, retErr
 }
 
-//GetAddressesOnServer
-func (cli *CLI) GetAddressesOnServer(walletID, accountID string, offset, limit int) ([]*openwsdk.Address, error) {
+// GetAddressesOnServer
+func (cli *CLI) GetAddressesOnServer(walletID, accountID, symbol string, lastId, limit int64) ([]*openwsdk.Address, error) {
 
 	var (
 		retErr error
@@ -480,7 +492,7 @@ func (cli *CLI) GetAddressesOnServer(walletID, accountID string, offset, limit i
 		return nil, fmt.Errorf("walleID is empty. ")
 	}
 
-	err := cli.api.FindAddressByAccountID(accountID, offset, limit, true,
+	err := cli.api.FindAddressByAccountID(symbol, accountID, lastId, limit, true,
 		func(status uint64, msg string, addresses []*openwsdk.Address) {
 			if status == owtp.StatusSuccess {
 				list = addresses
@@ -496,7 +508,7 @@ func (cli *CLI) GetAddressesOnServer(walletID, accountID string, offset, limit i
 	return list, retErr
 }
 
-//printAddressList 打印地址列表
+// printAddressList 打印地址列表
 func (cli *CLI) printAddressList(walletID string, list []*openwsdk.Address, password string) error {
 
 	var (
@@ -537,7 +549,17 @@ func (cli *CLI) printAddressList(walletID string, list []*openwsdk.Address, pass
 	if list != nil && len(list) > 0 {
 		tableInfo := make([][]interface{}, 0)
 
-		for i, a := range list {
+		for _, a := range list {
+
+			balanceStr := "0"
+			cli.api.GetBalanceByAddress(a.Symbol, a.Address, "",
+				true, func(status uint64, msg string, balance *openwsdk.BalanceResult) {
+					if status == owtp.StatusSuccess {
+						balanceStr = balance.Balance
+					} else {
+						balanceStr = "N/A"
+					}
+				})
 
 			if isShowPrivateKey && key != nil {
 
@@ -560,7 +582,7 @@ func (cli *CLI) printAddressList(walletID string, list []*openwsdk.Address, pass
 			}
 
 			tableInfo = append(tableInfo, []interface{}{
-				i, a.Address, a.WalletID, a.AccountID, a.Symbol, a.Balance, a.PublicKey, privatekey,
+				a.Id, a.Address, a.WalletID, a.AccountID, a.Symbol, balanceStr, a.PublicKey, privatekey,
 			})
 
 		}
@@ -577,7 +599,7 @@ func (cli *CLI) printAddressList(walletID string, list []*openwsdk.Address, pass
 	return nil
 }
 
-//UpdateSymbols 更新主链
+// UpdateSymbols 更新主链
 func (cli *CLI) UpdateSymbols() error {
 
 	const (
@@ -611,7 +633,7 @@ func (cli *CLI) UpdateSymbols() error {
 		for {
 
 			var getTokenContract []*openwsdk.TokenContract
-			err = cli.api.GetContracts(s.Coin, "", i, limit, true,
+			err = cli.api.GetContracts(s.Symbol, "", i, limit, true,
 				func(status uint64, msg string, tokenContract []*openwsdk.TokenContract) {
 					getTokenContract = tokenContract
 				})
@@ -643,7 +665,7 @@ func (cli *CLI) UpdateSymbols() error {
 	return tx.Commit()
 }
 
-//UpdateSymbols 更新主链
+// UpdateSymbols 更新主链
 func (cli *CLI) UpdateTokenContracts(symbol string) error {
 	var getTokenContract []*openwsdk.TokenContract
 	err := cli.api.GetContracts(symbol, "", 0, 5000, true,
@@ -679,7 +701,7 @@ func (cli *CLI) UpdateTokenContracts(symbol string) error {
 	return tx.Commit()
 }
 
-//GetLocalSymbolList 查询本地保存主链
+// GetLocalSymbolList 查询本地保存主链
 func (cli *CLI) GetSymbolList() ([]*openwsdk.Symbol, error) {
 
 	_, err := cli.getDB()
@@ -711,7 +733,7 @@ func (cli *CLI) GetSymbolList() ([]*openwsdk.Symbol, error) {
 	return getSymbols, nil
 }
 
-//printSymbolList 打印主链列表
+// printSymbolList 打印主链列表
 func (cli *CLI) printSymbolList(list []*openwsdk.Symbol) {
 
 	if list != nil && len(list) > 0 {
@@ -719,7 +741,7 @@ func (cli *CLI) printSymbolList(list []*openwsdk.Symbol) {
 
 		for _, w := range list {
 			tableInfo = append(tableInfo, []interface{}{
-				w.Name, w.Coin, w.Curve, w.Decimals,
+				w.Name, w.Symbol, w.Curve, w.Decimals,
 			})
 		}
 
@@ -734,7 +756,7 @@ func (cli *CLI) printSymbolList(list []*openwsdk.Symbol) {
 	}
 }
 
-//GetLocalSymbolInfo 查询本地主链信息
+// GetLocalSymbolInfo 查询本地主链信息
 func (cli *CLI) GetSymbolInfo(symbol string) (*openwsdk.Symbol, error) {
 
 	getSymbols, err := cli.GetSymbolList()
@@ -743,7 +765,7 @@ func (cli *CLI) GetSymbolInfo(symbol string) (*openwsdk.Symbol, error) {
 	}
 
 	for _, s := range getSymbols {
-		if s.Coin == strings.ToUpper(symbol) {
+		if s.Symbol == strings.ToUpper(symbol) {
 			return s, nil
 		}
 	}
@@ -751,7 +773,7 @@ func (cli *CLI) GetSymbolInfo(symbol string) (*openwsdk.Symbol, error) {
 	return nil, fmt.Errorf("can not find symbol info")
 }
 
-//GetContractList 查询本地保存代币合约信息
+// GetContractList 查询本地保存代币合约信息
 func (cli *CLI) GetTokenContractList(cols ...interface{}) ([]*openwsdk.TokenContract, error) {
 
 	var (
@@ -797,7 +819,7 @@ func (cli *CLI) GetTokenContractList(cols ...interface{}) ([]*openwsdk.TokenCont
 	return getTokenContracts, nil
 }
 
-//printTokenContractList 打印代币合约列表
+// printTokenContractList 打印代币合约列表
 func (cli *CLI) printTokenContractList(list []*openwsdk.TokenContract) {
 
 	if list != nil && len(list) > 0 {
@@ -820,7 +842,7 @@ func (cli *CLI) printTokenContractList(list []*openwsdk.TokenContract) {
 	}
 }
 
-//GetTokenContractInfo 查询单个合约信息
+// GetTokenContractInfo 查询单个合约信息
 func (cli *CLI) GetTokenContractInfo(contractID string) (*openwsdk.TokenContract, error) {
 
 	getTokenContracts, err := cli.GetTokenContractList()
@@ -837,11 +859,11 @@ func (cli *CLI) GetTokenContractInfo(contractID string) (*openwsdk.TokenContract
 	return nil, fmt.Errorf("can not find symbol info")
 }
 
-//SetSummaryInfo 设置账户的汇总设置
+// SetSummaryInfo 设置账户的汇总设置
 func (cli *CLI) SetSummaryInfo(obj *openwsdk.SummarySetting) error {
 
 	//检查账户是否存在
-	account, err := cli.GetAccountByAccountID(obj.AccountID)
+	account, err := cli.GetAccountByAccountID(obj.Symbol, obj.AccountID)
 	if err != nil {
 		return err
 	}
@@ -865,7 +887,7 @@ func (cli *CLI) SetSummaryInfo(obj *openwsdk.SummarySetting) error {
 	return cli.db.Save(obj)
 }
 
-//getLocalKeyByWallet
+// getLocalKeyByWallet
 func (cli *CLI) getLocalKeyByWallet(wallet *openwsdk.Wallet, password string) (*hdkeystore.HDKey, error) {
 	keystore := hdkeystore.NewHDKeystore(
 		cli.config.keydir,
@@ -886,7 +908,7 @@ func (cli *CLI) getLocalKeyByWallet(wallet *openwsdk.Wallet, password string) (*
 	return key, nil
 }
 
-//GetAllTokenContractBalance 查询账户合约余额
+// GetAllTokenContractBalance 查询账户合约余额
 func (cli *CLI) GetAllTokenContractBalance(accountID string, symbol string) ([]*openwsdk.TokenBalance, error) {
 
 	var (
@@ -912,7 +934,7 @@ func (cli *CLI) GetAllTokenContractBalance(accountID string, symbol string) ([]*
 	return getBalances, nil
 }
 
-//GetAllTokenContractBalanceByAddress 查询地址合约余额
+// GetAllTokenContractBalanceByAddress 查询地址合约余额
 func (cli *CLI) GetAllTokenContractBalanceByAddress(accountID, address, symbol string) ([]*openwsdk.TokenBalance, error) {
 
 	var (
@@ -947,7 +969,7 @@ func findTokenContractByID(tokenList []*openwsdk.TokenContract, contractID strin
 	return nil
 }
 
-//printTokenContractBalanceList 打印账户代币合约余额列表
+// printTokenContractBalanceList 打印账户代币合约余额列表
 func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.TokenBalance, symbol string) {
 
 	if list != nil && len(list) > 0 {
@@ -996,7 +1018,7 @@ func (cli *CLI) AddTrustAddress(trustAddress *openwsdk.TrustAddress) error {
 		return err
 	}
 
-	trustAddress.Symbol = s.Coin
+	trustAddress.Symbol = s.Symbol
 
 	_, err = cli.getDB()
 	if err != nil {
@@ -1037,7 +1059,7 @@ func (cli *CLI) ListTrustAddress(symbol string) ([]*openwsdk.TrustAddress, error
 	return list, nil
 }
 
-//printListTrustAddress 白名单地址列表
+// printListTrustAddress 白名单地址列表
 func (cli *CLI) printListTrustAddress(addrs []*openwsdk.TrustAddress) {
 
 	if len(addrs) == 0 {
@@ -1079,7 +1101,7 @@ func (cli *CLI) importSummaryAddressToTrustAddress() error {
 		for _, s := range sum {
 
 			//检查账户是否存在
-			account, err := cli.GetAccountByAccountID(s.AccountID)
+			account, err := cli.GetAccountByAccountID(s.Symbol, s.AccountID)
 			if err != nil {
 				return err
 			}
