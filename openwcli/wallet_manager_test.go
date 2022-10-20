@@ -63,7 +63,7 @@ func TestCLI_GetAccountsOnServer(t *testing.T) {
 		return
 	}
 
-	walletID := "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx"
+	walletID := "WE72vaeN6moqQKvBjXjrZGmxWEFfRKbcC4"
 	accounts, err := cli.GetAccountsOnServer(walletID)
 	if err != nil {
 		log.Error("GetAccountsOnServer error:", err)
@@ -80,7 +80,7 @@ func TestCLI_GetAccountOnServer(t *testing.T) {
 		return
 	}
 
-	accountID := "A9PfM5Dr62WAtDEC3Pio6G1g27288gSUAJaLom68rSCZ"
+	accountID := "Eh2ALZguch6DS2JaoFz97ZspvBvv56FjB79CVVkqc1aA"
 	account, err := cli.GetAccountByAccountID("ETH", accountID)
 	if err != nil {
 		log.Error("GetAccountByAccountID error:", err)
@@ -112,8 +112,8 @@ func TestCLI_GetAddressesOnServer(t *testing.T) {
 		return
 	}
 
-	walletID := "WJ728uvSxc73m6BvfRsjM1v3jGfdimVEAr"
-	accountID := "A9PfM5Dr62WAtDEC3Pio6G1g27288gSUAJaLom68rSCZ"
+	walletID := "WE72vaeN6moqQKvBjXjrZGmxWEFfRKbcC4"
+	accountID := "Eh2ALZguch6DS2JaoFz97ZspvBvv56FjB79CVVkqc1aA"
 
 	addresses, err := cli.GetAddressesOnServer(walletID, accountID, "ETH", 0, 50)
 	if err != nil {
@@ -134,15 +134,15 @@ func TestCLI_SearchAddressOnServer(t *testing.T) {
 		return
 	}
 
-	addr := "0x03463372a699f99775000edf9e89104af31c297f"
-
-	address, err := cli.SearchAddressOnServer("ETH", addr)
+	addr := "0x282425dd54156902ead4a99ec7e80a21213d878d"
+	symbol := "MATIC"
+	address, err := cli.SearchAddressOnServer(symbol, addr)
 	if err != nil {
 		log.Error("SearchAddressOnServer error:", err)
 		return
 	}
 	log.Info("address:", address)
-	cli.printAddressList(address.WalletID, []*openwsdk.Address{address}, "12345678")
+	cli.printAddressList(address.WalletID, symbol, []*openwsdk.Address{address}, "123456789")
 }
 
 func TestCLI_GetSymbolList(t *testing.T) {
