@@ -315,7 +315,7 @@ func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 	if list != nil && len(list) > 0 {
 		tableInfo := make([][]interface{}, 0)
 
-		for i, w := range list {
+		for _, w := range list {
 
 			//读取汇总信息
 			sumTips := ""
@@ -338,13 +338,13 @@ func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 				})
 
 			tableInfo = append(tableInfo, []interface{}{
-				i, w.Alias, w.AccountID, w.Symbol, balanceStr, w.AddressIndex + 1, sumTips,
+				w.Id, w.Alias, w.AccountID, w.Symbol, balanceStr, w.AddressIndex + 1, sumTips,
 			})
 		}
 
 		t := gotabulate.Create(tableInfo)
 		// Set Headers
-		t.SetHeaders([]string{"No.", "Name", "AccountID", "Symbol", "Balance", "Addresses",
+		t.SetHeaders([]string{"ID", "Name", "AccountID", "Symbol", "Balance", "Addresses",
 			"Setup summary info"})
 
 		//打印信息
@@ -509,7 +509,7 @@ func (cli *CLI) GetAddressesOnServer(walletID, accountID, symbol string, lastId,
 }
 
 // printAddressList 打印地址列表
-func (cli *CLI) printAddressList(walletID string, list []*openwsdk.Address, password string) error {
+func (cli *CLI) printAddressList(walletID, symbol string, list []*openwsdk.Address, password string) error {
 
 	var (
 		isShowPrivateKey bool
@@ -552,7 +552,7 @@ func (cli *CLI) printAddressList(walletID string, list []*openwsdk.Address, pass
 		for _, a := range list {
 
 			balanceStr := "0"
-			cli.api.GetBalanceByAddress(a.Symbol, a.Address, "",
+			cli.api.GetBalanceByAddress(symbol, a.Address, "",
 				true, func(status uint64, msg string, balance *openwsdk.BalanceResult) {
 					if status == owtp.StatusSuccess {
 						balanceStr = balance.Balance
@@ -563,7 +563,7 @@ func (cli *CLI) printAddressList(walletID string, list []*openwsdk.Address, pass
 
 			if isShowPrivateKey && key != nil {
 
-				selectedSymbol, err := cli.GetSymbolInfo(a.Symbol)
+				selectedSymbol, err := cli.GetSymbolInfo(symbol)
 				if err != nil {
 					return err
 				}
@@ -588,7 +588,7 @@ func (cli *CLI) printAddressList(walletID string, list []*openwsdk.Address, pass
 		}
 		t := gotabulate.Create(tableInfo)
 		// Set Headers
-		t.SetHeaders([]string{"No.", "Address", "WalletID", "AccounttID", "Symbol", "Balance", "publicKey", "privateKey"})
+		t.SetHeaders([]string{"ID", "Address", "WalletID", "AccounttID", "Symbol", "Balance", "publicKey", "privateKey"})
 
 		//打印信息
 		fmt.Println(t.Render("simple"))
@@ -1224,7 +1224,7 @@ func (cli *CLI) IsTrustAddress(address, symbol string) bool {
 }
 
 // SignHash 哈希消息签名
-func (cli *CLI) SignHash(address *openwsdk.Address, message, password string, appendV bool) (string, error) {
+func (cli *CLI) SignHash(address *openwsdk.Address, symbol, message, password string, appendV bool) (string, error) {
 
 	wallet, err := cli.GetWalletByWalletID(address.WalletID)
 	if err != nil {
@@ -1237,7 +1237,7 @@ func (cli *CLI) SignHash(address *openwsdk.Address, message, password string, ap
 		return "", err
 	}
 
-	symbolInfo, err := cli.GetSymbolInfo(address.Symbol)
+	symbolInfo, err := cli.GetSymbolInfo(symbol)
 	if err != nil {
 		return "", err
 	}
@@ -1256,7 +1256,7 @@ func (cli *CLI) SignHash(address *openwsdk.Address, message, password string, ap
 	if err != nil {
 		return "", err
 	}
-
+	//log.Debugf("address = %+v", address)
 	signature, v, sigErr := owcrypt.Signature(keyBytes, nil, hash, uint32(symbolInfo.Curve))
 	if sigErr != owcrypt.SUCCESS {
 		return "", fmt.Errorf("sign hash message failed")

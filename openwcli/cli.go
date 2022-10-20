@@ -401,7 +401,7 @@ func (cli *CLI) SearchAddressFlow() error {
 		return err
 	}
 
-	cli.printAddressList(address.WalletID, []*openwsdk.Address{address}, password)
+	cli.printAddressList(address.WalletID, symbol, []*openwsdk.Address{address}, password)
 
 	//是否需要显示地址私钥，需要必须填入密码
 	show, _ := console.Stdin.PromptConfirm("Do want to show address token balance?")
@@ -828,7 +828,7 @@ func (cli *CLI) ListAddressFlow() error {
 		return err
 	}
 
-	err = cli.printAddressList(account.WalletID, addresses, "")
+	err = cli.printAddressList(account.WalletID, account.Symbol, addresses, "")
 	if err != nil {
 		return err
 	}
@@ -1176,7 +1176,7 @@ func (cli *CLI) TriggerABIFlow() error {
 	//创建新交易单
 	sid := uuid.New().String()
 
-	_, exErr := cli.TriggerABI(wallet, account, contractAddress, "", "0", sid, feeRate, password, abiParam, "", 0, true)
+	_, exErr := cli.TriggerABI(wallet, account, account.Symbol, contractAddress, "", "0", sid, feeRate, password, abiParam, "", 0, true)
 	if exErr != nil {
 		return exErr
 	}
@@ -1254,7 +1254,7 @@ func (cli *CLI) SignHashFlow() error {
 		return err
 	}
 
-	signature, exErr := cli.SignHash(address, message, password, false)
+	signature, exErr := cli.SignHash(address, symbol, message, password, false)
 	if exErr != nil {
 		return exErr
 	}

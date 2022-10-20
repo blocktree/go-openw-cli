@@ -77,7 +77,7 @@ func TestCLI_TriggerABI(t *testing.T) {
 	}
 
 	sid := uuid.New().String()
-	_, exErr := cli.TriggerABI(wallet, account, contractAddress, "", "0", sid, "", "12345678", abiParam, "", 0, true)
+	_, exErr := cli.TriggerABI(wallet, account, account.Symbol, contractAddress, "", "0", sid, "", "12345678", abiParam, "", 0, true)
 	if exErr != nil {
 		t.Errorf("TriggerABI failed, err: %v", exErr)
 		return

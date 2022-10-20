@@ -24,7 +24,7 @@ import (
 	"strings"
 )
 
-//CallABI 直接调用ABI方法
+// CallABI 直接调用ABI方法
 func (cli *CLI) CallABI(account *openwsdk.Account, contractAddress string, abiParam []string) (*openwsdk.SmartContractCallResult, *openwallet.Error) {
 
 	var (
@@ -85,8 +85,8 @@ func (cli *CLI) CallABI(account *openwsdk.Account, contractAddress string, abiPa
 	return retCallResult, nil
 }
 
-//TriggerABI 触发合约ABI接口
-func (cli *CLI) TriggerABI(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, contractABI, amount, sid, feeRate, password string, abiParam []string, raw string, rawType uint64, awaitResult bool) (*openwsdk.SmartContractReceipt, *openwallet.Error) {
+// TriggerABI 触发合约ABI接口
+func (cli *CLI) TriggerABI(wallet *openwsdk.Wallet, account *openwsdk.Account, symbol, contractAddress, contractABI, amount, sid, feeRate, password string, abiParam []string, raw string, rawType uint64, awaitResult bool) (*openwsdk.SmartContractReceipt, *openwallet.Error) {
 
 	var (
 		isContract  bool
@@ -119,7 +119,7 @@ func (cli *CLI) TriggerABI(wallet *openwsdk.Wallet, account *openwsdk.Account, c
 		}
 	}
 	coin := openwsdk.Coin{
-		Symbol:          account.Symbol,
+		Symbol:          symbol,
 		IsContract:      isContract,
 		ContractID:      contractID,
 		ContractAddress: contractAddress,

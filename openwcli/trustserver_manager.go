@@ -806,7 +806,7 @@ func (cli *CLI) triggerABIViaTrustNode(ctx *owtp.Context) {
 		}
 	}
 
-	retTx, exErr := cli.TriggerABI(wallet, account, contractAddress, contractABI, amount, sid, feeRate, password, abiParam, raw, rawType, awaitResult)
+	retTx, exErr := cli.TriggerABI(wallet, account, symbol, contractAddress, contractABI, amount, sid, feeRate, password, abiParam, raw, rawType, awaitResult)
 	if exErr != nil {
 		ctx.Response(nil, exErr.Code(), exErr.Error())
 		return
@@ -855,7 +855,7 @@ func (cli *CLI) signHashViaTrustNode(ctx *owtp.Context) {
 		HdPath:    hdPath,
 	}
 
-	signature, err := cli.SignHash(addr, message, password, rsv)
+	signature, err := cli.SignHash(addr, symbol, message, password, rsv)
 	if err != nil {
 		ctx.Response(nil, openwallet.ErrSystemException, err.Error())
 		return

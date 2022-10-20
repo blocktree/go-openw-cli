@@ -3,6 +3,7 @@ package openwcli
 import (
 	"github.com/astaxie/beego/config"
 	"github.com/blocktree/openwallet/v2/common/file"
+	"github.com/blocktree/openwallet/v2/owtp"
 	"path/filepath"
 )
 
@@ -78,7 +79,7 @@ var (
 	BuildTime = ""
 )
 
-//配置
+// 配置
 type Config struct {
 
 	// 远程服务
@@ -127,7 +128,7 @@ type Config struct {
 	//dbReadOnlyMode bool
 }
 
-//初始化一个配置对象
+// 初始化一个配置对象
 func NewConfig(c config.Configer) *Config {
 	conf := &Config{}
 	conf.remoteserver = c.String("remoteserver")
@@ -173,6 +174,8 @@ func NewConfig(c config.Configer) *Config {
 	file.MkdirAll(conf.keydir)
 	file.MkdirAll(conf.dbdir)
 	file.MkdirAll(conf.exportaddressdir)
+
+	owtp.Debug = conf.logdebug
 
 	return conf
 }
