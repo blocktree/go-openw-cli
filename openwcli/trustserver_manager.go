@@ -294,7 +294,7 @@ func (cli *CLI) sendTransactionViaTrustNode(ctx *owtp.Context) {
 		}
 	}
 
-	retTx, retFailed, exErr := cli.TransferExt(wallet, account, contractAddress, address, amount, sid, feeRate, memo, extParam, password)
+	retTx, retFailed, exErr := cli.TransferExt(wallet, account, symbol, contractAddress, address, amount, sid, feeRate, memo, extParam, password)
 	if exErr != nil {
 		ctx.Response(nil, exErr.Code(), exErr.Error())
 		return

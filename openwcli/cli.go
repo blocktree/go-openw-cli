@@ -344,12 +344,6 @@ func (cli *CLI) NewAddressFlow() error {
 		return err
 	}
 
-	// 输入symbol
-	symbol, err := console.InputText("Enter symbol: ", false)
-	if err != nil {
-		return err
-	}
-
 	// 输入地址数量
 	count, err := console.InputNumber("Enter the number of addresses you want: ", false)
 	if err != nil {
@@ -360,7 +354,7 @@ func (cli *CLI) NewAddressFlow() error {
 		return fmt.Errorf("The number of addresses can not exceed %d ", maxAddresNum)
 	}
 
-	err = cli.CreateAddressOnServer(account.WalletID, account.AccountID, symbol, count)
+	err = cli.CreateAddressOnServer(account.WalletID, account.AccountID, account.Symbol, count)
 	if err != nil {
 		return err
 	}
@@ -406,7 +400,7 @@ func (cli *CLI) SearchAddressFlow() error {
 	//是否需要显示地址私钥，需要必须填入密码
 	show, _ := console.Stdin.PromptConfirm("Do want to show address token balance?")
 	if show {
-		balances, err := cli.GetAllTokenContractBalanceByAddress(address.AccountID, address.Address, address.Symbol)
+		balances, err := cli.GetAllTokenContractBalanceByAddress(address.WalletID, address.AccountID, address.Address, address.Symbol)
 		if err != nil {
 			return err
 		}
@@ -426,6 +420,12 @@ func (cli *CLI) TransferFlow() error {
 
 	//:选择账户
 	account, err := cli.SelectAccountStep(wallet.WalletID)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入symbol
+	symbol, err := console.InputText("Enter symbol: ", true)
 	if err != nil {
 		return err
 	}
@@ -473,7 +473,7 @@ func (cli *CLI) TransferFlow() error {
 	//创建新交易单
 	sid := uuid.New().String()
 
-	_, _, exErr := cli.Transfer(wallet, account, contractAddress, to, amount, sid, feeRate, memo, password)
+	_, _, exErr := cli.Transfer(wallet, account, symbol, contractAddress, to, amount, sid, feeRate, memo, password)
 	if exErr != nil {
 		return exErr
 	}
@@ -491,6 +491,12 @@ func (cli *CLI) TransferAllFlow() error {
 
 	//:选择账户
 	account, err := cli.SelectAccountStep(wallet.WalletID)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入symbol
+	symbol, err := console.InputText("Enter symbol: ", true)
 	if err != nil {
 		return err
 	}
@@ -532,7 +538,7 @@ func (cli *CLI) TransferAllFlow() error {
 	//创建新交易单
 	sid := uuid.New().String()
 
-	err = cli.TransferAll(wallet, account, contractAddress, to, sid, feeRate, memo, password)
+	err = cli.TransferAll(wallet, account, symbol, contractAddress, to, sid, feeRate, memo, password)
 	if err != nil {
 		return err
 	}
@@ -947,7 +953,7 @@ func (cli *CLI) ListTokenBalanceFlow() error {
 		return selectErr
 	}
 
-	list, err := cli.GetAllTokenContractBalance(account.AccountID, "")
+	list, err := cli.GetAllTokenContractBalance(account.WalletID, account.AccountID, account.Symbol)
 	if err != nil {
 		return err
 	}

@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func (cli *CLI) TransferAll(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, sid, feeRate, memo, password string) error {
+func (cli *CLI) TransferAll(wallet *openwsdk.Wallet, account *openwsdk.Account, symbol, contractAddress, to, sid, feeRate, memo, password string) error {
 
 	var (
 		isContract  bool
@@ -48,7 +48,7 @@ func (cli *CLI) TransferAll(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 
 	if len(contractAddress) > 0 {
 		isContract = true
-		tokenBalance, findErr := cli.GetTokenBalanceByContractAddress(account, contractAddress)
+		tokenBalance, findErr := cli.GetTokenBalanceByContractAddress(account, symbol, contractAddress)
 		if findErr != nil {
 			return findErr
 		}
@@ -57,7 +57,7 @@ func (cli *CLI) TransferAll(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 		balance = tokenBalance.Balance
 	} else {
 		balance = "0"
-		cli.api.GetBalanceByAccount(account.Symbol, account.AccountID, "",
+		cli.api.GetBalanceByAccount(symbol, account.AccountID, "",
 			true, func(status uint64, msg string, accBalance *openwsdk.BalanceResult) {
 				if status == owtp.StatusSuccess {
 					balance = accBalance.Balance
@@ -66,12 +66,12 @@ func (cli *CLI) TransferAll(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 
 	}
 	coin := openwsdk.Coin{
-		Symbol:     account.Symbol,
+		Symbol:     symbol,
 		IsContract: isContract,
 		ContractID: contractID,
 	}
 
-	log.Infof("Summary account[%s] Symbol: %s, token: %s ", account.AccountID, account.Symbol, tokenSymbol)
+	log.Infof("Summary account[%s] Symbol: %s, token: %s ", account.AccountID, symbol, tokenSymbol)
 
 	//汇总账户
 	err = cli.summaryAccount(account, accountTask, key, balance, *accountTask.SummarySetting, coin, "", decimal.Zero)
@@ -216,7 +216,7 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 		symbol = account.Symbol
 	}
 
-	tokenBalances, err := cli.GetAllTokenContractBalance(account.AccountID, symbol)
+	tokenBalances, err := cli.GetAllTokenContractBalance(account.WalletID, account.AccountID, symbol)
 	if err != nil {
 		return err
 	}
@@ -272,11 +272,11 @@ func (cli *CLI) SummaryAccountTokenContracts(accountTask *openwsdk.SummaryAccoun
 			ContractID: token.ContractID,
 		}
 
-		log.Infof("Summary account[%s] Symbol: %s, token: %s start", account.AccountID, symbol, token.Token)
+		log.Infof("Summary account[%s] Symbol: %s, token: %s start", account.AccountID, symbol, token.ContractToken)
 
-		err = cli.summaryAccountProcess(account, accountTask, key, token.Balance.Balance, *contrackTask.SummarySetting, coin)
+		err = cli.summaryAccountProcess(account, accountTask, key, token.Balance, *contrackTask.SummarySetting, coin)
 
-		log.Infof("Summary account[%s] Symbol: %s, token: %s end", account.AccountID, symbol, token.Token)
+		log.Infof("Summary account[%s] Symbol: %s, token: %s end", account.AccountID, symbol, token.ContractToken)
 
 		if err != nil {
 			continue
@@ -316,7 +316,7 @@ func (cli *CLI) summaryAccountProcess(account *openwsdk.Account, task *openwsdk.
 			if len(contractAddress) == 0 {
 				return fmt.Errorf("fees support account use token contract for fees, contract address is empty")
 			}
-			tokenBalance, err := cli.GetTokenBalanceByContractAddress(feesSupportAccounInfo, task.FeesSupportAccount.ContractAddress)
+			tokenBalance, err := cli.GetTokenBalanceByContractAddress(feesSupportAccounInfo, task.Symbol, task.FeesSupportAccount.ContractAddress)
 			if err == nil {
 				feesSupportBalance, _ = decimal.NewFromString(tokenBalance.Balance)
 			}
@@ -404,10 +404,10 @@ func (cli *CLI) summaryAccount(account *openwsdk.Account, task *openwsdk.Summary
 			task.FeeRate, sumSets.MinTransfer, sumSets.RetainedBalance,
 			i, addressLimit, sumSets.Confirms, sid, task.FeesSupportAccount, task.Memo, true,
 			func(status uint64, msg string, rawTxs []*openwsdk.RawTransaction) {
-				//log.Debugf("status: %d, msg: %s", status, msg)
+				log.Debugf("status: %d, msg: %s", status, msg)
 				for _, rawTx := range rawTxs {
 					//log.Debugf("rawTx.ErrorMsg: %s", rawTx.ErrorMsg.Err)
-					if rawTx.ErrorMsg != nil && rawTx.ErrorMsg.Code != 0 {
+					if rawTx.ErrorMsg != nil && rawTx.ErrorMsg.Code != "" {
 						log.Warning(rawTx.ErrorMsg.Err)
 					} else {
 

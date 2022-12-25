@@ -41,7 +41,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	walletID := "WJ728uvSxc73m6BvfRsjM1v3jGfdimVEAr"
+	walletID := "W4W8i2F27c1YB63rMZswSquVSnS3265MAF"
 	wallet, err := cli.GetWalletByWalletID(walletID)
 	if err != nil {
 		log.Error("GetWalletByWalletID error:", err)
@@ -49,7 +49,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	}
 
 	if wallet != nil {
-		_, _, err = cli.CreateAccountOnServer("testETH", "12345678", "ETH", wallet)
+		_, _, err = cli.CreateAccountOnServer("test2MATIC", "1234qwer", "MATIC", wallet)
 		if err != nil {
 			log.Error("CreateAccountOnServer error:", err)
 			return
@@ -63,7 +63,7 @@ func TestCLI_GetAccountsOnServer(t *testing.T) {
 		return
 	}
 
-	walletID := "WE72vaeN6moqQKvBjXjrZGmxWEFfRKbcC4"
+	walletID := "W4W8i2F27c1YB63rMZswSquVSnS3265MAF"
 	accounts, err := cli.GetAccountsOnServer(walletID)
 	if err != nil {
 		log.Error("GetAccountsOnServer error:", err)
@@ -80,8 +80,8 @@ func TestCLI_GetAccountOnServer(t *testing.T) {
 		return
 	}
 
-	accountID := "Eh2ALZguch6DS2JaoFz97ZspvBvv56FjB79CVVkqc1aA"
-	account, err := cli.GetAccountByAccountID("ETH", accountID)
+	accountID := "3BSJAseva4A2oZgmEuMEVtdSgnj5UXCunYzyWtK7dj4b"
+	account, err := cli.GetAccountByAccountID("MATIC", accountID)
 	if err != nil {
 		log.Error("GetAccountByAccountID error:", err)
 		return
@@ -239,13 +239,14 @@ func TestCLI_GetAllTokenContractBalance(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	accountID := "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF"
-	list, err := cli.GetAllTokenContractBalance(accountID, "")
+	walletID := "W4W8i2F27c1YB63rMZswSquVSnS3265MAF"
+	accountID := "3BSJAseva4A2oZgmEuMEVtdSgnj5UXCunYzyWtK7dj4b"
+	list, err := cli.GetAllTokenContractBalance(walletID, accountID, "MATIC")
 	if err != nil {
 		log.Error("GetAllTokenContractBalance error:", err)
 		return
 	}
-	cli.printTokenContractBalanceList(list, "TRX")
+	cli.printTokenContractBalanceList(list, "MATIC")
 }
 
 func TestCLI_GetAllTokenContractBalanceByAddress(t *testing.T) {
@@ -253,14 +254,15 @@ func TestCLI_GetAllTokenContractBalanceByAddress(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	accountID := "BBxgBEn7AoRhNqsS7vjD625B5SafFFdY1QMX7Zq8M9jn"
-	address := "WhWV4XcD7UJzt2bAcVe48PN1Cxwh8HAyoi"
-	list, err := cli.GetAllTokenContractBalanceByAddress(accountID, address, "WICC")
+	walletID := "W4W8i2F27c1YB63rMZswSquVSnS3265MAF"
+	accountID := "3BSJAseva4A2oZgmEuMEVtdSgnj5UXCunYzyWtK7dj4b"
+	address := "0xc27992b757a3c00ed3cb1dfa7dfb1a59d70dbd0f"
+	list, err := cli.GetAllTokenContractBalanceByAddress(walletID, accountID, address, "MATIC")
 	if err != nil {
 		log.Error("GetAllTokenContractBalance error:", err)
 		return
 	}
-	cli.printTokenContractBalanceList(list, "WICC")
+	cli.printTokenContractBalanceList(list, "MATIC")
 }
 
 func TestCLI_printAccountSummaryInfo(t *testing.T) {
@@ -279,7 +281,7 @@ func TestCLI_GetTokenBalanceByContractAddresss(t *testing.T) {
 	accountID := "DCgKWqyefttTqWbyS4ihFsyyvL4jHcF4XBTa3KAGwEmF"
 	address := "THvZvKPLHKLJhEFYKiyqj6j8G8nGgfg7ur"
 	account := &openwsdk.Account{Symbol: "TRX", AccountID: accountID}
-	balance, err := cli.GetTokenBalanceByContractAddress(account, address)
+	balance, err := cli.GetTokenBalanceByContractAddress(account, "TRX", address)
 	if err != nil {
 		t.Errorf("GetAllTokenContractBalance error: %v", err)
 		return
