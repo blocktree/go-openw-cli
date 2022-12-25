@@ -315,7 +315,7 @@ func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 	if list != nil && len(list) > 0 {
 		tableInfo := make([][]interface{}, 0)
 
-		for _, w := range list {
+		for i, w := range list {
 
 			//读取汇总信息
 			sumTips := ""
@@ -338,13 +338,13 @@ func (cli *CLI) printAccountList(list []*openwsdk.Account) {
 				})
 
 			tableInfo = append(tableInfo, []interface{}{
-				w.Id, w.Alias, w.AccountID, w.Symbol, balanceStr, w.AddressIndex + 1, sumTips,
+				i, w.Id, w.Alias, w.AccountID, w.Symbol, balanceStr, w.AddressIndex + 1, sumTips,
 			})
 		}
 
 		t := gotabulate.Create(tableInfo)
 		// Set Headers
-		t.SetHeaders([]string{"ID", "Name", "AccountID", "Symbol", "Balance", "Addresses",
+		t.SetHeaders([]string{"No.", "ID", "Name", "AccountID", "Symbol", "Balance", "Addresses",
 			"Setup summary info"})
 
 		//打印信息
@@ -909,14 +909,14 @@ func (cli *CLI) getLocalKeyByWallet(wallet *openwsdk.Wallet, password string) (*
 }
 
 // GetAllTokenContractBalance 查询账户合约余额
-func (cli *CLI) GetAllTokenContractBalance(accountID string, symbol string) ([]*openwsdk.TokenBalance, error) {
+func (cli *CLI) GetAllTokenContractBalance(walletID, accountID string, symbol string) ([]*openwsdk.BalanceResult, error) {
 
 	var (
 		getErr      error
-		getBalances []*openwsdk.TokenBalance
+		getBalances []*openwsdk.BalanceResult
 	)
-	err := cli.api.GetAllTokenBalanceByAccount(accountID, symbol, true,
-		func(status uint64, msg string, balance []*openwsdk.TokenBalance) {
+	err := cli.api.GetAllTokenBalanceByAccount(walletID, accountID, symbol, true,
+		func(status uint64, msg string, balance []*openwsdk.BalanceResult) {
 			if status == owtp.StatusSuccess {
 				getBalances = balance
 			} else {
@@ -935,14 +935,14 @@ func (cli *CLI) GetAllTokenContractBalance(accountID string, symbol string) ([]*
 }
 
 // GetAllTokenContractBalanceByAddress 查询地址合约余额
-func (cli *CLI) GetAllTokenContractBalanceByAddress(accountID, address, symbol string) ([]*openwsdk.TokenBalance, error) {
+func (cli *CLI) GetAllTokenContractBalanceByAddress(walletID, accountID, address, symbol string) ([]*openwsdk.BalanceResult, error) {
 
 	var (
 		getErr      error
-		getBalances []*openwsdk.TokenBalance
+		getBalances []*openwsdk.BalanceResult
 	)
-	err := cli.api.GetAllTokenBalanceByAddress(accountID, address, symbol, true,
-		func(status uint64, msg string, balance []*openwsdk.TokenBalance) {
+	err := cli.api.GetAllTokenBalanceByAddress(walletID, accountID, address, symbol, true,
+		func(status uint64, msg string, balance []*openwsdk.BalanceResult) {
 			if status == owtp.StatusSuccess {
 				getBalances = balance
 			} else {
@@ -970,7 +970,7 @@ func findTokenContractByID(tokenList []*openwsdk.TokenContract, contractID strin
 }
 
 // printTokenContractBalanceList 打印账户代币合约余额列表
-func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.TokenBalance, symbol string) {
+func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.BalanceResult, symbol string) {
 
 	if list != nil && len(list) > 0 {
 		tableInfo := make([][]interface{}, 0)
@@ -989,7 +989,7 @@ func (cli *CLI) printTokenContractBalanceList(list []*openwsdk.TokenBalance, sym
 			}
 
 			tableInfo = append(tableInfo, []interface{}{
-				w.ContractID, token.Symbol, token.Name, w.Token, token.Address, token.Protocol, w.Balance.Balance,
+				w.ContractID, token.Symbol, token.Name, w.ContractToken, token.Address, token.Protocol, w.Balance,
 			})
 		}
 

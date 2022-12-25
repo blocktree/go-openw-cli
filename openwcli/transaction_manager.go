@@ -21,18 +21,18 @@ func (cli *CLI) GetTokenBalance(account *openwsdk.Account, contractID string) st
 }
 
 // GetTokenBalanceByContractAddress 通过代币合约的地址获取代币余额
-func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, address string) (*openwsdk.BalanceResult, error) {
+func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, symbol, address string) (*openwsdk.BalanceResult, error) {
 	var (
 		getBalance *openwsdk.BalanceResult
 		callErr    error
 	)
 
-	token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", address)
+	token, findErr := cli.GetTokenContractList("Symbol", symbol, "Address", address)
 	if findErr != nil {
 		return nil, findErr
 	}
 	contractID := token[0].ContractID
-	err := cli.api.GetBalanceByAccount(account.Symbol, account.AccountID, contractID, true,
+	err := cli.api.GetBalanceByAccount(symbol, account.AccountID, contractID, true,
 		func(status uint64, msg string, balance *openwsdk.BalanceResult) {
 			if status == owtp.StatusSuccess {
 				getBalance = balance
@@ -51,12 +51,12 @@ func (cli *CLI) GetTokenBalanceByContractAddress(account *openwsdk.Account, addr
 }
 
 // Transfer 转账交易
-func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, *openwallet.Error) {
-	return cli.TransferExt(wallet, account, contractAddress, to, amount, sid, feeRate, memo, "", password)
+func (cli *CLI) Transfer(wallet *openwsdk.Wallet, account *openwsdk.Account, symbol, contractAddress, to, amount, sid, feeRate, memo, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, *openwallet.Error) {
+	return cli.TransferExt(wallet, account, symbol, contractAddress, to, amount, sid, feeRate, memo, "", password)
 }
 
 // TransferExt 转账交易 + 扩展参数
-func (cli *CLI) TransferExt(wallet *openwsdk.Wallet, account *openwsdk.Account, contractAddress, to, amount, sid, feeRate, memo, extParam, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, *openwallet.Error) {
+func (cli *CLI) TransferExt(wallet *openwsdk.Wallet, account *openwsdk.Account, symbol, contractAddress, to, amount, sid, feeRate, memo, extParam, password string) ([]*openwsdk.Transaction, []*openwsdk.FailedRawTransaction, *openwallet.Error) {
 
 	var (
 		isContract  bool
@@ -70,7 +70,7 @@ func (cli *CLI) TransferExt(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 	)
 
 	//:检查目标地址是否信任名单
-	if !cli.IsTrustAddress(to, account.Symbol) {
+	if !cli.IsTrustAddress(to, symbol) {
 		return nil, nil, openwallet.Errorf(openwallet.ErrUnknownException, "%s is not in trust address list", to)
 	}
 
@@ -86,7 +86,7 @@ func (cli *CLI) TransferExt(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 
 	if len(contractAddress) > 0 {
 		isContract = true
-		token, findErr := cli.GetTokenContractList("Symbol", account.Symbol, "Address", contractAddress)
+		token, findErr := cli.GetTokenContractList("Symbol", symbol, "Address", contractAddress)
 		if findErr != nil {
 			return nil, nil, openwallet.ConvertError(findErr)
 		}
@@ -94,13 +94,13 @@ func (cli *CLI) TransferExt(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 		tokenSymbol = token[0].Token
 	}
 	coin := openwsdk.Coin{
-		Symbol:     account.Symbol,
+		Symbol:     symbol,
 		IsContract: isContract,
 		ContractID: contractID,
 	}
 
 	api := cli.api
-	err = api.CreateTrade(account.AccountID, sid, coin, map[string]string{"to": amount}, feeRate, memo, extParam, true,
+	err = api.CreateTrade(account.AccountID, sid, coin, map[string]string{to: amount}, feeRate, memo, extParam, true,
 		func(status uint64, msg string, rawTx *openwsdk.RawTransaction) {
 			if status != owtp.StatusSuccess {
 				createErr = openwallet.Errorf(status, msg)
@@ -117,7 +117,7 @@ func (cli *CLI) TransferExt(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 
 	//:打印交易单明细
 	log.Infof("-----------------------------------------------")
-	log.Infof("[%s %s Transfer]", account.Symbol, tokenSymbol)
+	log.Infof("[%s %s Transfer]", symbol, tokenSymbol)
 	log.Infof("SID: %s", retRawTx.Sid)
 	log.Infof("From Account: %s", account.AccountID)
 	log.Infof("To Address: %s", to)
