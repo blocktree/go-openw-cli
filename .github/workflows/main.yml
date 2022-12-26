@@ -22,7 +22,7 @@ jobs:
         uses: crazy-max/ghaction-xgo@v2
         with:
           xgo_version: latest
-          go_version: 1.18
+          go_version: 1.12
           dest: build/
           prefix: ${{ env.OPENWCLIBINARY }}
           targets: darwin-10.10/amd64,linux/amd64,windows-6.0/*
