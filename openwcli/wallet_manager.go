@@ -582,13 +582,39 @@ func (cli *CLI) printAddressList(walletID, symbol string, list []*openwsdk.Addre
 			}
 
 			tableInfo = append(tableInfo, []interface{}{
-				a.Id, a.Address, a.WalletID, a.AccountID, a.Symbol, balanceStr, a.PublicKey, privatekey,
+				a.Id, a.Address, a.WalletID, a.AccountID, symbol, balanceStr, a.PublicKey, privatekey,
 			})
 
 		}
 		t := gotabulate.Create(tableInfo)
 		// Set Headers
-		t.SetHeaders([]string{"ID", "Address", "WalletID", "AccounttID", "Symbol", "Balance", "publicKey", "privateKey"})
+		t.SetHeaders([]string{"ID", "Address", "WalletID", "AccountID", "Symbol", "Balance", "publicKey", "privateKey"})
+
+		//打印信息
+		fmt.Println(t.Render("simple"))
+	} else {
+		fmt.Println("No address was created locally. ")
+	}
+
+	return nil
+}
+
+// printAddressBalanceList 打印地址余额列表
+func (cli *CLI) printAddressBalanceList(list []*openwsdk.BalanceResult) error {
+
+	if list != nil && len(list) > 0 {
+		tableInfo := make([][]interface{}, 0)
+
+		for _, a := range list {
+
+			tableInfo = append(tableInfo, []interface{}{
+				a.ID, a.Address, a.Symbol, a.ContractToken, a.Balance,
+			})
+
+		}
+		t := gotabulate.Create(tableInfo)
+		// Set Headers
+		t.SetHeaders([]string{"ID", "Address", "Symbol", "Token", "Balance"})
 
 		//打印信息
 		fmt.Println(t.Render("simple"))
@@ -1267,4 +1293,37 @@ func (cli *CLI) SignHash(address *openwsdk.Address, symbol, message, password st
 	}
 
 	return hex.EncodeToString(signature), nil
+}
+
+// GetAddressesBalance
+func (cli *CLI) GetAddressesBalance(walletID, accountID, symbol string, opType, lastId, limit int) ([]*openwsdk.BalanceResult, error) {
+
+	var (
+		retErr error
+	)
+
+	list := make([]*openwsdk.BalanceResult, 0)
+
+	if len(accountID) == 0 {
+		return nil, fmt.Errorf("accountID is empty. ")
+	}
+
+	if len(walletID) == 0 {
+		return nil, fmt.Errorf("walleID is empty. ")
+	}
+
+	err := cli.api.GetAddressBalanceList(walletID, accountID, "", symbol, "", opType, lastId, limit,
+		true, func(status uint64, msg string, balances []*openwsdk.BalanceResult) {
+			if status == owtp.StatusSuccess {
+				list = balances
+			} else {
+				log.Error("get address on server failed, unexpected error:", msg)
+				retErr = openwallet.Errorf(status, msg)
+			}
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return list, retErr
 }

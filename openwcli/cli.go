@@ -1273,3 +1273,47 @@ func (cli *CLI) SignHashFlow() error {
 
 	return nil
 }
+
+// ListAddressBalanceFlow
+func (cli *CLI) ListAddressBalanceFlow() error {
+
+	//:选择钱包
+	wallet, err := cli.SelectWalletStep()
+	if err != nil {
+		return err
+	}
+
+	//:选择账户
+	account, err := cli.SelectAccountStep(wallet.WalletID)
+	if err != nil {
+		return err
+	}
+
+	// 等待用户输入币种类型
+	opType, err := console.InputNumber("Enter coin type(0: All, 1: Native, 2: Token): ", true)
+	if err != nil {
+		return err
+	}
+
+	lastId, err := console.InputNumber("Enter last ID: ", true)
+	if err != nil {
+		return err
+	}
+
+	limit, err := console.InputNumber("Enter limit: ", true)
+	if err != nil {
+		return err
+	}
+
+	addresses, err := cli.GetAddressesBalance(account.WalletID, account.AccountID, account.Symbol, int(opType), int(lastId), int(limit))
+	if err != nil {
+		return err
+	}
+
+	err = cli.printAddressBalanceList(addresses)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
