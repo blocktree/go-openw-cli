@@ -90,6 +90,9 @@ func (cli *CLI) TransferExt(wallet *openwsdk.Wallet, account *openwsdk.Account, 
 		if findErr != nil {
 			return nil, nil, openwallet.ConvertError(findErr)
 		}
+		if len(token) == 0 {
+			return nil, nil, openwallet.Errorf(openwallet.ErrSystemException, "can not find contract address")
+		}
 		contractID = token[0].ContractID
 		tokenSymbol = token[0].Token
 	}

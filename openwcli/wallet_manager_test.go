@@ -134,7 +134,7 @@ func TestCLI_SearchAddressOnServer(t *testing.T) {
 		return
 	}
 
-	addr := "0x282425dd54156902ead4a99ec7e80a21213d878d"
+	addr := "0x4247f631804e9fbd5c9d27428617658bd70fa382"
 	symbol := "MATIC"
 	address, err := cli.SearchAddressOnServer(symbol, addr)
 	if err != nil {
@@ -142,7 +142,7 @@ func TestCLI_SearchAddressOnServer(t *testing.T) {
 		return
 	}
 	log.Info("address:", address)
-	cli.printAddressList(address.WalletID, symbol, []*openwsdk.Address{address}, "123456789")
+	cli.printAddressList(address.WalletID, symbol, []*openwsdk.Address{address}, "")
 }
 
 func TestCLI_GetSymbolList(t *testing.T) {
@@ -180,7 +180,7 @@ func TestCLI_GetTokenContractList(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	tokens, err := cli.GetTokenContractList("Symbol", "ETP", "Address", "dna")
+	tokens, err := cli.GetTokenContractList("Symbol", "MATIC", "Address", "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174")
 	if err != nil {
 		log.Error("GetTokenContractList error:", err)
 		return

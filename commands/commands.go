@@ -251,6 +251,15 @@ var (
 			Category:  "WALLET COMMANDS",
 			Flags:     []cli.Flag{},
 		},
+		{
+
+			Name:      "listaddressbalance",
+			Usage:     "show account all address native/token balance",
+			ArgsUsage: "<symbol>",
+			Action:    listaddressbalance,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
 	}
 )
 
@@ -275,7 +284,7 @@ func getCLI(c *cli.Context) *openwcli.CLI {
 	return cli
 }
 
-//register 注册
+// register 注册
 func noderegister(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -288,7 +297,7 @@ func noderegister(c *cli.Context) error {
 	return nil
 }
 
-//nodeinfo
+// nodeinfo
 func nodeinfo(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -302,7 +311,7 @@ func nodeinfo(c *cli.Context) error {
 	return nil
 }
 
-//newwallet 创建钱包
+// newwallet 创建钱包
 func newwallet(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -316,7 +325,7 @@ func newwallet(c *cli.Context) error {
 	return nil
 }
 
-//listwallet 钱包配置
+// listwallet 钱包配置
 func listwallet(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -330,7 +339,7 @@ func listwallet(c *cli.Context) error {
 	return nil
 }
 
-//newaccount 创建账户
+// newaccount 创建账户
 func newaccount(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -344,7 +353,7 @@ func newaccount(c *cli.Context) error {
 	return nil
 }
 
-//listaccount 账户列表
+// listaccount 账户列表
 func listaccount(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -358,7 +367,7 @@ func listaccount(c *cli.Context) error {
 	return nil
 }
 
-//newaddress 创建地址
+// newaddress 创建地址
 func newaddress(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -372,7 +381,7 @@ func newaddress(c *cli.Context) error {
 	return nil
 }
 
-//searchaddress 查询地址
+// searchaddress 查询地址
 func searchaddress(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -386,7 +395,7 @@ func searchaddress(c *cli.Context) error {
 	return nil
 }
 
-//transfer 转账交易
+// transfer 转账交易
 func transfer(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -400,7 +409,7 @@ func transfer(c *cli.Context) error {
 	return nil
 }
 
-//transferall 转账全部资产交易
+// transferall 转账全部资产交易
 func transferall(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -414,7 +423,7 @@ func transferall(c *cli.Context) error {
 	return nil
 }
 
-//setsum 设置汇总
+// setsum 设置汇总
 func setsum(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -428,7 +437,7 @@ func setsum(c *cli.Context) error {
 	return nil
 }
 
-//startsum 定时汇总
+// startsum 定时汇总
 func startsum(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -444,7 +453,7 @@ func startsum(c *cli.Context) error {
 	return nil
 }
 
-//updateinfo 更新区块链资料库
+// updateinfo 更新区块链资料库
 func updateinfo(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -458,7 +467,7 @@ func updateinfo(c *cli.Context) error {
 	return nil
 }
 
-//listsymbol 查看所有币种信息列表
+// listsymbol 查看所有币种信息列表
 func listsymbol(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -472,7 +481,7 @@ func listsymbol(c *cli.Context) error {
 	return nil
 }
 
-//listtokencontract 查看某个区块链所有代币合约信息列表
+// listtokencontract 查看某个区块链所有代币合约信息列表
 func listtokencontract(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -486,7 +495,7 @@ func listtokencontract(c *cli.Context) error {
 	return nil
 }
 
-//listaddress 查看账户所有地址
+// listaddress 查看账户所有地址
 func listaddress(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -500,7 +509,7 @@ func listaddress(c *cli.Context) error {
 	return nil
 }
 
-//trustserver 启动后台托管钱包服务
+// trustserver 启动后台托管钱包服务
 func trustserver(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -539,7 +548,7 @@ func listsuminfo(c *cli.Context) error {
 	return nil
 }
 
-//listtokenbalance
+// listtokenbalance
 func listtokenbalance(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -609,7 +618,7 @@ func disabletrustaddress(c *cli.Context) error {
 	return nil
 }
 
-//callabi 直接调用ABI
+// callabi 直接调用ABI
 func callabi(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -623,7 +632,7 @@ func callabi(c *cli.Context) error {
 	return nil
 }
 
-//triggerabi 触发ABI上链交易
+// triggerabi 触发ABI上链交易
 func triggerabi(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
@@ -637,11 +646,25 @@ func triggerabi(c *cli.Context) error {
 	return nil
 }
 
-//signhash 消息签名
+// signhash 消息签名
 func signhash(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
 		err := cli.SignHashFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+// listaddressbalance
+func listaddressbalance(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.ListAddressBalanceFlow()
 		if err != nil {
 			log.Error("unexpected error: ", err)
 			return err
