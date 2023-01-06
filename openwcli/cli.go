@@ -1154,6 +1154,12 @@ func (cli *CLI) TriggerABIFlow() error {
 		return err
 	}
 
+	// 等待用户输入合约ABI JSON
+	abiJSonInput, err := console.InputText("Enter Contract ABI:", false)
+	if err != nil {
+		return err
+	}
+
 	// 等待用户输入ABI参数
 	abiInput, err := console.InputText("Enter ABI parameters: ", false)
 	if err != nil {
@@ -1182,7 +1188,7 @@ func (cli *CLI) TriggerABIFlow() error {
 	//创建新交易单
 	sid := uuid.New().String()
 
-	_, exErr := cli.TriggerABI(wallet, account, account.Symbol, contractAddress, "", "0", sid, feeRate, password, abiParam, "", 0, true)
+	_, exErr := cli.TriggerABI(wallet, account, account.Symbol, contractAddress, abiJSonInput, "0", sid, feeRate, password, abiParam, "", 0, true)
 	if exErr != nil {
 		return exErr
 	}
