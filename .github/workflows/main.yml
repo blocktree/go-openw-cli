@@ -19,6 +19,9 @@ jobs:
           echo "GITREV=$(git describe --tags `git rev-list --tags --max-count=1`)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           echo "OPENWCLIBINARY=openw-cli-$(git describe --tags `git rev-list --tags --max-count=1`)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           echo "OPENWCLILDFLAGS=-X github.com/blocktree/go-openw-cli/v2/openwcli.Version=$(git describe --tags `git rev-list --tags --max-count=1`) -X github.com/blocktree/go-openw-cli/v2/openwcli.GitRev=$(git rev-parse --short HEAD) -X github.com/blocktree/go-openw-cli/v2/openwcli.BuildTime=$(date +'%Y-%m-%d_%T')" >> $GITHUB_ENV
+      - name: go mod tidy
+        run: |
+          go mod tidy
       - name: Build with xgo
         uses: crazy-max/ghaction-xgo@v2
         with:
