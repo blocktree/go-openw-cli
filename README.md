@@ -311,6 +311,7 @@ $ ./openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
                     "switchSymbol": "ETH",            //强制切换symbol（默认不设置，用于解决代币打错地址，需要切换网络汇总）
                     "memo": "hello",                  //备注，适用于可添加备注的交易单
                     "addressLimit": 50,               //地址分页数量限制，不填写，默认为200 
+                    "symbol": "ETH",                  //汇总的资产类型
                     "contracts": {                            //汇总代币合约
                         "all": {                              //全部合约
                             "threshold": "1000",              //账户总阈值
@@ -325,6 +326,7 @@ $ ./openw-cli -c=./node.ini startsum -f=/usr/to/sum.json
                     },
                     "feesSupportAccount": {           //主币余额不足时，可选择一个同钱包下的账户提供手续费
                         "accountID": "12323",         //同钱包下的账户ID
+                        "symbol": "ETH",              //资产类型
                         "lowBalanceWarning": "0.5",   //手续费账户余额过低警告阈值，打印警告
                         "lowBalanceStop": "0.1",      //手续费账户余额过低停止工作阈值
                         "fixSupportAmount": "2",      //手续费不足时，提供固定的数量支持
