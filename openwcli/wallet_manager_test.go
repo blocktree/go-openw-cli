@@ -41,7 +41,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	if cli == nil {
 		return
 	}
-	walletID := "W4W8i2F27c1YB63rMZswSquVSnS3265MAF"
+	walletID := "WMdec1yzEu5TGeJ5iCLyTZCvoDZ1CEMd3B"
 	wallet, err := cli.GetWalletByWalletID(walletID)
 	if err != nil {
 		log.Error("GetWalletByWalletID error:", err)
@@ -49,7 +49,7 @@ func TestCLI_CreateAccountOnServer(t *testing.T) {
 	}
 
 	if wallet != nil {
-		_, _, err = cli.CreateAccountOnServer("test2MATIC", "1234qwer", "MATIC", wallet)
+		_, _, err = cli.CreateAccountOnServer("test2MATIC", "12345678", "ETH", wallet)
 		if err != nil {
 			log.Error("CreateAccountOnServer error:", err)
 			return
@@ -375,13 +375,14 @@ func TestCLI_SetSummaryInfo(t *testing.T) {
 	}
 
 	obj := &openwsdk.SummarySetting{
-		WalletID:        "W3LxqTNAcXFqW7HGcTuERRLXKdNWu17Ccx",
-		AccountID:       "AEeBZy321NzbLWPFkjyGfFyUn8hHX2g93f4wMBVumin4",
-		SumAddress:      "",
-		Threshold:       "1",
+		WalletID:        "WMdec1yzEu5TGeJ5iCLyTZCvoDZ1CEMd3B",
+		AccountID:       "HK5gc7SSXAXKhExs8VUd63SgeG8juR1DiRJUGThdmZEV",
+		SumAddress:      "0xfc2d581783c0c78a252e113f73c4a93108464bcc",
+		Threshold:       "0",
 		MinTransfer:     "0",
 		RetainedBalance: "0",
 		Confirms:        1,
+		Symbol:          "ETH",
 	}
 
 	err := cli.SetSummaryInfo(obj)
