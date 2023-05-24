@@ -1323,3 +1323,51 @@ func (cli *CLI) ListAddressBalanceFlow() error {
 
 	return nil
 }
+
+// ChangePwdFlow
+func (cli *CLI) ChangePwdFlow() error {
+
+	//:选择钱包
+	wallet, err := cli.SelectWalletStep()
+	if err != nil {
+		return err
+	}
+
+	keystore := hdkeystore.NewHDKeystore(
+		cli.config.keydir,
+		hdkeystore.StandardScryptN,
+		hdkeystore.StandardScryptP,
+	)
+
+	//:输入钱包密码
+	// 等待用户输入密码
+	password, err := console.InputPassword(false, 3)
+	if err != nil {
+		return err
+	}
+
+	// 解密钱包
+	key, err := cli.getLocalKeyByWallet(wallet, password)
+	if err != nil {
+		return fmt.Errorf("wallet password invalid")
+	}
+
+	log.Infof("Setup a new password for wallet: %s", key.FileName())
+
+	// 解密成功，设置新密码
+	newPwd, err := console.InputPassword(true, 3)
+	if err != nil {
+		return err
+	}
+
+	//用新密码加密
+	filePath := keystore.JoinPath(hdkeystore.KeyFileName(key.Alias, key.KeyID) + ".key")
+	err = keystore.StoreKey(filePath, key, newPwd)
+	if err != nil {
+		return err
+	}
+
+	log.Infof("Wallet: %s password changed successfully.", key.FileName())
+
+	return nil
+}

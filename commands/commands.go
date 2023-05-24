@@ -260,6 +260,15 @@ var (
 			Category:  "WALLET COMMANDS",
 			Flags:     []cli.Flag{},
 		},
+		{
+
+			Name:      "changepwd",
+			Usage:     "change wallet password",
+			ArgsUsage: "<symbol>",
+			Action:    changepwd,
+			Category:  "WALLET COMMANDS",
+			Flags:     []cli.Flag{},
+		},
 	}
 )
 
@@ -665,6 +674,20 @@ func listaddressbalance(c *cli.Context) error {
 
 	if cli := getCLI(c); cli != nil {
 		err := cli.ListAddressBalanceFlow()
+		if err != nil {
+			log.Error("unexpected error: ", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+// changepwd
+func changepwd(c *cli.Context) error {
+
+	if cli := getCLI(c); cli != nil {
+		err := cli.ChangePwdFlow()
 		if err != nil {
 			log.Error("unexpected error: ", err)
 			return err
